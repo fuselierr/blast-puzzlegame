@@ -8,7 +8,7 @@ We will add a project description here once we decide what to do!
 
 | Name            | 
 | --------------- |
-| [NAME]                |
+| Mike Gao        |
 | Samuel Mathew   |
 | Masood Ashrafi  |
 | Omar Elnajmi    |
