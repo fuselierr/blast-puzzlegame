@@ -1,6 +1,6 @@
 # cs446-project
 
-# MyTeamName
+# L City
 
 We will add a project description here once we decide what to do!
 
