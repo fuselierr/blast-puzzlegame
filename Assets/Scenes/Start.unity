@@ -1099,6 +1099,7 @@ MonoBehaviour:
   - {fileID: 5756480538572182822, guid: e1c7927f4495e5744ab300357e6bf213, type: 3}
   - {fileID: 873592933591132906, guid: 32b3eea05f4a1df4483ecc6ae3001618, type: 3}
   count: 30
+  tileScale: 2
   xRange: {x: -3, y: 3}
   yRange: {x: -8, y: 8}
 --- !u!4 &1393326562
