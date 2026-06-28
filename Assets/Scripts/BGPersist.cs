@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BGPersist : MonoBehaviour
 {
@@ -14,5 +15,20 @@ public class BGPersist : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(gameObject);
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Game")
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

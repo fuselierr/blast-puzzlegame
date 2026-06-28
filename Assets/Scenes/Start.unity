@@ -1065,6 +1065,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1295597812}
   m_CullTransparentMesh: 1
+--- !u!1 &1393326560
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1393326562}
+  - component: {fileID: 1393326561}
+  m_Layer: 0
+  m_Name: BackgroundSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1393326561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393326560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9239cabfdbf93904cb56b48d42733032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BackgroundSpawner
+  prefabs:
+  - {fileID: 6081782159459282357, guid: 94cce7406f4254449a798f4294d2934a, type: 3}
+  - {fileID: 5756480538572182822, guid: e1c7927f4495e5744ab300357e6bf213, type: 3}
+  - {fileID: 873592933591132906, guid: 32b3eea05f4a1df4483ecc6ae3001618, type: 3}
+  count: 30
+  xRange: {x: -3, y: 3}
+  yRange: {x: -8, y: 8}
+--- !u!4 &1393326562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393326560}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1706434576}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1706434574
 GameObject:
   m_ObjectHideFlags: 0
@@ -1109,6 +1160,7 @@ Transform:
   m_Children:
   - {fileID: 519420032}
   - {fileID: 41630084}
+  - {fileID: 1393326562}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
