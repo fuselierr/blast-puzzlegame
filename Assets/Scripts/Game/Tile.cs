@@ -29,11 +29,25 @@ public class Tile : MonoBehaviour
 
     public void PlaceDebris()
     {
+        Type = TileType.Debris;
         spriteRenderer.sprite = debrisSprite;
     }
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    private void OnMouseDown()
+    {
+        if (Type == TileType.Tile)
+        {
+            Type = TileType.Mine;
+            spriteRenderer.sprite = mineSprite;
+        } else if (Type == TileType.Mine)
+        {
+            Type = TileType.Tile;
+            spriteRenderer.sprite = tileSprite;
+        }
     }
 }
