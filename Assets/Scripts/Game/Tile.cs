@@ -13,6 +13,8 @@ public class Tile : MonoBehaviour
 
     public void SetTileType(TileType type)
     {
+        Type = type;
+
         switch (type)
         {
             case TileType.Tile:
@@ -31,6 +33,15 @@ public class Tile : MonoBehaviour
     {
         Type = TileType.Debris;
         spriteRenderer.sprite = debrisSprite;
+    }
+
+    public void ExplodeDebris()
+    {
+        if (Type == TileType.Debris)
+        {
+            Type = TileType.Tile;
+            spriteRenderer.sprite = tileSprite;
+        }
     }
 
     private void Awake()

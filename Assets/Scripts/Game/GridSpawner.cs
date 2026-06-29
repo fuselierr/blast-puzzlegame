@@ -3,6 +3,7 @@ using UnityEngine;
 public class GridSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject tilePrefab;
+    [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private int width = 8;
     [SerializeField] private int height = 8;
     [SerializeField] private float tileSize = 1f;
@@ -96,6 +97,56 @@ public class GridSpawner : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void DetonateMines()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GameObject tileObject = tiles[x, y];
+                Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
+                if (tile != null && tile.Type == TileType.Mine)
+                {
+                    SpawnProjectiles(tileObject.transform.position);
+                    tile.SetTileType(TileType.Tile);
+                }
+            }
+        }
+    }
+
+    private void SpawnProjectiles(Vector3 position)
+    {
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning("No projectile prefab assigned to GridSpawner.");
+            return;
+        }
+
+        Vector2[] directions = new Vector2[]
+        {
+            new Vector2(0, 1),   // Up
+            new Vector2(1, 1).normalized, // Up-Right
+            new Vector2(1, 0),   // Right
+            new Vector2(1, -1).normalized, // Down-Right
+            new Vector2(0, -1),  // Down
+            new Vector2(-1, -1).normalized, // Down-Left
+            new Vector2(-1, 0),  // Left
+            new Vector2(-1, 1).normalized  // Up-Left
+        };
+
+        foreach (var dir in directions)
+        {
+            GameObject proj = Instantiate(projectilePrefab, position, Quaternion.identity);
+            Projectile p = proj.GetComponent<Projectile>();
+            if (p == null)
+            {
+                p = proj.AddComponent<Projectile>();
+            }
+
+            p.Init(dir);
         }
     }
 }
