@@ -53,12 +53,16 @@ public class Tile : MonoBehaviour
     {
         if (Type == TileType.Tile)
         {
-            Type = TileType.Mine;
-            spriteRenderer.sprite = mineSprite;
-        } else if (Type == TileType.Mine)
+            bool placedMine = GameManager.Instance == null || GameManager.Instance.TryPlaceMine();
+            if (placedMine)
+            {
+                SetTileType(TileType.Mine);
+            }
+        }
+        else if (Type == TileType.Mine)
         {
-            Type = TileType.Tile;
-            spriteRenderer.sprite = tileSprite;
+            SetTileType(TileType.Tile);
+            GameManager.Instance?.ReturnMine();
         }
     }
 }

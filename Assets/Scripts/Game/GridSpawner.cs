@@ -117,6 +117,24 @@ public class GridSpawner : MonoBehaviour
         }
     }
 
+    public int DebrisRemaining()
+    {
+        int count = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GameObject tileObject = tiles[x, y];
+                Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
+                if (tile != null && tile.Type == TileType.Debris)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     private void SpawnProjectiles(Vector3 position)
     {
         if (projectilePrefab == null)
