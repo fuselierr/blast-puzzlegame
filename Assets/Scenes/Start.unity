@@ -448,6 +448,7 @@ GameObject:
   - component: {fileID: 489891273}
   - component: {fileID: 489891275}
   - component: {fileID: 489891274}
+  - component: {fileID: 489891276}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -496,8 +497,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: BLAST
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2af8b8fadb9ae544aab5793a0e05484a, type: 2}
-  m_sharedMaterial: {fileID: 2586226061865642361, guid: 2af8b8fadb9ae544aab5793a0e05484a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: efc2608077887b844a4e974b7d7b0c18, type: 2}
+  m_sharedMaterial: {fileID: 2586226061865642361, guid: efc2608077887b844a4e974b7d7b0c18, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -574,6 +575,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 489891272}
   m_CullTransparentMesh: 1
+--- !u!114 &489891276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489891272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80b45d914516525469940647b59fb69e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TMPFloat
+  amplitude: 10
+  frequency: 4
+  speed: 2
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -995,6 +1011,8 @@ GameObject:
   - component: {fileID: 1295597816}
   - component: {fileID: 1295597815}
   - component: {fileID: 1295597814}
+  - component: {fileID: 1295597817}
+  - component: {fileID: 1295597818}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -1116,6 +1134,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1295597812}
   m_CullTransparentMesh: 1
+--- !u!114 &1295597817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295597812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 4, y: -5}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1295597818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295597812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 002bdf63239b01244ac3f27c5553107d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonPressEffect
+  target: {fileID: 1295597813}
+  text: {fileID: 721950963}
+  normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
+  pressedY: -12
+  speed: 6
 --- !u!1 &1393326560
 GameObject:
   m_ObjectHideFlags: 0
