@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public int CurrentMines => mineInventory?.GetCount(activeMineType) ?? 0;
     public MineInventory MineInventory => mineInventory;
     public MineType ActiveMineType => activeMineType;
+    public bool gameStarted = false;
 
     private void Awake()
     {
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager requires a MineInventory reference.");
         }
+        gameStarted = true;
     }
 
     public bool TryPlaceMine()

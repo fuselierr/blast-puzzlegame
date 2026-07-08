@@ -2365,6 +2365,7 @@ MonoBehaviour:
   limitedMines: 1
   mineInventory: {fileID: 1652305228}
   activeMineType: 0
+  gameStarted: 0
 --- !u!1 &675800070
 GameObject:
   m_ObjectHideFlags: 0
@@ -6122,6 +6123,8 @@ MonoBehaviour:
   crossText: {fileID: 1683151383}
   diagonalText: {fileID: 1683151383}
   doubleText: {fileID: 1683151383}
+  gameOverPanel: {fileID: 1152959720}
+  gameOverDelay: 5
 --- !u!1 &1820251539
 GameObject:
   m_ObjectHideFlags: 0

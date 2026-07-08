@@ -43,6 +43,7 @@ public class UIHandler : MonoBehaviour
     public void Detonate()
     {
         gridSpawner.DetonateMines();
+        GameManager.Instance.gameStarted = false;
         StartCoroutine(ShowGameOverPanelAfterDelay());
     }
 
