@@ -43,8 +43,21 @@ public class UIHandler : MonoBehaviour
     public void Detonate()
     {
         gridSpawner.DetonateMines();
-        GameManager.Instance.gameStarted = false;
+        GameManager.Instance.StopGame();
         StartCoroutine(ShowGameOverPanelAfterDelay());
+    }
+
+    public void RestartGame()
+    {
+        GameManager.Instance.ResetGame();
+        gameOverPanel.SetActive(false);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        GameManager.Instance.gameStarted = false;
+        gameOverPanel.SetActive(false);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
     private IEnumerator ShowGameOverPanelAfterDelay()

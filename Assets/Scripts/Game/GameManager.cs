@@ -7,11 +7,32 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool limitedMines = true;
     [SerializeField] private MineInventory mineInventory;
     [SerializeField] private MineType activeMineType = MineType.Standard;
+    [SerializeField] private GridSpawner gridSpawner;
+    [SerializeField] private Timer timer;
 
     public int CurrentMines => mineInventory?.GetCount(activeMineType) ?? 0;
     public MineInventory MineInventory => mineInventory;
     public MineType ActiveMineType => activeMineType;
     public bool gameStarted = false;
+
+    public void ResetGame()
+    {
+        if (mineInventory != null)
+        {
+            mineInventory.ResetInventory();
+        }
+        gameStarted = true;
+        if (gridSpawner != null)
+        {
+            gridSpawner.GenerateGrid();
+            gridSpawner.GenerateDebris();
+        }
+        if (timer != null)
+        {
+            timer.ResetTimer();
+            timer.ResumeTimer();
+        }
+    }
 
     private void Awake()
     {
@@ -61,5 +82,14 @@ public class GameManager : MonoBehaviour
         }
 
         mineInventory.AddMine(activeMineType, 1);
+    }
+
+    public void StopGame()
+    {
+        gameStarted = false;
+        if (timer != null)
+        {
+            timer.PauseTimer();
+        }
     }
 }
