@@ -6733,6 +6733,7 @@ MonoBehaviour:
   timer: {fileID: 706413032}
   timerText: {fileID: 706413030}
   inventory: {fileID: 1652305228}
+  classicLevelManager: {fileID: 0}
   standardText: {fileID: 28057731}
   crossText: {fileID: 1683151383}
   diagonalText: {fileID: 1683151383}
