@@ -7,6 +7,7 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private Timer timer;
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private MineInventory inventory;
+    [SerializeField] private ClassicLevelManager classicLevelManager;
 
     [SerializeField] private TMP_Text standardText;
     [SerializeField] private TMP_Text crossText;
@@ -31,6 +32,13 @@ public class UIHandler : MonoBehaviour
 
     public void Detonate()
     {
-        gridSpawner.DetonateMines();
+        if (classicLevelManager != null)
+        {
+            classicLevelManager.DetonateMines();
+        }
+        if (gridSpawner != null)
+        {
+            gridSpawner.DetonateMines();
+        }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class MineInventory : MonoBehaviour
 {
+
     public Dictionary<MineType, int> mines = new Dictionary<MineType, int>();
 
     void Awake()
@@ -11,6 +12,15 @@ public class MineInventory : MonoBehaviour
         mines[MineType.Cross] = 0;
         mines[MineType.Diagonal] = 0;
         mines[MineType.Double] = 0;
+    }
+
+    public void SetMineCount(MineType type, int amount)
+    {
+        if (!mines.ContainsKey(type))
+        {
+            mines[type] = 0;    
+        }
+        mines[type] = amount;
     }
 
     public int GetCount(MineType type)
