@@ -34,47 +34,78 @@ public class UIHandler : MonoBehaviour
 
         if (inventory != null)
         {
-            standardText.text = inventory.GetCount(MineType.Standard).ToString();
-            crossText.text = inventory.GetCount(MineType.Cross).ToString();
-            diagonalText.text = inventory.GetCount(MineType.Diagonal).ToString();
-            doubleText.text = inventory.GetCount(MineType.Double).ToString();
+            SetMineCountText(standardText, MineType.Standard);
+            SetMineCountText(crossText, MineType.Cross);
+            SetMineCountText(diagonalText, MineType.Diagonal);
+            SetMineCountText(doubleText, MineType.Double);
         }
     }
 
     public void Detonate()
     {
-        // Classic Mode
         if (classicLevelManager != null)
         {
             classicLevelManager.DetonateMines();
         }
-
-        // Freeplay / Daily Challenge
-        if (gridSpawner != null)
+        else if (gridSpawner != null)
         {
             gridSpawner.DetonateMines();
         }
-        gridSpawner.DetonateMines();
-        GameManager.Instance.StopGame();
-        StartCoroutine(ShowGameOverPanelAfterDelay());
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.StopGame();
+        }
+
+        if (gameOverPanel != null)
+        {
+            StartCoroutine(ShowGameOverPanelAfterDelay());
+        }
     }
 
     public void RestartGame()
     {
-        GameManager.Instance.ResetGame();
-        gameOverPanel.SetActive(false);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetGame();
+        }
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
     }
 
     public void ReturnToMainMenu()
     {
-        GameManager.Instance.gameStarted = false;
-        gameOverPanel.SetActive(false);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.gameStarted = false;
+        }
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+
+    private void SetMineCountText(TMP_Text text, MineType type)
+    {
+        if (text != null)
+        {
+            text.text = inventory.GetCount(type).ToString();
+        }
     }
 
     private IEnumerator ShowGameOverPanelAfterDelay()
     {
         yield return new WaitForSeconds(gameOverDelay);
-        gameOverPanel.SetActive(true);
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
     }
 }
