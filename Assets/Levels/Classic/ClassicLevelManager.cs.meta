@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 72c51145efa18b64ba8c06ac820cbe7b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - currentLevel: {instanceID: 0}
+  - normalTilePrefab: {fileID: 873592933591132906, guid: 32b3eea05f4a1df4483ecc6ae3001618, type: 3}
+  - stonePrefab: {fileID: 5756480538572182822, guid: e1c7927f4495e5744ab300357e6bf213, type: 3}
+  - gridParent: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -8,6 +8,7 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private Timer timer;
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private MineInventory inventory;
+    [SerializeField] private ClassicLevelManager classicLevelManager;
 
     [SerializeField] private TMP_Text standardText;
     [SerializeField] private TMP_Text crossText;
@@ -42,6 +43,17 @@ public class UIHandler : MonoBehaviour
 
     public void Detonate()
     {
+        // Classic Mode
+        if (classicLevelManager != null)
+        {
+            classicLevelManager.DetonateMines();
+        }
+
+        // Freeplay / Daily Challenge
+        if (gridSpawner != null)
+        {
+            gridSpawner.DetonateMines();
+        }
         gridSpawner.DetonateMines();
         GameManager.Instance.StopGame();
         StartCoroutine(ShowGameOverPanelAfterDelay());
