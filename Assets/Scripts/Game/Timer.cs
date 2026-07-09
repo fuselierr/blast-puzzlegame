@@ -6,6 +6,7 @@ public class Timer : MonoBehaviour
     [SerializeField] private bool isCountingDown = true;
 
     private float timeRemaining;
+    private bool isPaused = false;
 
     private void Start()
     {
@@ -14,6 +15,10 @@ public class Timer : MonoBehaviour
 
     private void Update()
     {
+        if (isPaused)
+        {
+            return;
+        }
         if (isCountingDown)
         {
             if (timeRemaining <= 0f)
@@ -50,5 +55,20 @@ public class Timer : MonoBehaviour
     public bool IsTimerFinished()
     {
         return timeRemaining <= 0f;
+    }
+
+    public void ResetTimer()
+    {
+        timeRemaining = startTime;
+    }
+
+    public void PauseTimer()
+    {
+        isPaused = true;
+    }
+
+    public void ResumeTimer()
+    {
+        isPaused = false;
     }
 }

@@ -9,11 +9,17 @@ public class Tile : MonoBehaviour
     [SerializeField] private Sprite debrisSprite;
     [SerializeField] private Sprite mineSprite;
 
+    [Header("Flag Overlay")]
+    [SerializeField] private SpriteRenderer flagRenderer;
+    [SerializeField] private Sprite flagSprite;
+
     public TileType Type { get; private set; } = TileType.Tile;
+    public bool IsFlagged { get; private set; }
 
     public void SetTileType(TileType type)
     {
         Type = type;
+        SetFlagged(false);
 
         switch (type)
         {
@@ -32,6 +38,7 @@ public class Tile : MonoBehaviour
     public void PlaceDebris()
     {
         Type = TileType.Debris;
+        SetFlagged(false);
         spriteRenderer.sprite = debrisSprite;
     }
 
@@ -40,17 +47,48 @@ public class Tile : MonoBehaviour
         if (Type == TileType.Debris)
         {
             Type = TileType.Tile;
+            SetFlagged(false);
             spriteRenderer.sprite = tileSprite;
+        }
+    }
+
+    public void ToggleFlag()
+    {
+        if (Type != TileType.Debris)
+        {
+            return;
+        }
+
+        SetFlagged(!IsFlagged);
+    }
+
+    private void SetFlagged(bool flagged)
+    {
+        IsFlagged = flagged;
+
+        if (flagRenderer != null)
+        {
+            flagRenderer.enabled = flagged;
         }
     }
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (flagRenderer != null)
+        {
+            flagRenderer.sprite = flagSprite;
+            flagRenderer.enabled = false;
+        }
     }
 
     private void OnMouseDown()
     {
+        if (GameManager.Instance == null || !GameManager.Instance.gameStarted)
+        {
+            return;
+        }
         if (Type == TileType.Tile)
         {
             bool placedMine = GameManager.Instance == null || GameManager.Instance.TryPlaceMine();
@@ -63,6 +101,10 @@ public class Tile : MonoBehaviour
         {
             SetTileType(TileType.Tile);
             GameManager.Instance?.ReturnMine();
+        }
+        else if (Type == TileType.Debris)
+        {
+            ToggleFlag();
         }
     }
 }

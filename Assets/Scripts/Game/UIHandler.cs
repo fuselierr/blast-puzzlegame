@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class UIHandler : MonoBehaviour
 {
@@ -13,6 +14,16 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private TMP_Text crossText;
     [SerializeField] private TMP_Text diagonalText;
     [SerializeField] private TMP_Text doubleText;
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private float gameOverDelay = 5f;
+
+    void Start()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+    }
 
     private void Update()
     {
@@ -32,13 +43,38 @@ public class UIHandler : MonoBehaviour
 
     public void Detonate()
     {
+        // Classic Mode
         if (classicLevelManager != null)
         {
             classicLevelManager.DetonateMines();
         }
+
+        // Freeplay / Daily Challenge
         if (gridSpawner != null)
         {
             gridSpawner.DetonateMines();
         }
+        gridSpawner.DetonateMines();
+        GameManager.Instance.StopGame();
+        StartCoroutine(ShowGameOverPanelAfterDelay());
+    }
+
+    public void RestartGame()
+    {
+        GameManager.Instance.ResetGame();
+        gameOverPanel.SetActive(false);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        GameManager.Instance.gameStarted = false;
+        gameOverPanel.SetActive(false);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+
+    private IEnumerator ShowGameOverPanelAfterDelay()
+    {
+        yield return new WaitForSeconds(gameOverDelay);
+        gameOverPanel.SetActive(true);
     }
 }

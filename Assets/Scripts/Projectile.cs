@@ -70,6 +70,13 @@ public class Projectile : MonoBehaviour
     {
         if (hasHit) return;
 
+        ClassicStone stone = other.GetComponentInParent<ClassicStone>();
+
+        if (stone != null)
+        {
+            stone.BreakStone();
+            return;
+        }
         Tile tile = other.GetComponent<Tile>();
         if (tile != null && tile.Type == TileType.Debris)
         {

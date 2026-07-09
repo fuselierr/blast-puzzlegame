@@ -17,7 +17,7 @@ public class GridSpawner : MonoBehaviour
         GenerateDebris();
     }
 
-    private void GenerateGrid()
+    public void GenerateGrid()
     {
         ClearGrid();
         tiles = new GameObject[width, height];
@@ -81,7 +81,7 @@ public class GridSpawner : MonoBehaviour
         tile.transform.localScale = Vector3.one * tileSize;
     }
 
-    private void GenerateDebris()
+    public void GenerateDebris()
     {
         for (int x = 0; x < width; x++)
         {

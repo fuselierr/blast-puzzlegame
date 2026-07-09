@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f3e1739251520314ca1e16f2e34d427b
+guid: f3d2e6ac738defa4c983bb6973017763
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1704058357339089482
-    second: mine_transparent_square_0
+      213: 8355508105799557509
+    second: stone_transparent_with_flag_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mine_transparent_square_0
+      name: stone_transparent_with_flag_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a4a6bb92c0806a710800000000000000
-      internalID: 1704058357339089482
+      spriteID: 58164145a5ab4f370800000000000000
+      internalID: 8355508105799557509
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mine_transparent_square_0: 1704058357339089482
+      stone_transparent_with_flag_0: 8355508105799557509
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
