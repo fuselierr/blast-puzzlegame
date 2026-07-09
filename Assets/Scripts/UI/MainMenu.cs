@@ -17,6 +17,11 @@ public class MainMenu : MonoBehaviour
         campaignPanel.SetActive(true);
     }
 
+    public void PlayClassic()
+    {
+        SceneManager.LoadScene("Classic");
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
