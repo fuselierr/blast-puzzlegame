@@ -289,7 +289,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.023425179}
+  m_AnchoredPosition: {x: 0, y: 3.1010897}
   m_SizeDelta: {x: 1063, y: 1906.3}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &44285992
@@ -305,14 +305,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 50
+    m_Right: 50
+    m_Top: 50
+    m_Bottom: 50
   m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 250, y: 250}
+  m_CellSize: {x: 200, y: 200}
   m_Spacing: {x: 30, y: 30}
   m_Constraint: 1
   m_ConstraintCount: 4
@@ -1681,8 +1681,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 880132251}
   m_HandleRect: {fileID: 880132250}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.99997514
+  m_Value: -0.0014190548
+  m_Size: 0.9983732
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2192,7 +2192,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 789779589}
   m_HandleRect: {fileID: 789779588}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
