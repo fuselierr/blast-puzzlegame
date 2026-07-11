@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Timer : MonoBehaviour
@@ -7,6 +8,10 @@ public class Timer : MonoBehaviour
 
     private float timeRemaining;
     private bool isPaused = false;
+    private bool finishedFired = false;
+
+    // Raised once when a count-down timer hits zero (Classic mode loss).
+    public event Action OnTimerFinished;
 
     private void Start()
     {
@@ -27,11 +32,28 @@ public class Timer : MonoBehaviour
             }
 
             timeRemaining -= Time.deltaTime;
+
+            if (timeRemaining <= 0f && !finishedFired)
+            {
+                finishedFired = true;
+                timeRemaining = 0f;
+                OnTimerFinished?.Invoke();
+            }
         }
         else
         {
             timeRemaining += Time.deltaTime;
         }
+    }
+
+    // Lets a mode set duration/direction at runtime instead of relying on
+    // whatever was left in the inspector for a previous mode.
+    public void Configure(float time, bool countDown)
+    {
+        startTime = time;
+        isCountingDown = countDown;
+        timeRemaining = time;
+        finishedFired = false;
     }
 
     public string GetFormattedTime()
@@ -52,6 +74,10 @@ public class Timer : MonoBehaviour
         return isCountingDown;
     }
 
+    // Raw seconds — for a count-up timer (Freeplay) this IS the elapsed
+    // time, useful as a score. For a count-down timer it's time left.
+    public float TimeValue => timeRemaining;
+
     public bool IsTimerFinished()
     {
         return timeRemaining <= 0f;
@@ -60,6 +86,7 @@ public class Timer : MonoBehaviour
     public void ResetTimer()
     {
         timeRemaining = startTime;
+        finishedFired = false;
     }
 
     public void PauseTimer()

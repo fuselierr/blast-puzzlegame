@@ -14,3 +14,10 @@ public enum MineType
     Diagonal,
     Double
 }
+
+public enum GameMode
+{
+    Campaign,
+    Freeplay,
+    Classic
+}

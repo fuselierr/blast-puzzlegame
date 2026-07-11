@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
@@ -13,8 +15,21 @@ public class GridSpawner : MonoBehaviour
 
     private void Start()
     {
-        GenerateGrid();
-        GenerateDebris();
+        // Only auto-run in isolation (e.g. testing this scene alone).
+        // Normally GameManager -> IGameMode drives grid setup explicitly.
+        if (GameManager.Instance == null)
+        {
+            GenerateGrid();
+            GenerateDebris();
+        }
+    }
+
+    // Lets a mode set difficulty/size before generating (Freeplay/Classic).
+    public void Configure(int newWidth, int newHeight, float newDebrisChance)
+    {
+        width = newWidth;
+        height = newHeight;
+        debrisChance = newDebrisChance;
     }
 
     public void GenerateGrid()
@@ -46,6 +61,42 @@ public class GridSpawner : MonoBehaviour
                 if (tileScript != null)
                 {
                     tileScript.GridPosition = new Vector2Int(x, y);
+                }
+            }
+        }
+    }
+
+    // Campaign: build the grid from a hand-authored layout instead of random debris.
+    public void LoadLevel(CampaignLevelData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning("GridSpawner.LoadLevel called with null data.");
+            return;
+        }
+
+        Configure(data.width, data.height, 0f);
+        GenerateGrid();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GameObject tileObject = tiles[x, y];
+                Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                TileType type = data.GetTile(x, y);
+                if (type == TileType.Debris)
+                {
+                    tile.PlaceDebris();
+                }
+                else
+                {
+                    tile.SetTileType(TileType.Tile);
                 }
             }
         }
@@ -87,7 +138,7 @@ public class GridSpawner : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (Random.value < debrisChance)
+                if (UnityEngine.Random.value < debrisChance)
                 {
                     GameObject tileObject = tiles[x, y];
                     Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
@@ -100,8 +151,24 @@ public class GridSpawner : MonoBehaviour
         }
     }
 
-    public void DetonateMines()
+    // True while spawned projectiles are still traveling/resolving hits.
+    // Modes (and GameManager) should avoid triggering another detonation
+    // while this is true.
+    public bool IsDetonating { get; private set; }
+
+    // Detonation is NOT instantaneous: projectiles take time to travel,
+    // hit debris, and run their own explode coroutine. Checking
+    // AllDebrisCleared right after calling this would read stale state.
+    // Pass a callback and it'll fire once every spawned projectile has
+    // actually finished (hit something or flown off-grid).
+    public void DetonateMinesAndResolve(Action<bool> onResolved)
     {
+        if (IsDetonating)
+        {
+            return; // ignore re-entrant detonate calls mid-resolution
+        }
+
+        bool anyMines = false;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -110,11 +177,36 @@ public class GridSpawner : MonoBehaviour
                 Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
                 if (tile != null && tile.Type == TileType.Mine)
                 {
+                    anyMines = true;
                     SpawnProjectiles(tileObject.transform.position);
                     tile.SetTileType(TileType.Tile);
                 }
             }
         }
+
+        if (!anyMines)
+        {
+            onResolved?.Invoke(AllDebrisCleared);
+            return;
+        }
+
+        IsDetonating = true;
+        StartCoroutine(WaitForProjectilesToResolve(onResolved));
+    }
+
+    private IEnumerator WaitForProjectilesToResolve(Action<bool> onResolved)
+    {
+        // Wait a frame so this detonation's projectiles are guaranteed to
+        // have been created before we start polling for them.
+        yield return null;
+
+        while (FindObjectsByType<Projectile>().Length > 0)
+        {
+            yield return null;
+        }
+
+        IsDetonating = false;
+        onResolved?.Invoke(AllDebrisCleared);
     }
 
     public int DebrisRemaining()
@@ -135,6 +227,8 @@ public class GridSpawner : MonoBehaviour
         return count;
     }
 
+    public bool AllDebrisCleared => DebrisRemaining() == 0;
+
     private void SpawnProjectiles(Vector3 position)
     {
         if (projectilePrefab == null)
@@ -145,14 +239,14 @@ public class GridSpawner : MonoBehaviour
 
         Vector2[] directions = new Vector2[]
         {
-            new Vector2(0, 1),   // Up
-            new Vector2(1, 1).normalized, // Up-Right
-            new Vector2(1, 0),   // Right
-            new Vector2(1, -1).normalized, // Down-Right
-            new Vector2(0, -1),  // Down
-            new Vector2(-1, -1).normalized, // Down-Left
-            new Vector2(-1, 0),  // Left
-            new Vector2(-1, 1).normalized  // Up-Left
+            new Vector2(0, 1),
+            new Vector2(1, 1).normalized,
+            new Vector2(1, 0),
+            new Vector2(1, -1).normalized,
+            new Vector2(0, -1),
+            new Vector2(-1, -1).normalized,
+            new Vector2(-1, 0),
+            new Vector2(-1, 1).normalized
         };
 
         foreach (var dir in directions)
