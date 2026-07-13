@@ -27,11 +27,21 @@ public class FreeplayMode : GameModeBase
 
     public override void OnDetonate()
     {
+        timer.PauseTimer();
+
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
     private void HandleDetonationResolved(bool debrisCleared)
     {
         manager.NotifyDetonateComplete(debrisCleared);
+
+        if (!debrisCleared)
+        {
+            manager.NotifyGameLost();
+            return;
+        }
+
+        manager.NotifyGameWon();
     }
 }
