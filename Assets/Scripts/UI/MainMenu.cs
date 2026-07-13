@@ -8,6 +8,7 @@ public class MainMenu : MonoBehaviour
 
     public void PlayFreeplay()
     {
+        GameModeSelection.SelectedMode = GameMode.Freeplay;
         SceneManager.LoadScene("Game");
     }
 
@@ -19,6 +20,8 @@ public class MainMenu : MonoBehaviour
 
     public void PlayClassic()
     {
+        // SceneManager.LoadScene("Classic");
+        GameModeSelection.SelectedMode = GameMode.Classic;
         SceneManager.LoadScene("Game");
     }
 
