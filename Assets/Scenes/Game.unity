@@ -2530,12 +2530,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dbe9e51270826c4080097ae782bfeaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  limitedMines: 1
-  mineInventory: {fileID: 1652305228}
-  activeMineType: 0
   gridSpawner: {fileID: 2057569388}
+  mineInventory: {fileID: 1652305228}
   timer: {fileID: 706413032}
-  gameStarted: 0
+  uiHandler: {fileID: 1756587305}
+  campaignLevels: []
+  CampaignStartIndex: 0
 --- !u!1 &675800070
 GameObject:
   m_ObjectHideFlags: 0
@@ -6729,16 +6729,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5748c6bf7e317734daa4025bdec2dbee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIHandler
-  gridSpawner: {fileID: 2057569388}
   timer: {fileID: 706413032}
   timerText: {fileID: 706413030}
   inventory: {fileID: 1652305228}
-  classicLevelManager: {fileID: 0}
   standardText: {fileID: 28057731}
   crossText: {fileID: 1683151383}
   diagonalText: {fileID: 1683151383}
   doubleText: {fileID: 1683151383}
+  levelText: {fileID: 1683151383}
   gameOverPanel: {fileID: 1152959720}
+  gameOverMessageText: {fileID: 1683151383}
+  gameWonPanel: {fileID: 1152959720}
   gameOverDelay: 5
 --- !u!1 &1820251539
 GameObject:

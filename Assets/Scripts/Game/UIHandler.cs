@@ -4,24 +4,51 @@ using System.Collections;
 
 public class UIHandler : MonoBehaviour
 {
-    [SerializeField] private GridSpawner gridSpawner;
     [SerializeField] private Timer timer;
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private MineInventory inventory;
-    [SerializeField] private ClassicLevelManager classicLevelManager;
 
     [SerializeField] private TMP_Text standardText;
     [SerializeField] private TMP_Text crossText;
     [SerializeField] private TMP_Text diagonalText;
     [SerializeField] private TMP_Text doubleText;
+
+    [SerializeField] private TMP_Text levelText; // e.g. "Level 4/10", hidden if totalLevels <= 1
+
     [SerializeField] private GameObject gameOverPanel;
-    [SerializeField] private float gameOverDelay = 5f;
+    [SerializeField] private TMP_Text gameOverMessageText;
+    [SerializeField] private GameObject gameWonPanel;
+    [SerializeField] private float gameOverDelay = 1f;
+
+    private void OnEnable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLevelStart += HandleLevelStart;
+            GameManager.Instance.OnGameWon += HandleGameWon;
+            GameManager.Instance.OnGameLost += HandleGameLost;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnLevelStart -= HandleLevelStart;
+            GameManager.Instance.OnGameWon -= HandleGameWon;
+            GameManager.Instance.OnGameLost -= HandleGameLost;
+        }
+    }
 
     void Start()
     {
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
+        }
+        if (gameWonPanel != null)
+        {
+            gameWonPanel.SetActive(false);
         }
     }
 
@@ -41,38 +68,23 @@ public class UIHandler : MonoBehaviour
         }
     }
 
+    // Hooked up to the Detonate button. GameManager routes this to
+    // whichever IGameMode is active.
     public void Detonate()
     {
-        if (classicLevelManager != null)
-        {
-            classicLevelManager.DetonateMines();
-        }
-        else if (gridSpawner != null)
-        {
-            gridSpawner.DetonateMines();
-        }
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.StopGame();
-        }
-
-        if (gameOverPanel != null)
-        {
-            StartCoroutine(ShowGameOverPanelAfterDelay());
-        }
+        GameManager.Instance?.Detonate();
     }
 
     public void RestartGame()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ResetGame();
-        }
-
+        GameManager.Instance?.ResetGame();
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
+        }
+        if (gameWonPanel != null)
+        {
+            gameWonPanel.SetActive(false);
         }
     }
 
@@ -91,21 +103,51 @@ public class UIHandler : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
-    private void SetMineCountText(TMP_Text text, MineType type)
+    private void HandleLevelStart(int levelNumber, int totalLevels)
     {
-        if (text != null)
+        if (levelText == null)
         {
-            text.text = inventory.GetCount(type).ToString();
+            return;
+        }
+        levelText.text = totalLevels > 1 ? $"Level {levelNumber}/{totalLevels}" : string.Empty;
+    }
+
+    private void HandleGameWon()
+    {
+        if (gameWonPanel != null)
+        {
+            StartCoroutine(ShowPanelAfterDelay(gameWonPanel));
         }
     }
 
-    private IEnumerator ShowGameOverPanelAfterDelay()
+    private void HandleGameLost()
     {
-        yield return new WaitForSeconds(gameOverDelay);
-
+        if (gameOverMessageText != null)
+        {
+            gameOverMessageText.text = "Time's up!";
+        }
         if (gameOverPanel != null)
         {
-            gameOverPanel.SetActive(true);
+            StartCoroutine(ShowPanelAfterDelay(gameOverPanel));
+        }
+    }
+
+    private void SetMineCountText(TMP_Text text, MineType type)
+    {
+        if (text == null)
+        {
+            return;
+        }
+        int count = inventory.GetCount(type);
+        text.text = count < 0 ? "\u221e" : count.ToString(); // ∞ for infinite (Campaign)
+    }
+
+    private IEnumerator ShowPanelAfterDelay(GameObject panel)
+    {
+        yield return new WaitForSeconds(gameOverDelay);
+        if (panel != null)
+        {
+            panel.SetActive(true);
         }
     }
 }

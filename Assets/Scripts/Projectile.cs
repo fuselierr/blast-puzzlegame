@@ -105,6 +105,14 @@ public class Projectile : MonoBehaviour
             main.loop = false;
             main.stopAction = ParticleSystemStopAction.None;
             ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            // Give remaining particles time to fade, then actually destroy it —
+            // otherwise it's DontDestroyOnLoad with nothing ever destroying it,
+            // leaking one trail object per shot for the life of the app.
+            Destroy(trailInstance, main.startLifetime.constantMax + 0.5f);
+        }
+        else
+        {
+            Destroy(trailInstance);
         }
     }
 }
