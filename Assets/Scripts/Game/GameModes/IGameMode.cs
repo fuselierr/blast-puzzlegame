@@ -9,4 +9,5 @@ public interface IGameMode
     bool TryPlaceMine();
     void ReturnMine();
     void OnDetonate();
+    int calculateScore();
 }

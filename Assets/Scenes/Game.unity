@@ -5173,8 +5173,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -93.306, y: 61}
-  m_SizeDelta: {x: 565.105, y: 361.474}
+  m_AnchoredPosition: {x: -96.467, y: 56.8641}
+  m_SizeDelta: {x: 608.65, y: 369.7456}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1221045016
 MonoBehaviour:
@@ -5240,8 +5240,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 64
-  m_fontSizeBase: 64
+  m_fontSize: 52
+  m_fontSizeBase: 52
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -6272,8 +6272,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -173.87, y: -245}
-  m_SizeDelta: {x: 583.7162, y: 216.7196}
+  m_AnchoredPosition: {x: -104, y: -243.9661}
+  m_SizeDelta: {x: 673.59, y: 214.6518}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1452556748
 MonoBehaviour:
@@ -7960,8 +7960,10 @@ MonoBehaviour:
   doubleText: {fileID: 1683151383}
   levelText: {fileID: 1683151383}
   gameOverPanel: {fileID: 1152959720}
-  gameOverMessageText: {fileID: 1683151383}
+  gameOverMessageText: {fileID: 914730665}
   gameWonPanel: {fileID: 2088916788}
+  gameWonScoreCalc: {fileID: 1221045017}
+  gameWonFinalScore: {fileID: 1452556749}
   gameOverDelay: 0
 --- !u!1 &1820251539
 GameObject:

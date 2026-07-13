@@ -35,5 +35,10 @@ public abstract class GameModeBase : IGameMode
         mineInventory.AddMine(MineType.Standard, 1);
     }
 
+    public virtual int calculateScore()
+    {
+        return 0;
+    }
+
     public abstract void OnDetonate();
 }

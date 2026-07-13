@@ -18,6 +18,8 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMP_Text gameOverMessageText;
     [SerializeField] private GameObject gameWonPanel;
+    [SerializeField] private TMP_Text gameWonScoreCalc;
+    [SerializeField] private TMP_Text gameWonFinalScore;
     [SerializeField] private float gameOverDelay = 1f;
 
     private void OnEnable()
@@ -114,6 +116,15 @@ public class UIHandler : MonoBehaviour
 
     private void HandleGameWon()
     {
+        if (gameWonScoreCalc != null)
+        {
+            gameWonScoreCalc.text = $"mines remaining: {inventory.GetCount(MineType.Standard)} * 200\ntime: {timer.GetFormattedTime()} * -1";
+        }
+        if (gameWonFinalScore != null)
+        {
+            int finalScore = GameManager.Instance.CalculateScore();
+            gameWonFinalScore.text = $"score: {finalScore}";
+        }
         if (gameWonPanel != null)
         {
             StartCoroutine(ShowPanelAfterDelay(gameWonPanel));
@@ -124,7 +135,7 @@ public class UIHandler : MonoBehaviour
     {
         if (gameOverMessageText != null)
         {
-            gameOverMessageText.text = "Time's up!";
+            gameOverMessageText.text = "Fail!";
         }
         if (gameOverPanel != null)
         {

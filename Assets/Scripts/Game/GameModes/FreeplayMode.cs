@@ -32,6 +32,13 @@ public class FreeplayMode : GameModeBase
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
+    public override int calculateScore()
+    {
+        float timeElapsed = timer.TimeValue;
+        int minesRemaining = mineInventory.GetCount(MineType.Standard);
+        return Mathf.RoundToInt(500f - timeElapsed + (minesRemaining * 200f));
+    }
+
     private void HandleDetonationResolved(bool debrisCleared)
     {
         manager.NotifyDetonateComplete(debrisCleared);

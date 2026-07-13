@@ -50,6 +50,11 @@ public class CampaignMode : GameModeBase
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
+    public override int calculateScore()
+    {
+        return 0;
+    }
+
     private void HandleDetonationResolved(bool debrisCleared)
     {
         manager.NotifyDetonateComplete(debrisCleared);
