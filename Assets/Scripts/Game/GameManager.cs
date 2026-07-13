@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     // Set this (e.g. from a main-menu button) before loading the gameplay
     // scene. Since one scene now handles every mode, this is the only thing
     // that needs to change between "campaign", "freeplay" and "classic".
-    public static GameMode SelectedMode = GameModeSelection.SelectedMode;
+    public static GameMode SelectedMode = GameMode.Freeplay;
 
     public static bool IsDailyChallenge = false;
 
