@@ -106,6 +106,11 @@ public class GameManager : MonoBehaviour
         currentMode.OnDetonate();
     }
 
+    public int CalculateScore()
+    {
+        return currentMode?.calculateScore() ?? 0;
+    }
+
     // --- Called by mode implementations to report state changes ---
 
     public void NotifyLevelStart(int levelNumber, int totalLevels)
