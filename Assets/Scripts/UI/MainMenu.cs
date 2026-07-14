@@ -1,15 +1,25 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
+    [SerializeField] private static bool attemptedDailyChallenge = false;
+    [SerializeField] private TMP_Text scoreText;
+    
+    private int score;
 
     public void PlayDailyChallenge()
     {
+        if (attemptedDailyChallenge)
+        {
+            return;
+        }
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.IsDailyChallenge = true;
+        attemptedDailyChallenge = true;
         SceneManager.LoadScene("Game");
     }
 
@@ -36,11 +46,20 @@ public class MainMenu : MonoBehaviour
     {
         campaignPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
+        if (attemptedDailyChallenge)
+        {
+            // load daily challenge playerdata
+            score = SaveManager.Instance.LoadDailyChallengeScore();
+            scoreText.text = score.ToString();
+        } else
+        {
+            scoreText.text = "N/A";
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 }

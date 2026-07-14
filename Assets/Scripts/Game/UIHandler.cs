@@ -216,6 +216,11 @@ public class UIHandler : MonoBehaviour
         {
             int finalScore = GameManager.Instance.CalculateScore();
             gameWonFinalScore.text = $"score: {finalScore}";
+            // update playerdata
+            if (GameManager.SelectedMode == GameMode.Freeplay && GameManager.IsDailyChallenge)
+            {
+                SaveManager.Instance.SaveDailyChallengeScore(finalScore);
+            }
         }
         if (gameWonPanel != null)
         {

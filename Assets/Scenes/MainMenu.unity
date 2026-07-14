@@ -289,7 +289,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 4.3193707}
+  m_AnchoredPosition: {x: 0, y: 0.2305326}
   m_SizeDelta: {x: 1063, y: 1906.3}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &44285992
@@ -1681,8 +1681,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 880132251}
   m_HandleRect: {fileID: 880132250}
   m_Direction: 2
-  m_Value: -0.000028261362
-  m_Size: 0.9977342
+  m_Value: -0.000529661
+  m_Size: 0.99987733
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2193,7 +2193,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 789779588}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2293,7 +2293,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'best time:'
+  m_text: 'your score:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2af8b8fadb9ae544aab5793a0e05484a, type: 2}
   m_sharedMaterial: {fileID: 2586226061865642361, guid: 2af8b8fadb9ae544aab5793a0e05484a, type: 2}
@@ -4200,6 +4200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
   mainMenuPanel: {fileID: 892044016}
   campaignPanel: {fileID: 1023464261}
+  scoreText: {fileID: 1578137820}
 --- !u!4 &2053295182
 Transform:
   m_ObjectHideFlags: 0
