@@ -8,7 +8,8 @@ public class MainMenu : MonoBehaviour
 
     public void PlayFreeplay()
     {
-        SceneManager.LoadScene("Game");
+        GameManager.SelectedMode = GameMode.Freeplay;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
     public void PlayCampaign()
@@ -19,7 +20,8 @@ public class MainMenu : MonoBehaviour
 
     public void PlayClassic()
     {
-        SceneManager.LoadScene("Classic");
+        GameManager.SelectedMode = GameMode.Classic;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -32,6 +34,6 @@ public class MainMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
