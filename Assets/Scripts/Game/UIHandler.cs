@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
@@ -22,11 +23,22 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private TMP_Text gameWonFinalScore;
     [SerializeField] private float gameOverDelay = 1f;
 
+    [Header("Classic Level Clear")]
+    [SerializeField] private GameObject levelClearPanel;
+    [SerializeField] private TMP_Text levelClearMessageText;
+    [SerializeField] private TMP_Text levelClearScoreText;
+    [SerializeField] private TMP_Text advanceButtonText;
+
+    [SerializeField] private Button advanceButton;
+
+
+
     private void OnEnable()
     {
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnLevelStart += HandleLevelStart;
+            GameManager.Instance.OnLevelCleared += HandleLevelCleared;
             GameManager.Instance.OnGameWon += HandleGameWon;
             GameManager.Instance.OnGameLost += HandleGameLost;
         }
@@ -37,6 +49,7 @@ public class UIHandler : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnLevelStart -= HandleLevelStart;
+            GameManager.Instance.OnLevelCleared -= HandleLevelCleared;
             GameManager.Instance.OnGameWon -= HandleGameWon;
             GameManager.Instance.OnGameLost -= HandleGameLost;
         }
@@ -48,12 +61,31 @@ public class UIHandler : MonoBehaviour
         {
             gameOverPanel.SetActive(false);
         }
+
         if (gameWonPanel != null)
         {
             gameWonPanel.SetActive(false);
         }
-    }
 
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(false);
+        }
+
+        ConfigurePanelText(gameOverMessageText);
+        ConfigurePanelText(gameWonScoreCalc);
+        ConfigurePanelText(gameWonFinalScore);
+        if (advanceButton != null)
+        {
+            advanceButton.onClick.RemoveListener(
+                AdvanceClassicLevel
+            );
+
+            advanceButton.onClick.AddListener(
+                AdvanceClassicLevel
+            );
+        }
+    }
     private void Update()
     {
         if (timer != null && timerText != null)
@@ -88,6 +120,10 @@ public class UIHandler : MonoBehaviour
         {
             gameWonPanel.SetActive(false);
         }
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(false);
+        }
     }
 
     public void ReturnToMainMenu()
@@ -114,11 +150,67 @@ public class UIHandler : MonoBehaviour
         levelText.text = totalLevels > 1 ? $"Level {levelNumber}/{totalLevels}" : string.Empty;
     }
 
+    private void HandleLevelCleared(int levelNumber, int totalLevels)
+    {
+        if (levelText != null)
+        {
+            levelText.text = $"Level {levelNumber} Clear!";
+        }
+
+        if (levelClearMessageText != null)
+        {
+            levelClearMessageText.text =
+                $"Good Job!\nLevel {levelNumber} Cleared";
+        }
+
+        if (levelClearScoreText != null)
+        {
+            int score = GameManager.Instance.CalculateScore();
+            levelClearScoreText.text = $"Current Score: {score}";
+        }
+
+        if (advanceButtonText != null)
+        {
+            advanceButtonText.text =
+                levelNumber >= totalLevels
+                    ? "Finish"
+                    : $"Advance to Level {levelNumber + 1}";
+        }
+
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(true);
+        }
+    }
+
+    public void AdvanceClassicLevel()
+    {
+        Debug.Log("Advance button clicked successfully");
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(false);
+        }
+
+        GameManager.Instance?.AdvanceClassicLevel();
+    }
+
     private void HandleGameWon()
     {
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(false);
+        }
+
         if (gameWonScoreCalc != null)
         {
-            gameWonScoreCalc.text = $"mines remaining: {inventory.GetCount(MineType.Standard)} * 200\ntime: {timer.GetFormattedTime()} * -1";
+            if (GameManager.SelectedMode == GameMode.Classic)
+            {
+                gameWonScoreCalc.text = "remaining time: 100 points per second\n" + "unused mines: 200 points each";
+            }
+            else
+            {
+                gameWonScoreCalc.text = $"mines remaining: {inventory.GetCount(MineType.Standard)} * 200\ntime: {timer.GetFormattedTime()} * -1";
+            }
         }
         if (gameWonFinalScore != null)
         {
@@ -135,7 +227,14 @@ public class UIHandler : MonoBehaviour
     {
         if (gameOverMessageText != null)
         {
-            gameOverMessageText.text = "Fail!";
+            if (GameManager.SelectedMode == GameMode.Classic)
+            {
+                gameOverMessageText.text = "Stage Failed!\nRestart from Level 1";
+            }
+            else
+            {
+                gameOverMessageText.text = "Fail!";
+            }
         }
         if (gameOverPanel != null)
         {
@@ -160,5 +259,20 @@ public class UIHandler : MonoBehaviour
         {
             panel.SetActive(true);
         }
+    }
+
+    private void ConfigurePanelText(TMP_Text text)
+    {
+        if (text == null)
+        {
+            return;
+        }
+
+        text.enableAutoSizing = true;
+        text.fontSizeMin = 18f;
+        text.fontSizeMax = 50f;
+        text.enableWordWrapping = true;
+        text.overflowMode = TextOverflowModes.Ellipsis;
+        text.alignment = TextAlignmentOptions.Center;
     }
 }
