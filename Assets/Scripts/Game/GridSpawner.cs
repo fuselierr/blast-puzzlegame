@@ -146,22 +146,15 @@ public class GridSpawner : MonoBehaviour
         tile.transform.localScale = Vector3.one * tileSize;
     }
 
-    public void GenerateDebris()
+    public void GenerateDebris(bool isDailyChallenge = false)
     {
-        for (int x = 0; x < width; x++)
+        if (isDailyChallenge)
         {
-            for (int y = 0; y < height; y++)
-            {
-                if (UnityEngine.Random.value < debrisChance)
-                {
-                    GameObject tileObject = tiles[x, y];
-                    Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
-                    if (tile != null)
-                    {
-                        tile.PlaceDebris();
-                    }
-                }
-            }
+            GenerateSeededSolvableDebris(Mathf.RoundToInt(width * height * debrisChance), mineBudget: 8);
+        }
+        else
+        {
+            GenerateSolvableDebris(Mathf.RoundToInt(width * height * debrisChance), mineBudget: 8);
         }
     }
 
@@ -592,5 +585,36 @@ public class GridSpawner : MonoBehaviour
 
             p.Init(dir);
         }
+    }
+
+    private void GenerateSeededSolvableDebris(int targetDebrisCount, int mineBudget)
+    {
+        UnityEngine.Random.State previousState = UnityEngine.Random.state;
+        UnityEngine.Random.InitState(GetTodaySeed());
+        
+        bool generated = false;
+        int temp = targetDebrisCount;
+        while (!generated && temp > 0)
+        {
+            generated = GenerateSolvableDebris(temp, mineBudget);
+            if (!generated)
+            {
+                temp--;
+            }
+        }
+
+        if (!generated)
+        {
+            Debug.LogWarning("Failed to generate a solvable debris layout for today.");
+        }
+
+        UnityEngine.Random.state = previousState;
+
+    }
+
+    private static int GetTodaySeed()
+    {
+        DateTime today = DateTime.Today;
+        return today.Year * 10000 + today.Month * 100 + today.Day;
     }
 }
