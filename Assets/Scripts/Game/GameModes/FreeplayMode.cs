@@ -17,7 +17,7 @@ public class FreeplayMode : GameModeBase
 
         gridSpawner.Configure(GridWidth, GridHeight, DebrisChance);
         gridSpawner.GenerateGrid();
-        gridSpawner.GenerateDebris();
+        gridSpawner.GenerateDebris(isDailyChallenge: GameManager.IsDailyChallenge);
 
         timer.Configure(0f, countDown: false);
         timer.ResumeTimer();

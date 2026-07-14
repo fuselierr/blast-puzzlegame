@@ -6,6 +6,13 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
 
+    public void PlayDailyChallenge()
+    {
+        GameManager.SelectedMode = GameMode.Freeplay;
+        GameManager.IsDailyChallenge = true;
+        SceneManager.LoadScene("Game");
+    }
+
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
