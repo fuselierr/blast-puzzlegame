@@ -466,6 +466,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c46475d03de3f24da65d76bff1e5b0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviourScript
+  titleText: {fileID: 489891272}
+  startButton: {fileID: 1295597812}
+  gravity: 1500
+  initYvel: 400
+  titleSpeed: 800
+  offScreenY: 500
 --- !u!4 &432629325
 Transform:
   m_ObjectHideFlags: 0
