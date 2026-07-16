@@ -6,6 +6,8 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
+    [SerializeField] private GameObject statsPanel;
+    [SerializeField] private GameObject settingsPanel;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
 
@@ -42,10 +44,32 @@ public class MainMenu : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
+    public void CheckStats()
+    {
+        mainMenuPanel.SetActive(false);
+        statsPanel.SetActive(true);
+    }
+
+    public void CheckSettings()
+    {
+        mainMenuPanel.SetActive(false);
+        settingsPanel.SetActive(true);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        campaignPanel.SetActive(false);
+        statsPanel.SetActive(false);
+        settingsPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         campaignPanel.SetActive(false);
+        statsPanel.SetActive(false);
+        settingsPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         if (attemptedDailyChallenge)
         {
