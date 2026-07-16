@@ -49,6 +49,7 @@ public class Tile : MonoBehaviour
             Type = TileType.Tile;
             SetFlagged(false);
             spriteRenderer.sprite = tileSprite;
+            SoundManager.Instance.PlayDebrisHit();
         }
     }
 
@@ -58,7 +59,7 @@ public class Tile : MonoBehaviour
         {
             return;
         }
-
+        SoundManager.Instance.PlayFlagPlaced();
         SetFlagged(!IsFlagged);
     }
 

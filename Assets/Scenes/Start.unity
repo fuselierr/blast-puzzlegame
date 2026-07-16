@@ -1317,6 +1317,63 @@ Transform:
   - {fileID: 1263035729}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2140596146
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2140596148}
+  - component: {fileID: 2140596147}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2140596147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140596146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc6b075c82b274a4186da48a76f031c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SoundManager
+  minePlaced: {fileID: 8300000, guid: 859658c0101e2a74f91544c588fcc01e, type: 3}
+  mineReturned: {fileID: 8300000, guid: d385531f666869a4a91b50495ef6d4b6, type: 3}
+  mineBlocked: {fileID: 8300000, guid: eed4b5dc6da19d24fafde1624fa7ae78, type: 3}
+  flagPlaced: {fileID: 8300000, guid: b543917caadd01846b754df16e23e9f1, type: 3}
+  detonate: {fileID: 8300000, guid: c31bbc9dd12c11e478d6d612508c89f0, type: 3}
+  debrisHit: {fileID: 8300000, guid: dbaa66c1ac5165f4d81707e317386b79, type: 3}
+  levelStart: {fileID: 8300000, guid: 55e5d637deae8504694f590fb72d92a6, type: 3}
+  timerTick: {fileID: 8300000, guid: fcdfa26ed427aff4fb3ef08e4565545d, type: 3}
+  gameWon: {fileID: 8300000, guid: 5392217fa832e6541bfa63f0a5e8ca48, type: 3}
+  gameLost: {fileID: 8300000, guid: d4ef20267e9928a49ab049c9b3cab683, type: 3}
+  uiClick: {fileID: 8300000, guid: 64fea0a012e174f4799891c46a7dd716, type: 3}
+  sfxVolume: 1
+  poolSize: 8
+--- !u!4 &2140596148
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140596146}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 320.68628, y: 489.08365, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1327,3 +1384,4 @@ SceneRoots:
   - {fileID: 237755952}
   - {fileID: 432629325}
   - {fileID: 201883841}
+  - {fileID: 2140596148}

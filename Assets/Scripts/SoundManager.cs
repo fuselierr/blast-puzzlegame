@@ -2,18 +2,23 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
+    [Header("Music")]
+    [SerializeField] private AudioClip musicClip;
 
     [Header("Gameplay Clips")]
     [SerializeField] private AudioClip minePlaced;
     [SerializeField] private AudioClip mineReturned;
     [SerializeField] private AudioClip mineBlocked;
+    [SerializeField] private AudioClip flagPlaced;
     [SerializeField] private AudioClip detonate;
     [SerializeField] private AudioClip debrisHit;
     [SerializeField] private AudioClip levelStart;
+    [SerializeField] private AudioClip timerTick;
     [SerializeField] private AudioClip gameWon;
     [SerializeField] private AudioClip gameLost;
 
@@ -25,6 +30,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private int poolSize = 8;
 
     private List<AudioSource> pool;
+    private AudioSource musicSource;
     private int nextSource;
 
     // Creates itself the first time anything asks for it — no need to
@@ -59,6 +65,11 @@ public class SoundManager : MonoBehaviour
             pool.Add(src);
         }
 
+        musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.clip = musicClip;
+        musicSource.loop = true;
+        musicSource.Play();
+
         SceneManager.sceneLoaded += OnSceneLoaded;
         TryHookGameManager(); // in case gameplay scene is already loaded
     }
@@ -74,6 +85,7 @@ public class SoundManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         TryHookGameManager();
+        HookAllButtons();
     }
 
     // Re-subscribes every time the gameplay scene (re)loads, since
@@ -122,4 +134,20 @@ public class SoundManager : MonoBehaviour
 
     // --- Usable from the main menu, pause menu, anywhere ---
     public void PlayUIClick() => Play(uiClick);
+    public void PlayFlagPlaced() => Play(flagPlaced);
+    public void PlayTimerTick() => Play(timerTick);
+
+    // Wires PlayUIClick() to every UI Button in the newly loaded scene,
+    // so you never have to manually assign it in the Inspector.
+    private void HookAllButtons()
+    {
+        Button[] buttons = FindObjectsOfType<Button>(includeInactive: true);
+        foreach (Button btn in buttons)
+        {
+            if (btn.GetComponent<NoAutoSfx>() != null) continue; // opt-out escape hatch
+
+            btn.onClick.RemoveListener(PlayUIClick); // avoid double-adding
+            btn.onClick.AddListener(PlayUIClick);
+        }
+    }
 }

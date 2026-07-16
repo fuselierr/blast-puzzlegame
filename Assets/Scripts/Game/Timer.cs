@@ -9,6 +9,7 @@ public class Timer : MonoBehaviour
     private float timeRemaining;
     private bool isPaused = false;
     private bool finishedFired = false;
+    private int lastDisplayedSecond = -1;
 
     // Raised once when a count-down timer hits zero (Classic mode loss).
     public event Action OnTimerFinished;
@@ -24,6 +25,7 @@ public class Timer : MonoBehaviour
         {
             return;
         }
+
         if (isCountingDown)
         {
             if (timeRemaining <= 0f)
@@ -44,6 +46,16 @@ public class Timer : MonoBehaviour
         {
             timeRemaining += Time.deltaTime;
         }
+
+        int displayedSecond = Mathf.FloorToInt(Mathf.Max(0f, timeRemaining));
+        if (displayedSecond != lastDisplayedSecond)
+        {
+            lastDisplayedSecond = displayedSecond;
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlayTimerTick();
+            }
+        }
     }
 
     // Lets a mode set duration/direction at runtime instead of relying on
@@ -54,6 +66,7 @@ public class Timer : MonoBehaviour
         isCountingDown = countDown;
         timeRemaining = time;
         finishedFired = false;
+        lastDisplayedSecond = -1;
     }
 
     public string GetFormattedTime()
@@ -87,6 +100,7 @@ public class Timer : MonoBehaviour
     {
         timeRemaining = startTime;
         finishedFired = false;
+        lastDisplayedSecond = -1;
     }
 
     public void PauseTimer()
