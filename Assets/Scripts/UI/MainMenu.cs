@@ -8,7 +8,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject campaignPanel;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
-    
+
     private int score;
 
     public void PlayDailyChallenge()
@@ -26,6 +26,7 @@ public class MainMenu : MonoBehaviour
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
+        GameManager.IsDailyChallenge = false;
         UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
@@ -51,7 +52,8 @@ public class MainMenu : MonoBehaviour
             // load daily challenge playerdata
             score = SaveManager.Instance.LoadDailyChallengeScore();
             scoreText.text = score.ToString();
-        } else
+        }
+        else
         {
             scoreText.text = "N/A";
         }
@@ -60,6 +62,6 @@ public class MainMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
