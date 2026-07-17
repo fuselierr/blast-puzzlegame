@@ -26,12 +26,23 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip uiClick;
 
     [Header("Mixing")]
+    [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 1f;
     [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
+    [SerializeField] private bool musicEnabled = true;
     [SerializeField] private int poolSize = 8;
 
     private List<AudioSource> pool;
     private AudioSource musicSource;
     private int nextSource;
+
+    public float CurrentMasterVolume => masterVolume;
+    public float CurrentMusicVolume => musicVolume;
+    public float CurrentSfxVolume => sfxVolume;
+    public bool CurrentMusicEnabled => musicEnabled;
+
+    private float EffectiveSfxVolume => masterVolume * sfxVolume;
+    private float EffectiveMusicVolume => musicEnabled ? masterVolume * musicVolume : 0f;
 
     // Creates itself the first time anything asks for it — no need to
     // manually drop a prefab into every scene, including your menu.
@@ -68,6 +79,10 @@ public class SoundManager : MonoBehaviour
         musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.clip = musicClip;
         musicSource.loop = true;
+        musicSource.playOnAwake = false;
+
+        LoadAudioSettings();
+        ApplyAudioSettings();
         musicSource.Play();
 
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -116,7 +131,8 @@ public class SoundManager : MonoBehaviour
         AudioSource src = pool[nextSource];
         nextSource = (nextSource + 1) % pool.Count;
         src.pitch = 1f;
-        src.PlayOneShot(clip, sfxVolume);
+        src.volume = EffectiveSfxVolume;
+        src.PlayOneShot(clip, 1f);
     }
 
     // --- Gameplay one-offs without a GameManager event ---
@@ -129,13 +145,58 @@ public class SoundManager : MonoBehaviour
         AudioSource src = pool[nextSource];
         nextSource = (nextSource + 1) % pool.Count;
         src.pitch = UnityEngine.Random.Range(0.92f, 1.08f);
-        src.PlayOneShot(debrisHit, sfxVolume);
+        src.volume = EffectiveSfxVolume;
+        src.PlayOneShot(debrisHit, 1f);
+    }
+
+    public void SetMasterVolume(float volume)
+    {
+        masterVolume = Mathf.Clamp01(volume);
+        SaveManager.GetOrCreate()?.SaveMasterVolume(masterVolume);
+        ApplyAudioSettings();
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        musicVolume = Mathf.Clamp01(volume);
+        SaveManager.GetOrCreate()?.SaveMusicVolume(musicVolume);
+        ApplyAudioSettings();
+    }
+
+    public void SetSfxVolume(float volume)
+    {
+        sfxVolume = Mathf.Clamp01(volume);
+        SaveManager.GetOrCreate()?.SaveSfxVolume(sfxVolume);
+    }
+
+    public void SetMusicEnabled(bool enabled)
+    {
+        musicEnabled = enabled;
+        SaveManager.GetOrCreate()?.SaveMusicEnabled(enabled);
+        ApplyAudioSettings();
     }
 
     // --- Usable from the main menu, pause menu, anywhere ---
     public void PlayUIClick() => Play(uiClick);
     public void PlayFlagPlaced() => Play(flagPlaced);
     public void PlayTimerTick() => Play(timerTick);
+
+    private void LoadAudioSettings()
+    {
+        SaveManager save = SaveManager.GetOrCreate();
+        if (save == null) return;
+
+        masterVolume = save.LoadMasterVolume();
+        musicVolume = save.LoadMusicVolume();
+        sfxVolume = save.LoadSfxVolume();
+        musicEnabled = save.LoadMusicEnabled();
+    }
+
+    private void ApplyAudioSettings()
+    {
+        if (musicSource != null)
+            musicSource.volume = EffectiveMusicVolume;
+    }
 
     // Wires PlayUIClick() to every UI Button in the newly loaded scene,
     // so you never have to manually assign it in the Inspector.
