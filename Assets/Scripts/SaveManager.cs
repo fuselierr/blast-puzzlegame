@@ -5,9 +5,28 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance;
 
+    private const string MasterVolumeKey = "MasterVolume";
+    private const string MusicVolumeKey = "MusicVolume";
+    private const string SfxVolumeKey = "SfxVolume";
+    private const string MusicEnabledKey = "MusicEnabled";
+
     private string SavePath => Path.Combine(Application.persistentDataPath, "playerdata.json");
 
     public PlayerData CurrentData { get; private set; }
+
+    public static SaveManager GetOrCreate()
+    {
+        if (Instance != null)
+            return Instance;
+
+        Instance = FindObjectOfType<SaveManager>();
+        if (Instance != null)
+            return Instance;
+
+        GameObject saveObject = new GameObject("SaveManager");
+        Instance = saveObject.AddComponent<SaveManager>();
+        return Instance;
+    }
 
     void Awake()
     {
@@ -68,26 +87,54 @@ public class SaveManager : MonoBehaviour
 
     // ---------- PLAYERPREFS (simple settings) ----------
 
-    public void SaveVolume(float volume)
+    [System.Obsolete("Use SaveMasterVolume instead.")]
+    public void SaveVolume(float volume) => SaveMasterVolume(volume);
+
+    [System.Obsolete("Use LoadMasterVolume instead.")]
+    public float LoadVolume() => LoadMasterVolume();
+
+    public void SaveMasterVolume(float volume)
     {
-        PlayerPrefs.SetFloat("Volume", volume);
+        PlayerPrefs.SetFloat(MasterVolumeKey, Mathf.Clamp01(volume));
         PlayerPrefs.Save();
     }
 
-    public float LoadVolume()
+    public float LoadMasterVolume()
     {
-        return PlayerPrefs.GetFloat("Volume", 1f); // default = 1
+        return PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
+    }
+
+    public void SaveMusicVolume(float volume)
+    {
+        PlayerPrefs.SetFloat(MusicVolumeKey, Mathf.Clamp01(volume));
+        PlayerPrefs.Save();
+    }
+
+    public float LoadMusicVolume()
+    {
+        return PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
+    }
+
+    public void SaveSfxVolume(float volume)
+    {
+        PlayerPrefs.SetFloat(SfxVolumeKey, Mathf.Clamp01(volume));
+        PlayerPrefs.Save();
+    }
+
+    public float LoadSfxVolume()
+    {
+        return PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
     }
 
     public void SaveMusicEnabled(bool enabled)
     {
-        PlayerPrefs.SetInt("MusicEnabled", enabled ? 1 : 0);
+        PlayerPrefs.SetInt(MusicEnabledKey, enabled ? 1 : 0);
         PlayerPrefs.Save();
     }
 
     public bool LoadMusicEnabled()
     {
-        return PlayerPrefs.GetInt("MusicEnabled", 1) == 1;
+        return PlayerPrefs.GetInt(MusicEnabledKey, 1) == 1;
     }
 
     public void SaveDailyChallengeScore(int score)

@@ -10,6 +10,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private GameObject leaderboardPanel;
     
     private int score;
 
@@ -63,12 +64,23 @@ public class MainMenu : MonoBehaviour
         mainMenuPanel.SetActive(true);
     }
 
+    public void OpenLeaderboard()
+    {
+        leaderboardPanel.SetActive(true);
+    }
+
+    public void CloseLeaderboard()
+    {
+        leaderboardPanel.SetActive(false);
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         campaignPanel.SetActive(false);
         statsPanel.SetActive(false);
         settingsPanel.SetActive(false);
+        leaderboardPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         if (attemptedDailyChallenge)
         {
