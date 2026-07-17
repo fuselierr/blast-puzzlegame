@@ -27,11 +27,13 @@ public abstract class GameModeBase : IGameMode
 
     public virtual bool TryPlaceMine()
     {
+        SoundManager.Instance.PlayMinePlaced();
         return mineInventory.UseMine(MineType.Standard);
     }
 
     public virtual void ReturnMine()
     {
+        SoundManager.Instance.PlayMineReturned();
         mineInventory.AddMine(MineType.Standard, 1);
     }
 
