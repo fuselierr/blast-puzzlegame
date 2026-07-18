@@ -7,6 +7,9 @@ public class Projectile : MonoBehaviour
     private bool hasHit;
 
     private const float destroyDistance = 15f;
+    private const float pathHitTolerance = 0.15f;
+    private Vector2 launchPosition;
+
     [SerializeField] private GameObject trailPrefab;
     private GameObject trailInstance;
 
@@ -17,6 +20,7 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
+        Vector2 previousPosition = transform.position;
         transform.position += (Vector3)(direction * speed * Time.deltaTime);
         if (trailInstance != null)
         {
@@ -45,6 +49,8 @@ public class Projectile : MonoBehaviour
 
     private void Start()
     {
+        launchPosition = transform.position;
+
         if (trailPrefab != null)
         {
             trailInstance = Instantiate(trailPrefab, transform.position, Quaternion.identity);
@@ -77,12 +83,26 @@ public class Projectile : MonoBehaviour
             stone.BreakStone();
             return;
         }
-        Tile tile = other.GetComponent<Tile>();
-        if (tile != null && tile.Type == TileType.Debris)
+        Tile tile = other.GetComponentInParent<Tile>();
+        if (tile != null && tile.Type == TileType.Debris && IsOnShotPath(tile.transform.position))
         {
             hasHit = true;
             StartCoroutine(ExplodeAtCenter(tile));
         }
+    }
+
+    private bool IsOnShotPath(Vector2 point)
+    {
+        Vector2 delta = point - launchPosition;
+        float forwardDistance = Vector2.Dot(delta, direction.normalized);
+        if (forwardDistance < 0f)
+        {
+            return false;
+        }
+
+        Vector2 nearest = launchPosition + direction.normalized * forwardDistance;
+        float offset = Vector2.Distance(point, nearest);
+        return offset <= pathHitTolerance;
     }
 
     private System.Collections.IEnumerator ExplodeAtCenter(Tile tile)

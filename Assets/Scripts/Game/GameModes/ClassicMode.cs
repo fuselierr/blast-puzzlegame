@@ -7,6 +7,21 @@ using UnityEngine;
 public class ClassicMode : GameModeBase
 {
     private const int MaxLevel = 10;
+    private const int GridWidth = 10;
+    private const int GridHeight = 14;
+    private const float LevelTime = 60f;
+    private const float LevelClearDelay = 1.25f;
+
+    private const int TimeScorePerSecond = 10;
+    private const int MineScoreValue = 200;
+
+    private float accumulatedRemainingTime;
+    private int accumulatedRemainingMines;
+    private bool hasDetonated;
+    private bool waitingForAdvance;
+
+
+
     private const int BaseGridSize = 6;
     private const float BaseDebrisChance = 0.15f;
     private const float BaseLevelTime = 60f;
@@ -22,14 +37,15 @@ public class ClassicMode : GameModeBase
     public override void StartGame()
     {
         currentLevel = 1;
+        accumulatedRemainingTime = 0f;
+        accumulatedRemainingMines = 0;
         BeginLevel();
     }
 
     public override void ResetGame()
     {
         // A loss (or manual restart) sends the player back to level 1.
-        currentLevel = 1;
-        BeginLevel();
+        StartGame();
     }
 
     public override void StopGame()
@@ -40,31 +56,65 @@ public class ClassicMode : GameModeBase
 
     private void BeginLevel()
     {
+        hasDetonated = false;
+        int mineCount = GetMineCountForLevel();
+        int debrisCount = GetDebrisCountForLevel();
+
+
+
         mineInventory.Infinite = false;
         mineInventory.ResetInventory();
-        mineInventory.SetMineCount(MineType.Standard, Mathf.Max(3, 8 - currentLevel / 2));
-
-        int size = BaseGridSize + currentLevel / 3;
-        float debrisChance = BaseDebrisChance + currentLevel * 0.015f;
-        gridSpawner.Configure(size, size, debrisChance);
+        mineInventory.SetMineCount(MineType.Standard, mineCount);
+        gridSpawner.Configure(GridWidth, GridHeight, 0f);
         gridSpawner.GenerateGrid();
-        gridSpawner.GenerateDebris();
+        bool generated = gridSpawner.GenerateSolvableDebris(debrisCount, mineCount);
 
-        float levelTime = Mathf.Max(30f, BaseLevelTime - currentLevel * 2f);
-        timer.Configure(levelTime, countDown: true);
+        if (!generated)
+        {
+            Debug.LogError("Could not generate a solveable level");
+            manager.NotifyGameLost();
+            return;
+        }
+
+        timer.Configure(LevelTime, countDown: true);
         timer.ResumeTimer();
 
         manager.NotifyLevelStart(currentLevel, MaxLevel);
+        waitingForAdvance = false;
+    }
+
+    private int GetMineCountForLevel()
+    {
+        // Idea is easier levels have more mines, so the mine count will decreases every other level
+        return 5;
+    }
+
+    private int GetDebrisCountForLevel()
+    {
+        // Harder levels have more debris
+        return 6 + ((currentLevel - 1) * 2);
     }
 
     public override void OnDetonate()
     {
+        // only allow one detonation attempt per stage
+        if (hasDetonated || gridSpawner.IsDetonating)
+        {
+            return;
+        }
+        hasDetonated = true;
+        timer.PauseTimer();
+
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
     public override int calculateScore()
     {
-        return 0;
+        // Scoring is time remaining multiplied by 10 
+        // added to mineScore which is number of mines remaining times mineScoreValue of 200
+        int timeScore = Mathf.RoundToInt(accumulatedRemainingTime * TimeScorePerSecond);
+        int mineScore = accumulatedRemainingMines * MineScoreValue;
+        return timeScore + mineScore;
     }
 
     private void HandleDetonationResolved(bool debrisCleared)
@@ -73,24 +123,39 @@ public class ClassicMode : GameModeBase
 
         if (!debrisCleared)
         {
+            manager.NotifyGameLost();
             return;
         }
 
         timer.PauseTimer();
+        accumulatedRemainingTime += Mathf.Max(0f, timer.TimeValue);
+        accumulatedRemainingMines += Mathf.Max(0, mineInventory.GetCount(MineType.Standard));
+
+        manager.NotifyLevelCleared(currentLevel, MaxLevel);
+        waitingForAdvance = true;
+        manager.gameStarted = false;
+    }
+    public void AdvanceToNextLevel()
+    {
+        if (!waitingForAdvance)
+        {
+            return;
+        }
+
+        waitingForAdvance = false;
 
         if (currentLevel >= MaxLevel)
         {
             manager.NotifyGameWon();
+            return;
         }
-        else
-        {
-            currentLevel++;
-            BeginLevel();
-        }
-    }
 
+        currentLevel++;
+        manager.gameStarted = true;
+        BeginLevel();
+    }
     private void HandleTimeUp()
     {
-        manager.NotifyGameLost();
+        OnDetonate();
     }
 }

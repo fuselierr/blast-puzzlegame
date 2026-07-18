@@ -64,6 +64,8 @@ public class CampaignMode : GameModeBase
             return;
         }
 
+        MarkLevelCompleted(levelIndex);
+
         levelIndex++;
         if (levelIndex >= manager.CampaignLevels.Length)
         {
@@ -72,6 +74,21 @@ public class CampaignMode : GameModeBase
         else
         {
             BeginLevel();
+        }
+    }
+
+    private void MarkLevelCompleted(int completedLevelIndex)
+    {
+        if (SaveManager.Instance == null || SaveManager.Instance.CurrentData == null)
+        {
+            return;
+        }
+
+        PlayerData data = SaveManager.Instance.CurrentData;
+        if (!data.completedCampaignLevels.Contains(completedLevelIndex))
+        {
+            data.completedCampaignLevels.Add(completedLevelIndex);
+            SaveManager.Instance.SaveData();
         }
     }
 
