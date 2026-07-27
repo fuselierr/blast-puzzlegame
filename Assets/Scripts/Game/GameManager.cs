@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
     // UIHandler subscribes to these instead of reaching into mode-specific
     // managers (e.g. the old ClassicLevelManager reference).
     public event Action<int, int> OnLevelStart; // (levelNumber, totalLevels)
+    public event Action<int, int> OnLevelCleared;
     public event Action OnGameWon;
     public event Action OnGameLost;
     public event Action<bool> OnDetonateComplete; // debrisCleared
@@ -113,11 +114,25 @@ public class GameManager : MonoBehaviour
         return currentMode?.calculateScore() ?? 0;
     }
 
+    public void AdvanceClassicLevel()
+    {
+        if (currentMode is ClassicMode classicMode)
+        {
+            classicMode.AdvanceToNextLevel();
+        }
+    }
+
+
     // --- Called by mode implementations to report state changes ---
 
     public void NotifyLevelStart(int levelNumber, int totalLevels)
     {
         OnLevelStart?.Invoke(levelNumber, totalLevels);
+    }
+
+    public void NotifyLevelCleared(int levelNumber, int totalLevels)
+    {
+        OnLevelCleared?.Invoke(levelNumber, totalLevels);
     }
 
     public void NotifyGameWon()
