@@ -11,6 +11,7 @@ public class LevelButton : MonoBehaviour
     public void LoadLevel()
     {
         GameManager.SelectedMode = GameMode.Campaign;
+        GameManager.SelectedCampaignLevelIndex = levelIndex - 1;
         SceneManager.LoadScene("Game");
     }
 

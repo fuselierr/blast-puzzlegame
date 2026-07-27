@@ -75,6 +75,12 @@ public class GridSpawner : MonoBehaviour
             return;
         }
 
+        if (!data.HasValidLayout(out string layoutError))
+        {
+            Debug.LogError($"Campaign level '{data.levelName}' has an invalid layout: {layoutError}.");
+            return;
+        }
+
         Configure(data.width, data.height, 0f);
         GenerateGrid();
 
@@ -89,7 +95,7 @@ public class GridSpawner : MonoBehaviour
                     continue;
                 }
 
-                TileType type = data.GetTile(x, y);
+                TileType type = data.GetTile(x, height - 1 - y);
                 if (type == TileType.Debris)
                 {
                     tile.PlaceDebris();
@@ -200,7 +206,7 @@ public class GridSpawner : MonoBehaviour
         // have been created before we start polling for them.
         yield return null;
 
-        while (FindObjectsByType<Projectile>().Length > 0)
+        while (FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length > 0)
         {
             yield return null;
         }

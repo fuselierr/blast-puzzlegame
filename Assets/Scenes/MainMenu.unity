@@ -2749,7 +2749,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelSelectGenerator
   levelButtonPrefab: {fileID: 915599939993081067, guid: a4780df99bf5ee445afc24b89dba54a0, type: 3}
   content: {fileID: 44285990}
-  numberOfLevels: 30
+  numberOfLevels: 5
 --- !u!1 &1063852643
 GameObject:
   m_ObjectHideFlags: 0

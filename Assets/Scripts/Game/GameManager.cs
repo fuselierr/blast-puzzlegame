@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     // that needs to change between "campaign", "freeplay" and "classic".
     public static GameMode SelectedMode = GameMode.Freeplay;
 
+    public static int SelectedCampaignLevelIndex = 0;
+
     public static bool IsDailyChallenge = false;
 
     [Header("Shared Services (all live in this one scene)")]
@@ -25,7 +27,7 @@ public class GameManager : MonoBehaviour
     public MineInventory MineInventory => mineInventory;
     public Timer Timer => timer;
     public CampaignLevelData[] CampaignLevels => campaignLevels;
-    public int CampaignStartIndex = 0;
+    public int CampaignStartIndex => SelectedCampaignLevelIndex;
 
     public bool gameStarted { get; set; }
 
