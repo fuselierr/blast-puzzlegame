@@ -6,4 +6,7 @@ public class CustomLevelData
     public int height;
     public string layout;
     public bool verified;
+    public int likes;
+    public int downloads;
+    public string previewImage;
 }

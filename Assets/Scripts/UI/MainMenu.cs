@@ -7,6 +7,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
     [SerializeField] private GameObject statsPanel;
+    [SerializeField] private GameObject communityPanel;
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
@@ -74,6 +75,17 @@ public class MainMenu : MonoBehaviour
         leaderboardPanel.SetActive(false);
     }
 
+    public void OpenCommunity()
+    {
+        mainMenuPanel.SetActive(false);
+        communityPanel.SetActive(true);
+    }
+
+    public void OpenLevelEditor()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelEditor");
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -81,6 +93,7 @@ public class MainMenu : MonoBehaviour
         statsPanel.SetActive(false);
         settingsPanel.SetActive(false);
         leaderboardPanel.SetActive(false);
+        communityPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         if (attemptedDailyChallenge)
         {

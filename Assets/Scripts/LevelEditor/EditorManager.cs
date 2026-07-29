@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class EditorManager : MonoBehaviour
@@ -156,6 +157,12 @@ public class EditorManager : MonoBehaviour
     {
         CustomLevelData level = BuildLevelData();
         CustomLevelStorage.Save(level);
+    }
+
+    public void SaveAndQuit()
+    {
+        SaveLevel();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
     public void LoadLevel()
