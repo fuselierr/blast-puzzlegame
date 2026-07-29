@@ -162,7 +162,9 @@ public class EditorManager : MonoBehaviour
     public void SaveAndQuit()
     {
         SaveLevel();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+
+        MainMenu.PageToOpen = MainMenuPage.Community;
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void LoadLevel()
