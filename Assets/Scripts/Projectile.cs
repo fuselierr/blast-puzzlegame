@@ -89,6 +89,11 @@ public class Projectile : MonoBehaviour
             hasHit = true;
             StartCoroutine(ExplodeAtCenter(tile));
         }
+        else if (tile != null && tile.Type == TileType.Wall && IsOnShotPath(tile.transform.position))
+        {
+            hasHit = true;
+            StartCoroutine(ExplodeAtCenter(tile));
+        }
     }
 
     private bool IsOnShotPath(Vector2 point)

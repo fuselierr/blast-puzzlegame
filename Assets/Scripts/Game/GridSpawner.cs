@@ -116,7 +116,7 @@ public class GridSpawner : MonoBehaviour
                 }
                 else
                 {
-                    tile.SetTileType(TileType.Tile);
+                    tile.SetTileType(type);
                 }
             }
         }

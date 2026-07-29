@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // A single hand-authored campaign level. Create these via
@@ -10,6 +11,17 @@ public class CampaignLevelData : ScriptableObject
 
     public string layout;
 
+    private static readonly Dictionary<char, TileType> tiletype_decoder = new Dictionary<char, TileType>()
+    {
+        ['x'] = TileType.Debris,
+        ['X'] = TileType.Debris,
+        ['#'] = TileType.Debris,
+        ['.'] = TileType.Tile,
+        ['-'] = TileType.Tile,
+        ['w'] = TileType.Wall,
+        ['W'] = TileType.Wall,
+    };
+
     public TileType GetTile(int x, int y)
     {
         string[] rows = GetRows();
@@ -19,9 +31,7 @@ public class CampaignLevelData : ScriptableObject
         }
 
         char symbol = rows[y][x];
-        return symbol == 'x' || symbol == 'X' || symbol == '#'
-            ? TileType.Debris
-            : TileType.Tile;
+        return tiletype_decoder[symbol];
     }
 
     public bool HasValidLayout(out string error)
@@ -44,7 +54,7 @@ public class CampaignLevelData : ScriptableObject
             for (int x = 0; x < rows[y].Length; x++)
             {
                 char symbol = rows[y][x];
-                if (symbol != '-' && symbol != '.' && symbol != 'x' && symbol != 'X' && symbol != '#')
+                if (!tiletype_decoder.ContainsKey(symbol))
                 {
                     error = $"unsupported character '{symbol}' at row {y + 1}, column {x + 1}";
                     return false;

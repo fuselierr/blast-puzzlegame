@@ -8,6 +8,7 @@ public class Tile : MonoBehaviour
     [SerializeField] private Sprite tileSprite;
     [SerializeField] private Sprite debrisSprite;
     [SerializeField] private Sprite mineSprite;
+    [SerializeField] private Sprite wallSprite;
 
     [Header("Flag Overlay")]
     [SerializeField] private SpriteRenderer flagRenderer;
@@ -31,6 +32,9 @@ public class Tile : MonoBehaviour
                 break;
             case TileType.Mine:
                 spriteRenderer.sprite = mineSprite;
+                break;
+            case TileType.Wall:
+                spriteRenderer.sprite = wallSprite;
                 break;
         }
     }
