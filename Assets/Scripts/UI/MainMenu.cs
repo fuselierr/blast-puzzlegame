@@ -70,9 +70,7 @@ public class MainMenu : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        campaignPanel.SetActive(false);
-        statsPanel.SetActive(false);
-        settingsPanel.SetActive(false);
+        HideAllPanels();
         mainMenuPanel.SetActive(true);
     }
 
