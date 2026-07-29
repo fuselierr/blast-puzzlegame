@@ -88,6 +88,11 @@ public class EditorGridSpawner : MonoBehaviour
             : MineType.Standard;
     }
 
+    public EditorTile GetEditorTile(int x, int y)
+    {
+        return IsInsideGrid(x, y) ? tiles[x, y] : null;
+    }
+
     private void ResizeAndCenterContent()
     {
         Canvas.ForceUpdateCanvases();

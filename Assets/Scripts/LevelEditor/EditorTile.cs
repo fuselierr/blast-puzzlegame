@@ -94,6 +94,53 @@ public class EditorTile : MonoBehaviour
         }
     }
 
+    public string GetTileToken()
+    {
+        switch (Type)
+        {
+            case TileType.None:
+                return "_";
+            case TileType.Tile:
+                return "-";
+            case TileType.Wall:
+                return "W";
+            case TileType.Debris:
+                return "D";
+            case TileType.StrongDebris:
+                return "H";
+            case TileType.Mirror:
+                return GetMirrorToken();
+            case TileType.Mine:
+                return GetMineToken();
+            default:
+                return "_";
+        }
+    }
+
+    private string GetMirrorToken()
+    {
+        return MineType switch
+        {
+            MineType.Standard => "MH",
+            MineType.Cross => "MV",
+            MineType.Diagonal => "MR",
+            MineType.Double => "ML",
+            _ => "MH"
+        };
+    }
+
+    private string GetMineToken()
+    {
+        return MineType switch
+        {
+            MineType.Standard => "NS",
+            MineType.Cross => "NC",
+            MineType.Diagonal => "NG",
+            MineType.Double => "ND",
+            _ => "NS"
+        };
+    }
+
     private void HandleClick()
     {
         Debug.Log(
