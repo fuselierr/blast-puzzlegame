@@ -35,8 +35,6 @@ public class EditorGridSpawner : MonoBehaviour
             return;
         }
 
-        ClearGrid();
-
         width = Mathf.Max(1, width);
         height = Mathf.Max(1, height);
 
@@ -44,19 +42,57 @@ public class EditorGridSpawner : MonoBehaviour
         gridLayout.constraintCount = width;
         gridLayout.childAlignment = TextAnchor.MiddleCenter;
 
+        EditorTile[,] previousTiles = tiles;
         tiles = new EditorTile[width, height];
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
+                EditorTile existingTile = null;
+                if (previousTiles != null && x < previousTiles.GetLength(0) && y < previousTiles.GetLength(1))
+                {
+                    existingTile = previousTiles[x, y];
+                }
+
+                if (existingTile != null)
+                {
+                    existingTile.transform.SetParent(content, false);
+                    RectTransform existingRect = existingTile.GetComponent<RectTransform>();
+                    existingRect.localScale = Vector3.one;
+                    existingRect.localRotation = Quaternion.identity;
+                    existingTile.name = $"EditorTile_{x}_{y}";
+                    existingTile.Initialize(globals, new Vector2Int(x, y));
+                    tiles[x, y] = existingTile;
+                    continue;
+                }
+
                 EditorTile tile = Instantiate(editorTilePrefab, content, false);
-                RectTransform tileRect = tile.GetComponent<RectTransform>();
-                tileRect.localScale = Vector3.one;
-                tileRect.localRotation = Quaternion.identity;
+                RectTransform newTileRect = tile.GetComponent<RectTransform>();
+                newTileRect.localScale = Vector3.one;
+                newTileRect.localRotation = Quaternion.identity;
                 tile.Initialize(globals, new Vector2Int(x, y));
                 tile.Clicked += HandleTileClicked;
                 tiles[x, y] = tile;
+            }
+        }
+
+        if (previousTiles != null)
+        {
+            for (int y = 0; y < previousTiles.GetLength(1); y++)
+            {
+                for (int x = 0; x < previousTiles.GetLength(0); x++)
+                {
+                    if (x >= width || y >= height)
+                    {
+                        EditorTile oldTile = previousTiles[x, y];
+                        if (oldTile != null)
+                        {
+                            oldTile.Clicked -= HandleTileClicked;
+                            Destroy(oldTile.gameObject);
+                        }
+                    }
+                }
             }
         }
 

@@ -15,6 +15,8 @@ public class EditorManager : MonoBehaviour
     [SerializeField] private TileType selectedTileType = TileType.Tile;
     [SerializeField] private MineType selectedMineType = MineType.Standard;
     [SerializeField] private TMP_InputField levelNameInput;
+    [SerializeField] private TMP_InputField widthInput;
+    [SerializeField] private TMP_InputField heightInput;
 
     public TileType SelectedTileType => selectedTileType;
     public MineType SelectedMineType => selectedMineType;
@@ -39,7 +41,28 @@ public class EditorManager : MonoBehaviour
             return;
         }
 
+        if (widthInput != null)
+        {
+            widthInput.text = gridSpawner.Width.ToString();
+        }
+
+        if (heightInput != null)
+        {
+            heightInput.text = gridSpawner.Height.ToString();
+        }
+
         gridSpawner.TileClicked += PaintTile;
+
+        if (widthInput != null)
+        {
+            widthInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
+        }
+
+        if (heightInput != null)
+        {
+            heightInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
+        }
+
         Debug.Log("EDITOR MANAGER CONNECTED TO GRID", this);
     }
 
@@ -75,6 +98,42 @@ public class EditorManager : MonoBehaviour
         );
 
         tile.SetTile(selectedTileType, selectedMineType);
+    }
+
+    public void ResizeGridFromInputs()
+    {
+        if (gridSpawner == null)
+        {
+            return;
+        }
+
+        int newWidth = ParseIntField(widthInput, gridSpawner.Width);
+        int newHeight = ParseIntField(heightInput, gridSpawner.Height);
+
+        if (newWidth <= 0 || newHeight <= 0)
+        {
+            return;
+        }
+
+        if (newWidth != gridSpawner.Width || newHeight != gridSpawner.Height)
+        {
+            gridSpawner.ResizeGrid(newWidth, newHeight);
+        }
+    }
+
+    private int ParseIntField(TMP_InputField inputField, int fallback)
+    {
+        if (inputField == null)
+        {
+            return fallback;
+        }
+
+        if (int.TryParse(inputField.text, out int value))
+        {
+            return Mathf.Max(1, value);
+        }
+
+        return fallback;
     }
 
     public void OpenFilePanel()
@@ -123,7 +182,7 @@ public class EditorManager : MonoBehaviour
         {
             levelName = levelNameInput != null ? levelNameInput.text : "Custom level",
             width = gridSpawner.Width,
-            height = gridSpawner.Height
+            height = gridSpawner.Height,
         };
 
         StringBuilder layout = new StringBuilder();
