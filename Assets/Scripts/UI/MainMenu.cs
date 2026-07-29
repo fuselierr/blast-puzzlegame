@@ -2,17 +2,29 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+public enum MainMenuPage
+{
+    Main,
+    Campaign,
+    Community,
+    Stats,
+    Settings
+}
+
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
     [SerializeField] private GameObject statsPanel;
+    [SerializeField] private GameObject communityPanel;
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private GameObject leaderboardPanel;
     
     private int score;
+
+    public static MainMenuPage PageToOpen = MainMenuPage.Main;
 
     public void PlayDailyChallenge()
     {
@@ -58,9 +70,7 @@ public class MainMenu : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        campaignPanel.SetActive(false);
-        statsPanel.SetActive(false);
-        settingsPanel.SetActive(false);
+        HideAllPanels();
         mainMenuPanel.SetActive(true);
     }
 
@@ -74,14 +84,48 @@ public class MainMenu : MonoBehaviour
         leaderboardPanel.SetActive(false);
     }
 
+    public void OpenCommunity()
+    {
+        mainMenuPanel.SetActive(false);
+        communityPanel.SetActive(true);
+    }
+
+    public void OpenLevelEditor()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelEditor");
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        campaignPanel.SetActive(false);
-        statsPanel.SetActive(false);
-        settingsPanel.SetActive(false);
-        leaderboardPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);
+        HideAllPanels();
+
+        switch (PageToOpen)
+        {
+            case MainMenuPage.Campaign:
+            campaignPanel.SetActive(true);
+            break;
+
+            case MainMenuPage.Community:
+                communityPanel.SetActive(true);
+                break;
+
+            case MainMenuPage.Stats:
+                statsPanel.SetActive(true);
+                break;
+
+            case MainMenuPage.Settings:
+                settingsPanel.SetActive(true);
+                break;
+
+            case MainMenuPage.Main:
+            default:
+                mainMenuPanel.SetActive(true);
+                break;
+        }
+
+        PageToOpen = MainMenuPage.Main;
+
         if (attemptedDailyChallenge)
         {
             // load daily challenge playerdata
@@ -93,9 +137,13 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void HideAllPanels()
     {
-        
+        mainMenuPanel.SetActive(false);
+        campaignPanel.SetActive(false);
+        communityPanel.SetActive(false);
+        statsPanel.SetActive(false);
+        settingsPanel.SetActive(false);
+        leaderboardPanel.SetActive(false);
     }
 }
