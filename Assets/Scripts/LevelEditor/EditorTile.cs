@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +11,9 @@ public class EditorTile : MonoBehaviour
     public TileType Type { get; private set; }
     public MineType MineType { get; private set; }
 
-    private EditorGridSpawner gridSpawner;
     private Globals globals;
     private Button button;
+    public event Action<EditorTile> Clicked;
 
     private void Awake()
     {
@@ -23,17 +24,18 @@ public class EditorTile : MonoBehaviour
             tileImage = GetComponent<Image>();
         }
 
+        tileImage.raycastTarget = true;
+        button.targetGraphic = tileImage;
+        button.interactable = true;
         button.onClick.AddListener(HandleClick);
     }
 
     public void Initialize(
-        EditorGridSpawner owner,
         Globals sharedGlobals,
         Vector2Int position,
         TileType initialType = TileType.Tile,
         MineType initialMineType = MineType.Standard)
     {
-        gridSpawner = owner;
         globals = sharedGlobals;
         GridPosition = position;
         name = $"EditorTile_{position.x}_{position.y}";
@@ -62,20 +64,10 @@ public class EditorTile : MonoBehaviour
         tileImage.type = Image.Type.Simple;
         tileImage.preserveAspect = true;
 
-        if (sprite != null)
-        {
-            tileImage.SetNativeSize();
-        }
-
-        tileImage.rectTransform.localScale = Vector3.one;
-        tileImage.rectTransform.sizeDelta = Vector2.zero;
-
         // Keep the transparent Image enabled so a None cell can still be clicked.
         tileImage.color = Type == TileType.None
             ? new Color(1f, 1f, 1f, 0f)
             : Color.white;
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)transform);
     }
 
     private Sprite GetCurrentSprite()
@@ -108,6 +100,6 @@ public class EditorTile : MonoBehaviour
             $"GRID CELL CLICKED: {GridPosition}",
             gameObject
         );
-        gridSpawner?.ApplySelectedTile(this);
+        Clicked?.Invoke(this);
     }
 }

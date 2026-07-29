@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +11,6 @@ public class EditorGridSpawner : MonoBehaviour
     [Header("Shared Assets")]
     [SerializeField] private Globals globals;
 
-    [Header("Editor")]
-    [SerializeField] private EditorManager editorManager;
-
     [Header("Scroll View")]
     [SerializeField] private RectTransform viewport;
     [SerializeField] private RectTransform content;
@@ -23,10 +21,10 @@ public class EditorGridSpawner : MonoBehaviour
 
     public int Width => width;
     public int Height => height;
+    public event Action<EditorTile> TileClicked;
 
     private void Start()
     {
-        ResolveEditorManager();
         GenerateGrid();
     }
 
@@ -52,8 +50,12 @@ public class EditorGridSpawner : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                EditorTile tile = Instantiate(editorTilePrefab, content);
-                tile.Initialize(this, globals, new Vector2Int(x, y));
+                EditorTile tile = Instantiate(editorTilePrefab, content, false);
+                RectTransform tileRect = tile.GetComponent<RectTransform>();
+                tileRect.localScale = Vector3.one;
+                tileRect.localRotation = Quaternion.identity;
+                tile.Initialize(globals, new Vector2Int(x, y));
+                tile.Clicked += HandleTileClicked;
                 tiles[x, y] = tile;
             }
         }
@@ -61,21 +63,10 @@ public class EditorGridSpawner : MonoBehaviour
         ResizeAndCenterContent();
     }
 
-    public void ApplySelectedTile(EditorTile tile)
+    private void HandleTileClicked(EditorTile tile)
     {
-        if (tile == null)
-        {
-            return;
-        }
-
-        ResolveEditorManager();
-
-        if (editorManager == null)
-        {
-            return;
-        }
-
-        tile.SetTile(editorManager.SelectedTileType, editorManager.SelectedMineType);
+        Debug.Log($"GRID SPAWNER FORWARDING: {tile.GridPosition}", this);
+        TileClicked?.Invoke(tile);
     }
 
     public void ResizeGrid(int newWidth, int newHeight)
@@ -128,14 +119,6 @@ public class EditorGridSpawner : MonoBehaviour
             contentHeight);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
-    }
-
-    private void ResolveEditorManager()
-    {
-        if (editorManager == null)
-        {
-            editorManager = FindObjectOfType<EditorManager>();
-        }
     }
 
     private bool IsInsideGrid(int x, int y)
