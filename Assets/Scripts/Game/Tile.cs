@@ -7,6 +7,7 @@ public class Tile : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite tileSprite;
     [SerializeField] private Sprite debrisSprite;
+    [SerializeField] private Sprite toughDebrisSprite;
     [SerializeField] private Sprite mineSprite;
     [SerializeField] private Sprite wallSprite;
 
@@ -29,6 +30,9 @@ public class Tile : MonoBehaviour
                 break;
             case TileType.Debris:
                 spriteRenderer.sprite = debrisSprite;
+                break;
+            case TileType.ToughDebris:
+                spriteRenderer.sprite = toughDebrisSprite;
                 break;
             case TileType.Mine:
                 spriteRenderer.sprite = mineSprite;
@@ -53,6 +57,13 @@ public class Tile : MonoBehaviour
             Type = TileType.Tile;
             SetFlagged(false);
             spriteRenderer.sprite = tileSprite;
+            SoundManager.Instance.PlayDebrisHit();
+        }
+        else if (Type == TileType.ToughDebris)
+        {
+            bool wasFlagged = IsFlagged;
+            SetTileType(TileType.Debris);
+            SetFlagged(wasFlagged);
             SoundManager.Instance.PlayDebrisHit();
         }
     }

@@ -20,6 +20,8 @@ public class CampaignLevelData : ScriptableObject
         ['-'] = TileType.Tile,
         ['w'] = TileType.Wall,
         ['W'] = TileType.Wall,
+        ['t'] = TileType.ToughDebris,
+        ['T'] = TileType.ToughDebris,
     };
 
     public TileType GetTile(int x, int y)

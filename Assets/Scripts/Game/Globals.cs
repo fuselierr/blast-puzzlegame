@@ -4,6 +4,7 @@ public enum TileType
 {
     Tile,
     Debris,
+    ToughDebris, 
     Wall, 
     Mine
 }
