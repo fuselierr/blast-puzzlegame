@@ -11,7 +11,6 @@ public enum TileType
     Mine = 6,
     None = 7,
     Splitter = 8,
-    ToughDebris = 9, 
 }
 
 public enum MineType
@@ -48,7 +47,6 @@ public class Globals : ScriptableObject
     [Header("Debris Sprites")]
     public Sprite debrisSprite;
     public Sprite strongDebrisSprite;
-    public Sprite toughDebrisSprite;
 
     public Sprite GetMineSprite(MineType mineType)
     {
@@ -83,8 +81,6 @@ public class Globals : ScriptableObject
                 return debrisSprite;
             case TileType.StrongDebris:
                 return strongDebrisSprite;
-            case TileType.ToughDebris:
-                return toughDebrisSprite;
             case TileType.Mine:
                 return standardMineSprite;
             case TileType.None:

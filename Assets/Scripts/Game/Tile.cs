@@ -33,25 +33,6 @@ public class Tile : MonoBehaviour
             Debug.LogWarning($"Tile: no sprite for {type}.");
         }
         return;
-
-        switch (type)
-        {
-            case TileType.Tile:
-                spriteRenderer.sprite = tileSprite;
-                break;
-            case TileType.Debris:
-                spriteRenderer.sprite = debrisSprite;
-                break;
-            case TileType.ToughDebris:
-                spriteRenderer.sprite = toughDebrisSprite;
-                break;
-            case TileType.Mine:
-                spriteRenderer.sprite = mineSprite;
-                break;
-            case TileType.Wall:
-                spriteRenderer.sprite = wallSprite;
-                break;
-        }
     }
 
     // overload for specific MineType
@@ -83,7 +64,7 @@ public class Tile : MonoBehaviour
             spriteRenderer.sprite = tileSprite;
             SoundManager.Instance.PlayDebrisHit();
         }
-        else if (Type == TileType.ToughDebris)
+        else if (Type == TileType.StrongDebris)
         {
             bool wasFlagged = IsFlagged;
             SetTileType(TileType.Debris);
