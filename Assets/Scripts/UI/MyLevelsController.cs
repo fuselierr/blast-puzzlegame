@@ -14,6 +14,9 @@ public class MyLevelsController : MonoBehaviour
     [Header("Data")]
     [SerializeField] private List<CustomLevelData> customLevels = new List<CustomLevelData>();
 
+    [Header("Kebab Menu")]
+    [SerializeField] private KebabMenuController kebabMenuController;
+
     private void Start()
     {
         PopulateLevels();
@@ -42,6 +45,10 @@ public class MyLevelsController : MonoBehaviour
                 {
                     continue;
                 }
+
+                // Older level files may not contain their own filename.
+                // Keep it so editing saves back to this exact JSON file.
+                level.fileName = Path.GetFileName(filePath);
 
                 customLevels.Add(level);
                 CreateLevelEntry(level);
@@ -90,7 +97,7 @@ public class MyLevelsController : MonoBehaviour
             MyLevelEntryUI entryUI = entryObject.GetComponent<MyLevelEntryUI>();
             if (entryUI != null)
             {
-                entryUI.Setup(level);
+                entryUI.Setup(level, kebabMenuController);
                 return;
             }
 

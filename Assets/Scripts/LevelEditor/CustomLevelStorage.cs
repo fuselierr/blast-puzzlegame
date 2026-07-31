@@ -4,6 +4,20 @@ using UnityEngine;
 
 public static class CustomLevelStorage
 {
+    private static CustomLevelData pendingEditLevel;
+
+    public static void BeginEdit(CustomLevelData level)
+    {
+        pendingEditLevel = level;
+    }
+
+    public static CustomLevelData TakePendingEdit()
+    {
+        CustomLevelData level = pendingEditLevel;
+        pendingEditLevel = null;
+        return level;
+    }
+
     public static void Save(CustomLevelData level)
     {
         if (level == null)
@@ -11,16 +25,21 @@ public static class CustomLevelStorage
             return;
         }
 
-        string safeName = string.IsNullOrWhiteSpace(level.levelName)
-            ? "custom_level"
-            : level.levelName.Replace(" ", "_");
+        string fileName = level.fileName;
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            string safeName = string.IsNullOrWhiteSpace(level.levelName)
+                ? "custom_level"
+                : level.levelName.Replace(" ", "_");
 
-        string uniqueId = Guid.NewGuid().ToString("N");
-        string fileName = safeName + "_" + uniqueId + ".json";
+            string uniqueId = Guid.NewGuid().ToString("N");
+            fileName = safeName + "_" + uniqueId + ".json";
+            level.fileName = fileName;
+        }
+
         string path = Path.Combine(Application.persistentDataPath, fileName);
         string json = JsonUtility.ToJson(level, true);
 
-        level.fileName = fileName;
         File.WriteAllText(path, json);
         Debug.Log("Saved custom level to: " + path);
     }
@@ -81,7 +100,15 @@ public static class CustomLevelStorage
 
         try
         {
-            return JsonUtility.FromJson<CustomLevelData>(File.ReadAllText(path));
+            CustomLevelData level =
+                JsonUtility.FromJson<CustomLevelData>(File.ReadAllText(path));
+
+            if (level != null)
+            {
+                level.fileName = Path.GetFileName(path);
+            }
+
+            return level;
         }
         catch (Exception)
         {

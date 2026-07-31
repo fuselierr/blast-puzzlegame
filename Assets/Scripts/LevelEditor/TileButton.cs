@@ -10,9 +10,46 @@ public class TileButton : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private EditorManager editorManager;
+    [SerializeField] private Image iconImage;
     [SerializeField] private Image selectionOverlay;
 
     private Button button;
+
+    public void Configure(
+        EditorManager manager,
+        TileType newTileType,
+        MineType newMineType,
+        Sprite icon)
+    {
+        if (editorManager != null && isActiveAndEnabled)
+        {
+            editorManager.SelectionChanged -= RefreshSelection;
+        }
+
+        editorManager = manager;
+        tileType = newTileType;
+        mineType = newMineType;
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = icon;
+            iconImage.enabled = icon != null;
+        }
+
+        if (editorManager != null && isActiveAndEnabled)
+        {
+            editorManager.SelectionChanged -= RefreshSelection;
+            editorManager.SelectionChanged += RefreshSelection;
+            RefreshSelection(
+                editorManager.SelectedTileType,
+                editorManager.SelectedMineType);
+        }
+
+        gameObject.name =
+            tileType == TileType.Mine
+                ? $"TileButton_{tileType}_{mineType}"
+                : $"TileButton_{tileType}";
+    }
 
     private void Awake()
     {

@@ -5,24 +5,22 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button), typeof(Image))]
 public class EditorTile : MonoBehaviour
 {
-    [SerializeField] private Image tileImage;
-
     public Vector2Int GridPosition { get; private set; }
     public TileType Type { get; private set; }
     public MineType MineType { get; private set; }
 
     private Globals globals;
     private Button button;
+    private Image tileImage;
     public event Action<EditorTile> Clicked;
 
     private void Awake()
     {
         button = GetComponent<Button>();
 
-        if (tileImage == null)
-        {
-            tileImage = GetComponent<Image>();
-        }
+        // The grid cell's visual is always its root Image. This replaces the
+        // prefab sprite instead of layering a child icon over it.
+        tileImage = GetComponent<Image>();
 
         tileImage.raycastTarget = true;
         button.targetGraphic = tileImage;
@@ -82,6 +80,8 @@ public class EditorTile : MonoBehaviour
                 return globals.mirrorSprite;
             case TileType.Teleporter:
                 return globals.teleporterSprite;
+            case TileType.Splitter:
+                return globals.splitterSprite;
             case TileType.Debris:
                 return globals.debrisSprite;
             case TileType.StrongDebris:
@@ -104,6 +104,8 @@ public class EditorTile : MonoBehaviour
                 return "-";
             case TileType.Wall:
                 return "W";
+            case TileType.Splitter:
+                return "S";
             case TileType.Debris:
                 return "D";
             case TileType.StrongDebris:
