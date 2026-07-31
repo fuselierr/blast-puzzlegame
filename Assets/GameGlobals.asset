@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: GameGlobals
   m_EditorClassIdentifier: Assembly-CSharp::Globals
   tileSprite: {fileID: 7399533318584292489, guid: f2cca8e1b81cced4487cc44435a2942b, type: 3}
-  wallSprite: {fileID: 5211086781936739708, guid: 2524b5376a358a34787ef9f05899a009, type: 3}
-  mirrorSprite: {fileID: 5211086781936739708, guid: 45704558cca23b444af4b8c9c1753cc3, type: 3}
-  teleporterSprite: {fileID: 5211086781936739708, guid: 45704558cca23b444af4b8c9c1753cc3, type: 3}
+  wallSprite: {fileID: 8494637627259261307, guid: b728a5826c66bc842b706e275f6632c4, type: 3}
+  mirrorSprite: {fileID: -6728250628938413968, guid: 812159355bca4794e960e600c6e90cd7, type: 3}
+  teleporterSprite: {fileID: 3519107522686806051, guid: bba6120f3617067488cf32922e36e97e, type: 3}
   standardMineSprite: {fileID: -5933715298724706184, guid: efb905ae467e12e4d938b3e2e920baf0, type: 3}
-  crossMineSprite: {fileID: -5933715298724706184, guid: bbc450621645b87478a39ac23b01843a, type: 3}
-  diagonalMineSprite: {fileID: -5933715298724706184, guid: bbc450621645b87478a39ac23b01843a, type: 3}
-  doubleMineSprite: {fileID: -6365250143721812414, guid: a156902d8e13c8b4c8de77cf556fd49f, type: 3}
+  crossMineSprite: {fileID: 7670227700825838776, guid: b8b394375df7bed458c05f5ab16c5b4f, type: 3}
+  diagonalMineSprite: {fileID: -581534660479669388, guid: a999acb1fee04d5439d0981d284f1ada, type: 3}
+  doubleMineSprite: {fileID: -8199840198811927050, guid: 5da2ee4e98b27324c835bde14ecb1a45, type: 3}
   debrisSprite: {fileID: 5725184139431673129, guid: 5d9e231b70e5d0c4cad512e7520d1a77, type: 3}
-  strongDebrisSprite: {fileID: 5725184139431673129, guid: b660199d1c961d44086e7a61fc46ca71, type: 3}
+  strongDebrisSprite: {fileID: 21300000, guid: b660199d1c961d44086e7a61fc46ca71, type: 3}
+  splitterSprite: {fileID: 6667910881968864793, guid: 08d27171051875342b9428fb9a4eb973, type: 3}

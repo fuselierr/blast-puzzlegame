@@ -2,15 +2,16 @@ using UnityEngine;
 
 public enum TileType
 {
-    Tile,
-    Wall,
-    Mirror,
-    Teleporter,
-    Debris,
-    StrongDebris,
-    ToughDebris, 
-    Mine,
-    None
+    Tile = 0,
+    Wall = 1,
+    Mirror = 2,
+    Teleporter = 3,
+    Debris = 4,
+    StrongDebris = 5,
+    Mine = 6,
+    None = 7,
+    Splitter = 8,
+    ToughDebris = 9, 
 }
 
 public enum MineType
@@ -36,6 +37,7 @@ public class Globals : ScriptableObject
     public Sprite wallSprite;
     public Sprite mirrorSprite;
     public Sprite teleporterSprite;
+    public Sprite splitterSprite;
 
     [Header("Mine Sprites")]
     public Sprite standardMineSprite;
