@@ -25,7 +25,12 @@ public class EditorGridSpawner : MonoBehaviour
 
     private void Start()
     {
-        GenerateGrid();
+        // EditorManager may already have generated and loaded this grid in its
+        // Start method. Do not generate it again and overwrite that data.
+        if (tiles == null)
+        {
+            GenerateGrid();
+        }
     }
 
     public void GenerateGrid()
@@ -62,7 +67,11 @@ public class EditorGridSpawner : MonoBehaviour
                     existingRect.localScale = Vector3.one;
                     existingRect.localRotation = Quaternion.identity;
                     existingTile.name = $"EditorTile_{x}_{y}";
-                    existingTile.Initialize(globals, new Vector2Int(x, y));
+                    existingTile.Initialize(
+                        globals,
+                        new Vector2Int(x, y),
+                        existingTile.Type,
+                        existingTile.MineType);
                     tiles[x, y] = existingTile;
                     continue;
                 }

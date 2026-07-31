@@ -295,6 +295,7 @@ public class EditorManager : MonoBehaviour
             "_" => TileType.None,
             "-" => TileType.Tile,
             "W" => TileType.Wall,
+            "S" => TileType.Splitter,
             "D" => TileType.Debris,
             "H" => TileType.StrongDebris,
             "MH" or "MV" or "MR" or "ML" => TileType.Mirror,
