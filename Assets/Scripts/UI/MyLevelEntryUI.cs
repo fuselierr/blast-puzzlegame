@@ -12,31 +12,109 @@ public class MyLevelEntryUI : MonoBehaviour
     [SerializeField] private TMP_Text verifiedText;
     [SerializeField] private Image previewImage;
     [SerializeField] private Sprite defaultPreviewSprite;
+    [SerializeField] private Button kebabButton;
 
-    public void Setup(CustomLevelData level)
+    private CustomLevelData level;
+    private KebabMenuController kebabMenuController;
+
+    public CustomLevelData Level => level;
+
+    public void Setup(
+        CustomLevelData levelData,
+        KebabMenuController menuController)
     {
-        if (level == null)
+        if (levelData == null)
         {
             return;
         }
 
-        levelNameText.text = string.IsNullOrWhiteSpace(level.levelName)
-            ? "Untitled Level"
-            : level.levelName;
+        level = levelData;
+        kebabMenuController = menuController;
 
-        sizeText.text = $"Dimensions: {level.width} x {level.height}";
-        likesText.text = $"{level.likes}";
-        downloadsText.text = $"{level.downloads}";
-        verifiedText.text = level.verified ? "Verified" : "Unverified";
-        verifiedText.color = level.verified ? Color.green : Color.red;
+        levelNameText.text =
+            string.IsNullOrWhiteSpace(level.levelName)
+                ? "Untitled Level"
+                : level.levelName;
+
+        sizeText.text =
+            $"Dimensions: {level.width} x {level.height}";
+
+        likesText.text = level.likes.ToString();
+        downloadsText.text = level.downloads.ToString();
+
+        verifiedText.text =
+            level.verified ? "Verified" : "Unverified";
+
+        verifiedText.color =
+            level.verified ? Color.green : Color.red;
 
         if (previewImage != null)
         {
             previewImage.sprite = defaultPreviewSprite;
+        }
 
-            // If your custom level stores a preview sprite path or name,
-            // load and assign it here when appropriate.
-            // Example: previewImage.sprite = LoadPreviewSprite(level.previewImage) ?? defaultPreviewSprite;
+        kebabButton.onClick.RemoveListener(OpenKebabMenu);
+        kebabButton.onClick.AddListener(OpenKebabMenu);
+    }
+
+    private void OpenKebabMenu()
+    {
+        if (kebabMenuController == null)
+        {
+            Debug.LogError(
+                "MyLevelEntryUI has no KebabMenuController.",
+                this
+            );
+            return;
+        }
+
+        kebabMenuController.Open(
+            kebabButton.GetComponent<RectTransform>(),
+            this
+        );
+    }
+
+    public void EditLevel()
+    {
+        Debug.Log($"Edit level: {level.levelName}");
+
+        // Set the level that the editor should load here,
+        // then load the LevelEditor scene.
+    }
+
+    public void RenameLevel()
+    {
+        Debug.Log($"Rename level: {level.levelName}");
+
+        // Open your rename dialog here.
+    }
+
+    public void DuplicateLevel()
+    {
+        Debug.Log($"Duplicate level: {level.levelName}");
+
+        // Create and save a copy here.
+    }
+
+    public void UploadLevel()
+    {
+        Debug.Log($"Upload level: {level.levelName}");
+
+        // Upload it to your backend here.
+    }
+
+    public void DeleteLevel()
+    {
+        Debug.Log($"Delete level: {level.levelName}");
+
+        // Delete the JSON file and destroy or refresh this entry.
+    }
+
+    private void OnDestroy()
+    {
+        if (kebabButton != null)
+        {
+            kebabButton.onClick.RemoveListener(OpenKebabMenu);
         }
     }
 }
