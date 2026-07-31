@@ -161,6 +161,7 @@ MonoBehaviour:
   wallSprite: {fileID: 2868539044483428322, guid: 0b88ad49c6d05354baef5141447f5fd4, type: 3}
   flagRenderer: {fileID: 1186786016561013165}
   flagSprite: {fileID: -5154189640090123692, guid: 5344fa19a60dda646b13e14b0eb64059, type: 3}
+  globals: {fileID: 11400000, guid: d93029da9ee3b55439018199c3a3d144, type: 2}
 --- !u!1 &6513811474699682424
 GameObject:
   m_ObjectHideFlags: 0

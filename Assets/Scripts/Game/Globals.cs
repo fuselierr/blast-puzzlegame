@@ -48,6 +48,7 @@ public class Globals : ScriptableObject
     [Header("Debris Sprites")]
     public Sprite debrisSprite;
     public Sprite strongDebrisSprite;
+    public Sprite toughDebrisSprite;
 
     public Sprite GetMineSprite(MineType mineType)
     {
@@ -65,4 +66,50 @@ public class Globals : ScriptableObject
                 return null;
         }
     }
+
+    public Sprite GetSprite(TileType tileType)
+    {
+        switch (tileType)
+        {
+            case TileType.Tile:
+                return tileSprite;
+            case TileType.Wall:
+                return wallSprite;
+            case TileType.Mirror:
+                return mirrorSprite;
+            case TileType.Teleporter:
+                return teleporterSprite;
+            case TileType.Debris:
+                return debrisSprite;
+            case TileType.StrongDebris:
+                return strongDebrisSprite;
+            case TileType.ToughDebris:
+                return toughDebrisSprite;
+            case TileType.Mine:
+                return standardMineSprite;
+            case TileType.None:
+            default:
+                return null;
+        }
+    }
+
+    public Sprite GetSprite(MineType mineType)
+    {
+        switch (mineType)
+        {
+            case MineType.Standard:
+                return standardMineSprite;
+            case MineType.Cross:
+                return crossMineSprite;
+            case MineType.Diagonal:
+                return diagonalMineSprite;
+            case MineType.Double:
+                return doubleMineSprite;
+            default:
+                return null;
+        }
+    }
 }
+
+
+

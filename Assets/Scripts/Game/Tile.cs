@@ -15,13 +15,24 @@ public class Tile : MonoBehaviour
     [SerializeField] private SpriteRenderer flagRenderer;
     [SerializeField] private Sprite flagSprite;
 
+    [SerializeField] private Globals globals;
+
     public TileType Type { get; private set; } = TileType.Tile;
+    public MineType mineType { get; private set; } = MineType.Standard;
+    // public DebrisType debrisType { get; private set; } = DebrisType.Standard;
     public bool IsFlagged { get; private set; }
 
     public void SetTileType(TileType type)
     {
         Type = type;
         SetFlagged(false);
+        spriteRenderer.sprite = globals.GetSprite(type);
+        // warning if null
+        if (spriteRenderer.sprite == null)
+        {
+            Debug.LogWarning($"Tile: no sprite for {type}.");
+        }
+        return;
 
         switch (type)
         {
@@ -40,6 +51,19 @@ public class Tile : MonoBehaviour
             case TileType.Wall:
                 spriteRenderer.sprite = wallSprite;
                 break;
+        }
+    }
+
+    // overload for specific MineType
+    public void SetTileType(MineType type)
+    {
+        Type = TileType.Mine;
+        SetFlagged(false);
+        spriteRenderer.sprite = globals.GetSprite(type);
+        // warning if null
+        if (spriteRenderer.sprite == null)
+        {
+            Debug.LogWarning($"Tile: no sprite for {type}.");
         }
     }
 

@@ -1,2 +1,20 @@
 fileFormatVersion: 2
 guid: 3cf15f375cad28c469ba9f0e764021ee
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - spriteRenderer: {instanceID: 0}
+  - tileSprite: {instanceID: 0}
+  - debrisSprite: {instanceID: 0}
+  - toughDebrisSprite: {instanceID: 0}
+  - mineSprite: {instanceID: 0}
+  - wallSprite: {instanceID: 0}
+  - flagRenderer: {instanceID: 0}
+  - flagSprite: {instanceID: 0}
+  - globals: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
