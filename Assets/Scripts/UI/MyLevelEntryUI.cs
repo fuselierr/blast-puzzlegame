@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MyLevelEntryUI : MonoBehaviour
@@ -76,10 +77,14 @@ public class MyLevelEntryUI : MonoBehaviour
 
     public void EditLevel()
     {
-        Debug.Log($"Edit level: {level.levelName}");
+        if (level == null)
+        {
+            Debug.LogError("No level data was assigned to this entry.", this);
+            return;
+        }
 
-        // Set the level that the editor should load here,
-        // then load the LevelEditor scene.
+        CustomLevelStorage.BeginEdit(level);
+        SceneManager.LoadScene("LevelEditor");
     }
 
     public void RenameLevel()

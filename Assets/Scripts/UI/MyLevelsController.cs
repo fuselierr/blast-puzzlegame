@@ -46,6 +46,10 @@ public class MyLevelsController : MonoBehaviour
                     continue;
                 }
 
+                // Older level files may not contain their own filename.
+                // Keep it so editing saves back to this exact JSON file.
+                level.fileName = Path.GetFileName(filePath);
+
                 customLevels.Add(level);
                 CreateLevelEntry(level);
             }

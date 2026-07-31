@@ -24,6 +24,8 @@ public class EditorManager : MonoBehaviour
 
     public event Action<TileType, MineType> SelectionChanged;
 
+    private CustomLevelData currentLevel;
+
     private void Start()
     {
         if (filePanel != null)
@@ -42,16 +44,6 @@ public class EditorManager : MonoBehaviour
             return;
         }
 
-        if (widthInput != null)
-        {
-            widthInput.text = gridSpawner.Width.ToString();
-        }
-
-        if (heightInput != null)
-        {
-            heightInput.text = gridSpawner.Height.ToString();
-        }
-
         gridSpawner.TileClicked += PaintTile;
 
         if (widthInput != null)
@@ -63,6 +55,16 @@ public class EditorManager : MonoBehaviour
         {
             heightInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
         }
+
+        CustomLevelData levelBeingEdited =
+            CustomLevelStorage.TakePendingEdit();
+
+        if (levelBeingEdited != null)
+        {
+            ApplyLevelData(levelBeingEdited);
+        }
+
+        RefreshInputFields(levelBeingEdited);
 
         Debug.Log("EDITOR MANAGER CONNECTED TO GRID", this);
     }
@@ -187,12 +189,11 @@ public class EditorManager : MonoBehaviour
 
     private CustomLevelData BuildLevelData()
     {
-        CustomLevelData level = new CustomLevelData
-        {
-            levelName = levelNameInput != null ? levelNameInput.text : "Custom level",
-            width = gridSpawner.Width,
-            height = gridSpawner.Height,
-        };
+        CustomLevelData level = currentLevel ?? new CustomLevelData();
+        level.levelName =
+            levelNameInput != null ? levelNameInput.text : "Custom level";
+        level.width = gridSpawner.Width;
+        level.height = gridSpawner.Height;
 
         StringBuilder layout = new StringBuilder();
 
@@ -217,6 +218,7 @@ public class EditorManager : MonoBehaviour
         }
 
         level.layout = layout.ToString();
+        currentLevel = level;
         return level;
     }
 
@@ -231,6 +233,8 @@ public class EditorManager : MonoBehaviour
         {
             gridSpawner.ResizeGrid(level.width, level.height);
         }
+
+        currentLevel = level;
 
         string[] rows = level.layout?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
         int rowIndex = 0;
@@ -258,6 +262,24 @@ public class EditorManager : MonoBehaviour
             }
 
             rowIndex++;
+        }
+    }
+
+    private void RefreshInputFields(CustomLevelData loadedLevel)
+    {
+        if (levelNameInput != null && loadedLevel != null)
+        {
+            levelNameInput.text = loadedLevel.levelName;
+        }
+
+        if (widthInput != null)
+        {
+            widthInput.text = gridSpawner.Width.ToString();
+        }
+
+        if (heightInput != null)
+        {
+            heightInput.text = gridSpawner.Height.ToString();
         }
     }
 
