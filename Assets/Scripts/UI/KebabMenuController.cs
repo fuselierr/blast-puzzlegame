@@ -25,14 +25,22 @@ public class KebabMenuController : MonoBehaviour
 
     private void Awake()
     {
+        // Hide these first so an Inspector reference problem cannot leave the
+        // blocker or menu visible when the scene opens.
+        Close();
+
+        if (!ReferencesAreValid())
+        {
+            enabled = false;
+            return;
+        }
+
         clickBlocker.onClick.AddListener(Close);
         editButton.onClick.AddListener(EditSelected);
         renameButton.onClick.AddListener(RenameSelected);
         duplicateButton.onClick.AddListener(DuplicateSelected);
         uploadButton.onClick.AddListener(UploadSelected);
         deleteButton.onClick.AddListener(DeleteSelected);
-
-        Close();
     }
 
     public void Open(
@@ -180,27 +188,41 @@ public class KebabMenuController : MonoBehaviour
 
         menuPanel.anchorMin = new Vector2(0.5f, 0.5f);
         menuPanel.anchorMax = new Vector2(0.5f, 0.5f);
+        menuPanel.localScale = Vector3.one;
 
         if (openOnRight)
         {
             // Top-left of menu beside bottom-right of button.
             menuPanel.pivot = new Vector2(0f, 1f);
 
-            menuPanel.anchoredPosition =
-                localPoint +
-                new Vector2(horizontalGap, -verticalGap);
+            SetMenuLocalPivotPosition(
+                localPoint + new Vector2(horizontalGap, -verticalGap)
+            );
         }
         else
         {
             // Top-right of menu beside bottom-left of button.
             menuPanel.pivot = new Vector2(1f, 1f);
 
-            menuPanel.anchoredPosition =
-                localPoint +
-                new Vector2(-horizontalGap, -verticalGap);
+            SetMenuLocalPivotPosition(
+                localPoint + new Vector2(-horizontalGap, -verticalGap)
+            );
         }
 
         ClampInsidePopupLayer();
+    }
+
+    private void SetMenuLocalPivotPosition(Vector2 localPivotPosition)
+    {
+        // anchoredPosition is relative to the anchors, while localPoint is
+        // relative to popupLayer's pivot. Account for that difference.
+        Rect layerRect = popupLayer.rect;
+        Vector2 anchorReference = new Vector2(
+            Mathf.Lerp(layerRect.xMin, layerRect.xMax, menuPanel.anchorMin.x),
+            Mathf.Lerp(layerRect.yMin, layerRect.yMax, menuPanel.anchorMin.y)
+        );
+
+        menuPanel.anchoredPosition = localPivotPosition - anchorReference;
     }
 
     private void ClampInsidePopupLayer()
@@ -208,7 +230,12 @@ public class KebabMenuController : MonoBehaviour
         Rect layerRect = popupLayer.rect;
         Rect menuRect = menuPanel.rect;
         Vector2 pivot = menuPanel.pivot;
-        Vector2 position = menuPanel.anchoredPosition;
+        Vector2 anchorReference = new Vector2(
+            Mathf.Lerp(layerRect.xMin, layerRect.xMax, menuPanel.anchorMin.x),
+            Mathf.Lerp(layerRect.yMin, layerRect.yMax, menuPanel.anchorMin.y)
+        );
+        Vector2 localPivotPosition =
+            anchorReference + menuPanel.anchoredPosition;
 
         float minimumX =
             layerRect.xMin +
@@ -230,19 +257,44 @@ public class KebabMenuController : MonoBehaviour
             menuRect.height * (1f - pivot.y) -
             screenPadding;
 
-        position.x = Mathf.Clamp(
-            position.x,
+        localPivotPosition.x = Mathf.Clamp(
+            localPivotPosition.x,
             minimumX,
             maximumX
         );
 
-        position.y = Mathf.Clamp(
-            position.y,
+        localPivotPosition.y = Mathf.Clamp(
+            localPivotPosition.y,
             minimumY,
             maximumY
         );
 
-        menuPanel.anchoredPosition = position;
+        menuPanel.anchoredPosition =
+            localPivotPosition - anchorReference;
+    }
+
+    private bool ReferencesAreValid()
+    {
+        bool valid =
+            popupLayer != null &&
+            menuPanel != null &&
+            clickBlocker != null &&
+            rootCanvas != null &&
+            editButton != null &&
+            renameButton != null &&
+            duplicateButton != null &&
+            uploadButton != null &&
+            deleteButton != null;
+
+        if (!valid)
+        {
+            Debug.LogError(
+                "KebabMenuController has missing Inspector references.",
+                this
+            );
+        }
+
+        return valid;
     }
 
     private void OnDestroy()
