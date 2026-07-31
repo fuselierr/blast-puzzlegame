@@ -4244,16 +4244,16 @@ MonoBehaviour:
   tileButtonPrefab: {fileID: 4469470406862551414, guid: 0bd67958c78057d439b365d66cf02053, type: 3}
   editorManager: {fileID: 1368192152}
   buttons:
-  - tileType: 7
+  - tileType: 6
     mineType: 0
     icon: {fileID: -5933715298724706184, guid: efb905ae467e12e4d938b3e2e920baf0, type: 3}
-  - tileType: 7
+  - tileType: 6
     mineType: 1
     icon: {fileID: 7670227700825838776, guid: b8b394375df7bed458c05f5ab16c5b4f, type: 3}
-  - tileType: 7
+  - tileType: 6
     mineType: 2
     icon: {fileID: -581534660479669388, guid: a999acb1fee04d5439d0981d284f1ada, type: 3}
-  - tileType: 7
+  - tileType: 6
     mineType: 3
     icon: {fileID: -8199840198811927050, guid: 5da2ee4e98b27324c835bde14ecb1a45, type: 3}
   populateOnStart: 1

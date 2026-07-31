@@ -1,3 +1,4 @@
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -51,11 +52,41 @@ public class MyLevelEntryUI : MonoBehaviour
 
         if (previewImage != null)
         {
-            previewImage.sprite = defaultPreviewSprite;
+            previewImage.sprite = LoadPreviewSprite(levelData);
         }
 
         kebabButton.onClick.RemoveListener(OpenKebabMenu);
         kebabButton.onClick.AddListener(OpenKebabMenu);
+    }
+
+    private Sprite LoadPreviewSprite(CustomLevelData levelData)
+    {
+        if (levelData == null || string.IsNullOrWhiteSpace(levelData.previewImage))
+        {
+            return defaultPreviewSprite;
+        }
+
+        string previewPath = Path.Combine(Application.persistentDataPath, levelData.previewImage);
+        if (!File.Exists(previewPath))
+        {
+            return defaultPreviewSprite;
+        }
+
+        try
+        {
+            byte[] bytes = File.ReadAllBytes(previewPath);
+            Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (!texture.LoadImage(bytes))
+            {
+                return defaultPreviewSprite;
+            }
+
+            return Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        }
+        catch
+        {
+            return defaultPreviewSprite;
+        }
     }
 
     private void OpenKebabMenu()

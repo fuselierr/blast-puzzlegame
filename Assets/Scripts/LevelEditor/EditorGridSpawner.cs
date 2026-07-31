@@ -121,6 +121,11 @@ public class EditorGridSpawner : MonoBehaviour
         GenerateGrid();
     }
 
+    public RectTransform GetPreviewCaptureTarget()
+    {
+        return viewport != null ? viewport : content;
+    }
+
     public TileType GetTileType(int x, int y)
     {
         return IsInsideGrid(x, y) ? tiles[x, y].Type : TileType.None;

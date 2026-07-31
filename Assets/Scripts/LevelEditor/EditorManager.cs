@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -163,10 +165,125 @@ public class EditorManager : MonoBehaviour
 
     public void SaveAndQuit()
     {
-        SaveLevel();
+        CustomLevelData level = BuildLevelData();
+        filePanel.SetActive(false);
+        StartCoroutine(CapturePreviewAndSaveRoutine(level));
+    }
 
+    private IEnumerator CapturePreviewAndSaveRoutine(CustomLevelData level)
+    {
+        if (level == null)
+        {
+            LoadMainMenu();
+            yield break;
+        }
+
+        yield return new WaitForEndOfFrame();
+
+        Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+        if (screenshot != null)
+        {
+            Rect captureRect = GetGridCaptureRect();
+            if (captureRect.width > 0f && captureRect.height > 0f)
+            {
+                Texture2D cropped = CropTexture(screenshot, captureRect);
+                if (cropped != null)
+                {
+                    string previewFileName = SaveTextureToFile(cropped, level);
+                    if (!string.IsNullOrWhiteSpace(previewFileName))
+                    {
+                        level.previewImage = previewFileName;
+                    }
+
+                    Destroy(cropped);
+                }
+            }
+
+            Destroy(screenshot);
+        }
+
+        CustomLevelStorage.Save(level);
+        LoadMainMenu();
+    }
+
+    private void LoadMainMenu()
+    {
         MainMenu.PageToOpen = MainMenuPage.Community;
         SceneManager.LoadScene("MainMenu");
+    }
+
+    private Rect GetGridCaptureRect()
+    {
+        if (gridSpawner == null)
+        {
+            return new Rect(0f, 0f, Screen.width, Screen.height);
+        }
+
+        RectTransform captureTarget = gridSpawner.GetPreviewCaptureTarget();
+        if (captureTarget == null)
+        {
+            return new Rect(0f, 0f, Screen.width, Screen.height);
+        }
+
+        Vector3[] corners = new Vector3[4];
+        captureTarget.GetWorldCorners(corners);
+
+        float minX = Mathf.Min(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+        float maxX = Mathf.Max(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+        float minY = Mathf.Min(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+        float maxY = Mathf.Max(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+
+        return new Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    private Texture2D CropTexture(Texture2D source, Rect rect)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        int x = Mathf.Clamp(Mathf.RoundToInt(rect.x), 0, source.width);
+        int y = Mathf.Clamp(Mathf.RoundToInt(rect.y), 0, source.height);
+        int width = Mathf.Clamp(Mathf.RoundToInt(rect.width), 1, source.width - x);
+        int height = Mathf.Clamp(Mathf.RoundToInt(rect.height), 1, source.height - y);
+
+        Texture2D cropped = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        cropped.ReadPixels(new Rect(x, y, width, height), 0, 0, false);
+        cropped.Apply();
+        return cropped;
+    }
+
+    private string SaveTextureToFile(Texture2D texture, CustomLevelData level)
+    {
+        if (texture == null || level == null)
+        {
+            return null;
+        }
+
+        string fileName = level.fileName;
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            string safeName = string.IsNullOrWhiteSpace(level.levelName)
+                ? "custom_level"
+                : level.levelName.Replace(" ", "_");
+
+            string uniqueId = Guid.NewGuid().ToString("N");
+            fileName = safeName + "_" + uniqueId + ".json";
+            level.fileName = fileName;
+        }
+
+        string previewFileName = Path.GetFileNameWithoutExtension(fileName) + "_preview.png";
+        string path = Path.Combine(Application.persistentDataPath, previewFileName);
+
+        byte[] bytes = texture.EncodeToPNG();
+        if (bytes == null || bytes.Length == 0)
+        {
+            return null;
+        }
+
+        File.WriteAllBytes(path, bytes);
+        return previewFileName;
     }
 
     public void LoadLevel()
