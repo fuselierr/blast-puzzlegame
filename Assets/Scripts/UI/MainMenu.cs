@@ -11,6 +11,12 @@ public enum MainMenuPage
     Settings
 }
 
+public enum CommunityTab
+{
+    MyLevels,
+    Discover
+}
+
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
@@ -18,6 +24,11 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject communityPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject myLevelsPanel;
+    [SerializeField] private GameObject discoverPanel;
+    [SerializeField] private TabController communityTabController;
+    [SerializeField] private int myLevelsTabIndex = 0;
+    [SerializeField] private int discoverTabIndex = 1;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private GameObject leaderboardPanel;
@@ -25,6 +36,7 @@ public class MainMenu : MonoBehaviour
     private int score;
 
     public static MainMenuPage PageToOpen = MainMenuPage.Main;
+    public static CommunityTab CommunityTabToOpen = CommunityTab.MyLevels;
 
     public void PlayDailyChallenge()
     {
@@ -88,6 +100,25 @@ public class MainMenu : MonoBehaviour
     {
         mainMenuPanel.SetActive(false);
         communityPanel.SetActive(true);
+        OpenCommunityTab(CommunityTab.MyLevels);
+    }
+
+    public void OpenCommunityTab(CommunityTab tab)
+    {
+        if (communityPanel == null || myLevelsPanel == null || discoverPanel == null)
+        {
+            return;
+        }
+
+        communityPanel.SetActive(true);
+        myLevelsPanel.SetActive(tab == CommunityTab.MyLevels);
+        discoverPanel.SetActive(tab == CommunityTab.Discover);
+
+        if (communityTabController != null)
+        {
+            communityTabController.SelectTab(
+                tab == CommunityTab.MyLevels ? myLevelsTabIndex : discoverTabIndex);
+        }
     }
 
     public void OpenLevelEditor()
@@ -108,6 +139,7 @@ public class MainMenu : MonoBehaviour
 
             case MainMenuPage.Community:
                 communityPanel.SetActive(true);
+                OpenCommunityTab(CommunityTabToOpen);
                 break;
 
             case MainMenuPage.Stats:

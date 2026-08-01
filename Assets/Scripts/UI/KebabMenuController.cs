@@ -15,6 +15,9 @@ public class KebabMenuController : MonoBehaviour
     [SerializeField] private Button duplicateButton;
     [SerializeField] private Button uploadButton;
     [SerializeField] private Button deleteButton;
+    
+    [Header("Popups")]
+    [SerializeField] private LevelNamePopupController namePopup;
 
     [Header("Positioning")]
     [SerializeField] private float horizontalGap = 8f;
@@ -47,19 +50,35 @@ public class KebabMenuController : MonoBehaviour
         RectTransform kebabButton,
         MyLevelEntryUI entry)
     {
+        Debug.Log($"KebabMenuController.Open invoked. kebabButton={(kebabButton!=null)}, entry={(entry!=null)}", this);
+
         if (kebabButton == null || entry == null)
         {
+            Debug.LogWarning($"KebabMenuController.Open called with null parameter: kebabButton={(kebabButton==null)}, entry={(entry==null)}", this);
             return;
         }
 
         selectedEntry = entry;
 
-        clickBlocker.gameObject.SetActive(true);
-        menuPanel.gameObject.SetActive(true);
+        // Ensure the shared popup layer is active so child panels are visible.
+        if (popupLayer != null && !popupLayer.gameObject.activeSelf)
+        {
+            popupLayer.gameObject.SetActive(true);
+        }
+
+        if (clickBlocker != null)
+        {
+            clickBlocker.gameObject.SetActive(true);
+        }
+
+        if (menuPanel != null)
+        {
+            menuPanel.gameObject.SetActive(true);
+        }
 
         // Keep the blocker behind the menu.
-        clickBlocker.transform.SetAsLastSibling();
-        menuPanel.SetAsLastSibling();
+        if (clickBlocker != null) clickBlocker.transform.SetAsLastSibling();
+        if (menuPanel != null) menuPanel.SetAsLastSibling();
 
         Canvas.ForceUpdateCanvases();
 
@@ -102,7 +121,26 @@ public class KebabMenuController : MonoBehaviour
 
         MyLevelEntryUI entry = selectedEntry;
         Close();
-        entry.RenameLevel();
+
+        if (namePopup == null)
+        {
+            // Fallback to the existing hookup if no popup is provided.
+            entry.RenameLevel();
+            return;
+        }
+
+        string starting = entry.Level != null && !string.IsNullOrWhiteSpace(entry.Level.levelName)
+            ? entry.Level.levelName
+            : "Untitled";
+
+        namePopup.Show(starting, newName =>
+        {
+            if (entry.Level == null) return;
+
+            entry.Level.levelName = newName;
+            CustomLevelStorage.Save(entry.Level);
+            entry.Setup(entry.Level, this);
+        });
     }
 
     public void DuplicateSelected()
@@ -275,26 +313,34 @@ public class KebabMenuController : MonoBehaviour
 
     private bool ReferencesAreValid()
     {
-        bool valid =
-            popupLayer != null &&
-            menuPanel != null &&
-            clickBlocker != null &&
-            rootCanvas != null &&
-            editButton != null &&
-            renameButton != null &&
-            duplicateButton != null &&
-            uploadButton != null &&
-            deleteButton != null;
+        System.Text.StringBuilder missing = new System.Text.StringBuilder();
 
-        if (!valid)
+        void Check(object field, string name)
         {
-            Debug.LogError(
-                "KebabMenuController has missing Inspector references.",
-                this
-            );
+            if (field == null)
+            {
+                if (missing.Length > 0) missing.Append(", ");
+                missing.Append(name);
+            }
         }
 
-        return valid;
+        Check(popupLayer, nameof(popupLayer));
+        Check(menuPanel, nameof(menuPanel));
+        Check(clickBlocker, nameof(clickBlocker));
+        Check(rootCanvas, nameof(rootCanvas));
+        Check(editButton, nameof(editButton));
+        Check(renameButton, nameof(renameButton));
+        Check(duplicateButton, nameof(duplicateButton));
+        Check(uploadButton, nameof(uploadButton));
+        Check(deleteButton, nameof(deleteButton));
+
+        if (missing.Length > 0)
+        {
+            Debug.LogError($"KebabMenuController missing Inspector references: {missing}", this);
+            return false;
+        }
+
+        return true;
     }
 
     private void OnDestroy()

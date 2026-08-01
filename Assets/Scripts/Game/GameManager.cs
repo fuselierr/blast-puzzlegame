@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
 
     public static int SelectedCampaignLevelIndex = 0;
 
+    public static CustomLevelData SelectedCustomLevel;
+
     public static bool IsDailyChallenge = false;
 
     [Header("Shared Services (all live in this one scene)")]

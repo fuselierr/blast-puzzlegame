@@ -21,7 +21,7 @@ public class BGPersist : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Game" || scene.name == "Classic")
+        if (scene.name == "Game" || scene.name == "Classic" || scene.name == "LevelEditor")
         {
             Destroy(gameObject);
         }

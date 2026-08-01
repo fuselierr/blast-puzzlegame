@@ -14,10 +14,17 @@ public class EditorManager : MonoBehaviour
     [Header("Grid")]
     [SerializeField] private EditorGridSpawner gridSpawner;
 
+    [Header("Verification")]
+    [SerializeField] private GridSpawner gameplayGridSpawner;
+    [SerializeField] private VerificationManager verificationManager;
+    [Tooltip("Text used to show verification success/failure feedback.")]
+    [SerializeField] private TMP_Text verifiedText;
+    [Tooltip("How long the verification message stays visible before hiding.")]
+    [SerializeField] private float messageDisplayDuration = 2f;
+
     [Header("Initial Selection")]
     [SerializeField] private TileType selectedTileType = TileType.Tile;
     [SerializeField] private MineType selectedMineType = MineType.Standard;
-    [SerializeField] private TMP_InputField levelNameInput;
     [SerializeField] private TMP_InputField widthInput;
     [SerializeField] private TMP_InputField heightInput;
 
@@ -27,6 +34,23 @@ public class EditorManager : MonoBehaviour
     public event Action<TileType, MineType> SelectionChanged;
 
     private CustomLevelData currentLevel;
+    private Coroutine messageHideRoutine;
+
+    public string CurrentLevelName =>
+        currentLevel != null ? currentLevel.levelName : string.Empty;
+
+    private void Awake()
+    {
+        // This VerificationManager lives in the editor scene and is only
+        // started explicitly by VerifyCurrentLevel(). Disable it before any
+        // Start methods run so it cannot consume the pending edit level before
+        // EditorManager receives it. That pending object contains both the
+        // chosen display name and the original filename used for overwriting.
+        if (verificationManager != null)
+        {
+            verificationManager.enabled = false;
+        }
+    }
 
     private void Start()
     {
@@ -48,6 +72,16 @@ public class EditorManager : MonoBehaviour
 
         gridSpawner.TileClicked += PaintTile;
 
+        if (gameplayGridSpawner != null)
+        {
+            gameplayGridSpawner.gameObject.SetActive(false);
+        }
+
+        if (verificationManager != null)
+        {
+            verificationManager.OnVerificationComplete += HandleVerificationComplete;
+        }
+
         if (widthInput != null)
         {
             widthInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
@@ -63,10 +97,23 @@ public class EditorManager : MonoBehaviour
 
         if (levelBeingEdited != null)
         {
+            currentLevel = levelBeingEdited;
             ApplyLevelData(levelBeingEdited);
+
+            Debug.Log(
+                $"EditorManager received level " +
+                $"'{currentLevel.levelName}'.",
+                this);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "EditorManager did not receive pending level data. " +
+                "A new unnamed level will be used.",
+                this);
         }
 
-        RefreshInputFields(levelBeingEdited);
+        RefreshDimensionInputs();
 
         Debug.Log("EDITOR MANAGER CONNECTED TO GRID", this);
     }
@@ -76,6 +123,11 @@ public class EditorManager : MonoBehaviour
         if (gridSpawner != null)
         {
             gridSpawner.TileClicked -= PaintTile;
+        }
+
+        if (verificationManager != null)
+        {
+            verificationManager.OnVerificationComplete -= HandleVerificationComplete;
         }
     }
 
@@ -170,6 +222,107 @@ public class EditorManager : MonoBehaviour
         StartCoroutine(CapturePreviewAndSaveRoutine(level));
     }
 
+    public void VerifyCurrentLevel()
+    {
+        if (verificationManager == null || gameplayGridSpawner == null || gridSpawner == null)
+        {
+            Debug.LogError("Cannot verify level because a required verification component is missing.", this);
+            return;
+        }
+
+        CustomLevelData level = BuildLevelData();
+        if (level == null)
+        {
+            Debug.LogError("Failed to build custom level data for verification.", this);
+            return;
+        }
+
+        ResolveVerificationText();
+        if (verifiedText != null)
+        {
+            verifiedText.gameObject.SetActive(false);
+        }
+
+        gridSpawner.SetTilesVisible(false);
+        filePanel.SetActive(false);
+        gameplayGridSpawner.gameObject.SetActive(true);
+        verificationManager.enabled = true;
+        verificationManager.StartVerification(level);
+    }
+
+    private void HandleVerificationComplete(bool debrisCleared)
+    {
+        // VerificationManager updates the same in-memory level instance, but
+        // the main menu rebuilds its entries from the saved JSON files. Persist
+        // the result now so the entry shows the latest verification state.
+        if (currentLevel != null)
+        {
+            currentLevel.verified = debrisCleared;
+            CustomLevelStorage.Save(currentLevel);
+        }
+
+        if (verificationManager != null)
+        {
+            verificationManager.enabled = false;
+        }
+
+        if (gameplayGridSpawner != null)
+        {
+            gameplayGridSpawner.gameObject.SetActive(false);
+        }
+
+        if (gridSpawner != null)
+        {
+            gridSpawner.SetTilesVisible(true);
+        }
+
+        ShowVerificationMessage(debrisCleared ? "Level Verified!" : "Verification Failed.", debrisCleared ? Color.green : Color.red);
+
+        Debug.Log($"Custom level verification completed. Debris cleared: {debrisCleared}", this);
+    }
+
+    private void ResolveVerificationText()
+    {
+        if (verifiedText != null)
+        {
+            return;
+        }
+
+        verifiedText = GetComponentInChildren<TMP_Text>(true);
+    }
+
+    private void ShowVerificationMessage(string message, Color color)
+    {
+        ResolveVerificationText();
+
+        if (verifiedText == null)
+        {
+            return;
+        }
+
+        if (messageHideRoutine != null)
+        {
+            StopCoroutine(messageHideRoutine);
+        }
+
+        verifiedText.text = message;
+        verifiedText.color = color;
+        verifiedText.gameObject.SetActive(true);
+        messageHideRoutine = StartCoroutine(HideVerificationMessageAfterDelay());
+    }
+
+    private IEnumerator HideVerificationMessageAfterDelay()
+    {
+        yield return new WaitForSeconds(messageDisplayDuration);
+
+        if (verifiedText != null)
+        {
+            verifiedText.gameObject.SetActive(false);
+        }
+
+        messageHideRoutine = null;
+    }
+
     private IEnumerator CapturePreviewAndSaveRoutine(CustomLevelData level)
     {
         if (level == null)
@@ -177,6 +330,8 @@ public class EditorManager : MonoBehaviour
             LoadMainMenu();
             yield break;
         }
+
+        Debug.Log($"CapturePreviewAndSaveRoutine: saving level name='{level.levelName}' file='{level.fileName}'", this);
 
         yield return new WaitForEndOfFrame();
 
@@ -286,15 +441,14 @@ public class EditorManager : MonoBehaviour
         return previewFileName;
     }
 
-    public void LoadLevel()
+    public void LoadLevel(string identifier)
     {
-        if (levelNameInput == null)
+        if (string.IsNullOrWhiteSpace(identifier))
         {
             return;
         }
 
-        string fileName = levelNameInput.text;
-        CustomLevelData level = CustomLevelStorage.Load(fileName);
+        CustomLevelData level = CustomLevelStorage.Load(identifier);
 
         if (level == null)
         {
@@ -307,8 +461,13 @@ public class EditorManager : MonoBehaviour
     private CustomLevelData BuildLevelData()
     {
         CustomLevelData level = currentLevel ?? new CustomLevelData();
-        level.levelName =
-            levelNameInput != null ? levelNameInput.text : "Custom level";
+
+        // The name comes from CustomLevelStorage.BeginCreateNew() or from the
+        // existing level being edited. There is no scene UI dependency here.
+        if (string.IsNullOrWhiteSpace(level.levelName))
+        {
+            level.levelName = "Custom level";
+        }
         level.width = gridSpawner.Width;
         level.height = gridSpawner.Height;
 
@@ -382,13 +541,8 @@ public class EditorManager : MonoBehaviour
         }
     }
 
-    private void RefreshInputFields(CustomLevelData loadedLevel)
+    private void RefreshDimensionInputs()
     {
-        if (levelNameInput != null && loadedLevel != null)
-        {
-            levelNameInput.text = loadedLevel.levelName;
-        }
-
         if (widthInput != null)
         {
             widthInput.text = gridSpawner.Width.ToString();
