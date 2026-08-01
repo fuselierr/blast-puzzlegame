@@ -17,6 +17,10 @@ public class EditorManager : MonoBehaviour
     [Header("Verification")]
     [SerializeField] private GridSpawner gameplayGridSpawner;
     [SerializeField] private VerificationManager verificationManager;
+    [Tooltip("Text used to show verification success/failure feedback.")]
+    [SerializeField] private TMP_Text verifiedText;
+    [Tooltip("How long the verification message stays visible before hiding.")]
+    [SerializeField] private float messageDisplayDuration = 2f;
 
     [Header("Initial Selection")]
     [SerializeField] private TileType selectedTileType = TileType.Tile;
@@ -30,6 +34,7 @@ public class EditorManager : MonoBehaviour
     public event Action<TileType, MineType> SelectionChanged;
 
     private CustomLevelData currentLevel;
+    private Coroutine messageHideRoutine;
 
     public string CurrentLevelName =>
         currentLevel != null ? currentLevel.levelName : string.Empty;
@@ -232,6 +237,12 @@ public class EditorManager : MonoBehaviour
             return;
         }
 
+        ResolveVerificationText();
+        if (verifiedText != null)
+        {
+            verifiedText.gameObject.SetActive(false);
+        }
+
         gridSpawner.SetTilesVisible(false);
         filePanel.SetActive(false);
         gameplayGridSpawner.gameObject.SetActive(true);
@@ -241,6 +252,15 @@ public class EditorManager : MonoBehaviour
 
     private void HandleVerificationComplete(bool debrisCleared)
     {
+        // VerificationManager updates the same in-memory level instance, but
+        // the main menu rebuilds its entries from the saved JSON files. Persist
+        // the result now so the entry shows the latest verification state.
+        if (currentLevel != null)
+        {
+            currentLevel.verified = debrisCleared;
+            CustomLevelStorage.Save(currentLevel);
+        }
+
         if (verificationManager != null)
         {
             verificationManager.enabled = false;
@@ -256,7 +276,51 @@ public class EditorManager : MonoBehaviour
             gridSpawner.SetTilesVisible(true);
         }
 
+        ShowVerificationMessage(debrisCleared ? "Level Verified!" : "Verification Failed.", debrisCleared ? Color.green : Color.red);
+
         Debug.Log($"Custom level verification completed. Debris cleared: {debrisCleared}", this);
+    }
+
+    private void ResolveVerificationText()
+    {
+        if (verifiedText != null)
+        {
+            return;
+        }
+
+        verifiedText = GetComponentInChildren<TMP_Text>(true);
+    }
+
+    private void ShowVerificationMessage(string message, Color color)
+    {
+        ResolveVerificationText();
+
+        if (verifiedText == null)
+        {
+            return;
+        }
+
+        if (messageHideRoutine != null)
+        {
+            StopCoroutine(messageHideRoutine);
+        }
+
+        verifiedText.text = message;
+        verifiedText.color = color;
+        verifiedText.gameObject.SetActive(true);
+        messageHideRoutine = StartCoroutine(HideVerificationMessageAfterDelay());
+    }
+
+    private IEnumerator HideVerificationMessageAfterDelay()
+    {
+        yield return new WaitForSeconds(messageDisplayDuration);
+
+        if (verifiedText != null)
+        {
+            verifiedText.gameObject.SetActive(false);
+        }
+
+        messageHideRoutine = null;
     }
 
     private IEnumerator CapturePreviewAndSaveRoutine(CustomLevelData level)

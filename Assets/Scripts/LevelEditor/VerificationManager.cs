@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class VerificationManager : MonoBehaviour
 {
@@ -31,7 +32,6 @@ public class VerificationManager : MonoBehaviour
 
         if (!TryLoadLevelData())
         {
-            Debug.LogWarning("VerificationManager has no custom level data to verify.", this);
             return;
         }
 
@@ -47,7 +47,6 @@ public class VerificationManager : MonoBehaviour
 
         if (customLevelData == null)
         {
-            Debug.LogError("VerificationManager has no custom level data to verify.", this);
             return;
         }
 
