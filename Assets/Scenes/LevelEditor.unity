@@ -1433,6 +1433,72 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 329513199}
   m_CullTransparentMesh: 1
+--- !u!1 &505494834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 505494837}
+  - component: {fileID: 505494836}
+  - component: {fileID: 505494835}
+  m_Layer: 0
+  m_Name: VerificationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &505494835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505494834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e743434c08660a48a7a1ac4d3fb8843, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VerificationManager
+  gridSpawner: {fileID: 505494836}
+  customLevelIdentifier: 
+  detonationDelay: 3
+--- !u!114 &505494836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505494834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 133b744460a42b146a789f240243d03f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridSpawner
+  tilePrefab: {fileID: 81243628368889610, guid: 361014c226c92f24187eb262161283bb, type: 3}
+  projectilePrefab: {fileID: 4757138332800204887, guid: 7455376edcc1a0c4ca9238060ce7d66f, type: 3}
+  width: 8
+  height: 8
+  tileSize: 0.3
+  debrisChance: 0.15
+--- !u!4 &505494837
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505494834}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 708.354, y: 1010.92505, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &524070427
 GameObject:
   m_ObjectHideFlags: 0
@@ -1529,7 +1595,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &531283812
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2316,7 +2382,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 625153492}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1368192152}
+        m_TargetAssemblyTypeName: EditorManager, Assembly-CSharp
+        m_MethodName: VerifyCurrentLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &625153492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3293,6 +3371,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EditorManager
   filePanel: {fileID: 531283811}
   gridSpawner: {fileID: 1368192151}
+  gameplayGridSpawner: {fileID: 505494836}
+  verificationManager: {fileID: 505494835}
   selectedTileType: 0
   selectedMineType: 0
   levelNameInput: {fileID: 0}
@@ -5152,3 +5232,4 @@ SceneRoots:
   - {fileID: 1738450056}
   - {fileID: 138843226}
   - {fileID: 1368192150}
+  - {fileID: 505494837}

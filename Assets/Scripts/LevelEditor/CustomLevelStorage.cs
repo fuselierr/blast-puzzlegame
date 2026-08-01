@@ -11,6 +11,49 @@ public static class CustomLevelStorage
         pendingEditLevel = level;
     }
 
+    // Begin creating a fresh custom level with the provided display name.
+    // This will generate a safe filename (ensuring no collisions) and store
+    // the newly-created level as the pending edit so the LevelEditor can
+    // pick it up via TakePendingEdit(). Returns the created level.
+    public static CustomLevelData BeginCreateNew(string levelName)
+    {
+        if (string.IsNullOrWhiteSpace(levelName))
+        {
+            levelName = "custom_level";
+        }
+
+        string safeName = levelName.Trim().Replace(" ", "_");
+        if (!safeName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            safeName += ".json";
+        }
+
+        string path = Path.Combine(Application.persistentDataPath, safeName);
+        int suffix = 1;
+        string baseName = Path.GetFileNameWithoutExtension(safeName);
+        string ext = Path.GetExtension(safeName);
+
+        while (File.Exists(path))
+        {
+            string candidate = $"{baseName}_{suffix}{ext}";
+            path = Path.Combine(Application.persistentDataPath, candidate);
+            suffix++;
+        }
+
+        string finalFileName = Path.GetFileName(path);
+
+        CustomLevelData level = new CustomLevelData();
+        level.levelName = levelName;
+        level.fileName = finalFileName;
+        level.width = 8;
+        level.height = 8;
+        level.layout = string.Empty;
+
+        Debug.Log($"BeginCreateNew: created pending level with name='{level.levelName}' file='{level.fileName}'");
+        BeginEdit(level);
+        return level;
+    }
+
     public static CustomLevelData TakePendingEdit()
     {
         CustomLevelData level = pendingEditLevel;

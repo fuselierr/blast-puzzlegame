@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MyLevelsController : MonoBehaviour
 {
@@ -16,10 +17,32 @@ public class MyLevelsController : MonoBehaviour
 
     [Header("Kebab Menu")]
     [SerializeField] private KebabMenuController kebabMenuController;
+    [Header("Popups")]
+    [SerializeField] private LevelNamePopupController namePopup;
 
     private void Start()
     {
         PopulateLevels();
+    }
+
+    // Called from a UI Create button. Shows the shared name popup and
+    // creates a new custom level with the entered name, then opens the
+    // LevelEditor scene for editing.
+    public void OpenCreatePopup()
+    {
+        if (namePopup == null)
+        {
+            Debug.LogError("MyLevelsController has no LevelNamePopupController assigned.", this);
+            return;
+        }
+
+        namePopup.Show("New Level", newName =>
+        {
+            if (string.IsNullOrWhiteSpace(newName)) return;
+
+            CustomLevelData level = CustomLevelStorage.BeginCreateNew(newName);
+            SceneManager.LoadScene("LevelEditor");
+        });
     }
 
     public void PopulateLevels()

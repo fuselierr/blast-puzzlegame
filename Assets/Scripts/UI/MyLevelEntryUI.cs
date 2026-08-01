@@ -33,6 +33,8 @@ public class MyLevelEntryUI : MonoBehaviour
         level = levelData;
         kebabMenuController = menuController;
 
+        Debug.Log($"MyLevelEntryUI.Setup: levelFile={level.fileName} levelName={level.levelName} kebabMenuController={(kebabMenuController!=null)}", this);
+
         levelNameText.text =
             string.IsNullOrWhiteSpace(level.levelName)
                 ? "Untitled Level"
@@ -100,6 +102,7 @@ public class MyLevelEntryUI : MonoBehaviour
             return;
         }
 
+        Debug.Log($"MyLevelEntryUI.OpenKebabMenu called for {level.fileName}", this);
         kebabMenuController.Open(
             kebabButton.GetComponent<RectTransform>(),
             this

@@ -18,9 +18,11 @@ public class EditorGridSpawner : MonoBehaviour
     [SerializeField] private EditorTile editorTilePrefab;
 
     private EditorTile[,] tiles;
+    private bool tilesVisible = true;
 
     public int Width => width;
     public int Height => height;
+    public bool TilesVisible => tilesVisible;
     public event Action<EditorTile> TileClicked;
 
     private void Start()
@@ -72,6 +74,7 @@ public class EditorGridSpawner : MonoBehaviour
                         new Vector2Int(x, y),
                         existingTile.Type,
                         existingTile.MineType);
+                    existingTile.gameObject.SetActive(tilesVisible);
                     tiles[x, y] = existingTile;
                     continue;
                 }
@@ -82,6 +85,7 @@ public class EditorGridSpawner : MonoBehaviour
                 newTileRect.localRotation = Quaternion.identity;
                 tile.Initialize(globals, new Vector2Int(x, y));
                 tile.Clicked += HandleTileClicked;
+                tile.gameObject.SetActive(tilesVisible);
                 tiles[x, y] = tile;
             }
         }
@@ -181,6 +185,27 @@ public class EditorGridSpawner : MonoBehaviour
         return tiles != null &&
                x >= 0 && x < width &&
                y >= 0 && y < height;
+    }
+
+    public void SetTilesVisible(bool visible)
+    {
+        tilesVisible = visible;
+        if (tiles == null)
+        {
+            return;
+        }
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                EditorTile tile = tiles[x, y];
+                if (tile != null)
+                {
+                    tile.gameObject.SetActive(visible);
+                }
+            }
+        }
     }
 
     private void ClearGrid()

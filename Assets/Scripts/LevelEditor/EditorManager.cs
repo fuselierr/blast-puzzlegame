@@ -14,6 +14,10 @@ public class EditorManager : MonoBehaviour
     [Header("Grid")]
     [SerializeField] private EditorGridSpawner gridSpawner;
 
+    [Header("Verification")]
+    [SerializeField] private GridSpawner gameplayGridSpawner;
+    [SerializeField] private VerificationManager verificationManager;
+
     [Header("Initial Selection")]
     [SerializeField] private TileType selectedTileType = TileType.Tile;
     [SerializeField] private MineType selectedMineType = MineType.Standard;
@@ -48,6 +52,17 @@ public class EditorManager : MonoBehaviour
 
         gridSpawner.TileClicked += PaintTile;
 
+        if (gameplayGridSpawner != null)
+        {
+            gameplayGridSpawner.gameObject.SetActive(false);
+        }
+
+        if (verificationManager != null)
+        {
+            verificationManager.enabled = false;
+            verificationManager.OnVerificationComplete += HandleVerificationComplete;
+        }
+
         if (widthInput != null)
         {
             widthInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
@@ -60,6 +75,10 @@ public class EditorManager : MonoBehaviour
 
         CustomLevelData levelBeingEdited =
             CustomLevelStorage.TakePendingEdit();
+        if (levelBeingEdited != null)
+        {
+            Debug.Log($"EditorManager.Start: found pending edit level name='{levelBeingEdited.levelName}' file='{levelBeingEdited.fileName}'", this);
+        }
 
         if (levelBeingEdited != null)
         {
@@ -76,6 +95,11 @@ public class EditorManager : MonoBehaviour
         if (gridSpawner != null)
         {
             gridSpawner.TileClicked -= PaintTile;
+        }
+
+        if (verificationManager != null)
+        {
+            verificationManager.OnVerificationComplete -= HandleVerificationComplete;
         }
     }
 
@@ -170,6 +194,48 @@ public class EditorManager : MonoBehaviour
         StartCoroutine(CapturePreviewAndSaveRoutine(level));
     }
 
+    public void VerifyCurrentLevel()
+    {
+        if (verificationManager == null || gameplayGridSpawner == null || gridSpawner == null)
+        {
+            Debug.LogError("Cannot verify level because a required verification component is missing.", this);
+            return;
+        }
+
+        CustomLevelData level = BuildLevelData();
+        if (level == null)
+        {
+            Debug.LogError("Failed to build custom level data for verification.", this);
+            return;
+        }
+
+        gridSpawner.SetTilesVisible(false);
+        filePanel.SetActive(false);
+        gameplayGridSpawner.gameObject.SetActive(true);
+        verificationManager.enabled = true;
+        verificationManager.StartVerification(level);
+    }
+
+    private void HandleVerificationComplete(bool debrisCleared)
+    {
+        if (verificationManager != null)
+        {
+            verificationManager.enabled = false;
+        }
+
+        if (gameplayGridSpawner != null)
+        {
+            gameplayGridSpawner.gameObject.SetActive(false);
+        }
+
+        if (gridSpawner != null)
+        {
+            gridSpawner.SetTilesVisible(true);
+        }
+
+        Debug.Log($"Custom level verification completed. Debris cleared: {debrisCleared}", this);
+    }
+
     private IEnumerator CapturePreviewAndSaveRoutine(CustomLevelData level)
     {
         if (level == null)
@@ -177,6 +243,8 @@ public class EditorManager : MonoBehaviour
             LoadMainMenu();
             yield break;
         }
+
+        Debug.Log($"CapturePreviewAndSaveRoutine: saving level name='{level.levelName}' file='{level.fileName}'", this);
 
         yield return new WaitForEndOfFrame();
 
@@ -307,8 +375,20 @@ public class EditorManager : MonoBehaviour
     private CustomLevelData BuildLevelData()
     {
         CustomLevelData level = currentLevel ?? new CustomLevelData();
-        level.levelName =
-            levelNameInput != null ? levelNameInput.text : "Custom level";
+        // Preserve the existing level name if the UI input field is
+        // not assigned (to avoid overwriting a freshly-created name).
+        if (levelNameInput != null)
+        {
+            level.levelName = levelNameInput.text;
+        }
+        else if (!string.IsNullOrWhiteSpace(level.levelName))
+        {
+            // keep currentLevel.levelName as-is
+        }
+        else
+        {
+            level.levelName = "Custom level";
+        }
         level.width = gridSpawner.Width;
         level.height = gridSpawner.Height;
 
