@@ -25,16 +25,16 @@ public abstract class GameModeBase : IGameMode
         StartGame();
     }
 
-    public virtual bool TryPlaceMine()
+    public virtual bool TryPlaceMine(MineType mineType = MineType.Standard)
     {
         SoundManager.Instance.PlayMinePlaced();
-        return mineInventory.UseMine(MineType.Standard);
+        return mineInventory.UseMine(mineType);
     }
 
-    public virtual void ReturnMine()
+    public virtual void ReturnMine(MineType mineType = MineType.Standard)
     {
         SoundManager.Instance.PlayMineReturned();
-        mineInventory.AddMine(MineType.Standard, 1);
+        mineInventory.AddMine(mineType, 1);
     }
 
     public virtual int calculateScore()

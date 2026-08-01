@@ -112,16 +112,18 @@ public class Tile : MonoBehaviour
         }
         if (Type == TileType.Tile)
         {
-            bool placedMine = GameManager.Instance == null || GameManager.Instance.TryPlaceMine();
+            MineType selectedMineType = GameManager.Instance.SelectedMineType; 
+            bool placedMine = GameManager.Instance == null || GameManager.Instance.TryPlaceMine(selectedMineType);
             if (placedMine)
             {
-                SetTileType(TileType.Mine);
+                SetTileType(selectedMineType);
             }
         }
         else if (Type == TileType.Mine)
         {
+            MineType prevMineType = mineType; 
             SetTileType(TileType.Tile);
-            GameManager.Instance?.ReturnMine();
+            GameManager.Instance?.ReturnMine(prevMineType);
         }
         else if (Type == TileType.Debris)
         {
