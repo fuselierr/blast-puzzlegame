@@ -39,6 +39,7 @@ public class Tile : MonoBehaviour
     public void SetTileType(MineType type)
     {
         Type = TileType.Mine;
+        mineType = type;
         SetFlagged(false);
         spriteRenderer.sprite = globals.GetSprite(type);
         // warning if null

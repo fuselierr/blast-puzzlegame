@@ -509,7 +509,7 @@ public class GridSpawner : MonoBehaviour
                 if (tile != null && tile.Type == TileType.Mine)
                 {
                     anyMines = true;
-                    SpawnProjectiles(tileObject.transform.position);
+                    SpawnProjectiles(tileObject.transform.position, tile.mineType);
                     tile.SetTileType(TileType.Tile);
                 }
             }
@@ -560,25 +560,70 @@ public class GridSpawner : MonoBehaviour
 
     public bool AllDebrisCleared => DebrisRemaining() == 0;
 
-    private void SpawnProjectiles(Vector3 position)
+    private void SpawnProjectiles(Vector3 position, MineType mineType = MineType.Standard)
     {
         if (projectilePrefab == null)
         {
             Debug.LogWarning("No projectile prefab assigned to GridSpawner.");
             return;
         }
-
-        Vector2[] directions = new Vector2[]
+        Vector2[] directions;
+        switch (mineType)
         {
-            new Vector2(0, 1),
-            new Vector2(1, 1).normalized,
-            new Vector2(1, 0),
-            new Vector2(1, -1).normalized,
-            new Vector2(0, -1),
-            new Vector2(-1, -1).normalized,
-            new Vector2(-1, 0),
-            new Vector2(-1, 1).normalized
-        };
+            case MineType.Cross:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 0),
+                    new Vector2(0, -1),
+                    new Vector2(-1, 0),
+                };
+                break;
+            case MineType.Diagonal:
+                directions = new Vector2[]
+                {
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, -1).normalized,
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Double:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized,
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Standard:
+            default:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+        }
 
         foreach (var dir in directions)
         {
