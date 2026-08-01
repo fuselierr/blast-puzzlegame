@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
@@ -119,6 +118,86 @@ public class GridSpawner : MonoBehaviour
                     tile.SetTileType(type);
                 }
             }
+        }
+    }
+
+    public void LoadLevel(CustomLevelData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning(
+                "GridSpawner.LoadLevel called with null custom level data.");
+            return;
+        }
+
+        if (!data.TryToTileGrid(
+                out CustomLevelTileData[,] board,
+                out string layoutError))
+        {
+            Debug.LogError(
+                $"Custom level '{data.levelName}' has an invalid layout: " +
+                layoutError);
+            return;
+        }
+
+        Configure(data.width, data.height, 0f);
+        GenerateGrid();
+
+        Dictionary<string, List<Tile>> teleporters =
+            new Dictionary<string, List<Tile>>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Tile tile = GetTile(new Vector2Int(x, y));
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                // Layout strings are written top-to-bottom, while the world
+                // grid's y coordinate increases bottom-to-top.
+                CustomLevelTileData cell = board[x, height - 1 - y];
+
+                if (cell.tileType == TileType.Mine)
+                {
+                    tile.SetTileType(cell.mineType);
+                }
+                else if (cell.tileType == TileType.Mirror)
+                {
+                    tile.SetTileType(TileType.Mirror, cell.mineType);
+                }
+                else if (cell.tileType == TileType.Debris)
+                {
+                    tile.PlaceDebris();
+                }
+                else
+                {
+                    tile.SetTileType(cell.tileType);
+                }
+
+                if (cell.tileType == TileType.Teleporter)
+                {
+                    if (!teleporters.TryGetValue(
+                            cell.teleporterPairId,
+                            out List<Tile> pair))
+                    {
+                        pair = new List<Tile>();
+                        teleporters[cell.teleporterPairId] = pair;
+                    }
+
+                    pair.Add(tile);
+                }
+            }
+        }
+
+        foreach (var entry in teleporters)
+        {
+            Tile first = entry.Value[0];
+            Tile second = entry.Value[1];
+            first.SetTeleporterPair(entry.Key, second);
+            second.SetTeleporterPair(entry.Key, first);
         }
     }
 

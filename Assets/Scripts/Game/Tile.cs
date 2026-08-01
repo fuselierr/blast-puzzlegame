@@ -19,12 +19,19 @@ public class Tile : MonoBehaviour
 
     public TileType Type { get; private set; } = TileType.Tile;
     public MineType mineType { get; private set; } = MineType.Standard;
+    public string TeleporterPairId { get; private set; }
+    public Tile TeleporterPartner { get; private set; }
     // public DebrisType debrisType { get; private set; } = DebrisType.Standard;
     public bool IsFlagged { get; private set; }
 
     public void SetTileType(TileType type)
     {
         Type = type;
+        if (type != TileType.Teleporter)
+        {
+            TeleporterPairId = null;
+            TeleporterPartner = null;
+        }
         SetFlagged(false);
         spriteRenderer.sprite = globals.GetSprite(type);
         // warning if null
@@ -33,6 +40,22 @@ public class Tile : MonoBehaviour
             Debug.LogWarning($"Tile: no sprite for {type}.");
         }
         return;
+    }
+
+    // Mirror orientation is encoded using the same four-way variant enum.
+    public void SetTileType(TileType type, MineType variant)
+    {
+        mineType = variant;
+        SetTileType(type);
+    }
+
+    public void SetTeleporterPair(string pairId, Tile partner)
+    {
+        Type = TileType.Teleporter;
+        TeleporterPairId = pairId;
+        TeleporterPartner = partner;
+        SetFlagged(false);
+        spriteRenderer.sprite = globals.GetSprite(TileType.Teleporter);
     }
 
     // overload for specific MineType

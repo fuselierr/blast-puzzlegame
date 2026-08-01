@@ -81,6 +81,8 @@ public class Globals : ScriptableObject
                 return debrisSprite;
             case TileType.StrongDebris:
                 return strongDebrisSprite;
+            case TileType.Splitter:
+                return splitterSprite;
             case TileType.Mine:
                 return standardMineSprite;
             case TileType.None:
@@ -106,6 +108,3 @@ public class Globals : ScriptableObject
         }
     }
 }
-
-
-
