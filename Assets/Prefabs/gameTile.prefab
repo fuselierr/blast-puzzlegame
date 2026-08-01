@@ -156,9 +156,12 @@ MonoBehaviour:
   spriteRenderer: {fileID: 6193608697499634344}
   tileSprite: {fileID: 7399533318584292489, guid: f2cca8e1b81cced4487cc44435a2942b, type: 3}
   debrisSprite: {fileID: 5725184139431673129, guid: 5d9e231b70e5d0c4cad512e7520d1a77, type: 3}
+  toughDebrisSprite: {fileID: -4500261076205833934, guid: a86a4af2ae190494e9967df23cf75838, type: 3}
   mineSprite: {fileID: -5933715298724706184, guid: efb905ae467e12e4d938b3e2e920baf0, type: 3}
+  wallSprite: {fileID: 2868539044483428322, guid: 0b88ad49c6d05354baef5141447f5fd4, type: 3}
   flagRenderer: {fileID: 1186786016561013165}
   flagSprite: {fileID: -5154189640090123692, guid: 5344fa19a60dda646b13e14b0eb64059, type: 3}
+  globals: {fileID: 11400000, guid: d93029da9ee3b55439018199c3a3d144, type: 2}
 --- !u!1 &6513811474699682424
 GameObject:
   m_ObjectHideFlags: 0

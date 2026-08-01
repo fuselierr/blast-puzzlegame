@@ -1,6 +1,6 @@
 # cs446-project
 
-# L City
+# L City 
 
 The basic description of our project starts with a 2D grid on the screen. A random amount of debris is scattered on random tiles. Mines that explode in 8 directions (horizontally, vertically, diagonally) are placable by the user. Each projectile sent by the mine can destroy 1 piece of debris. The objective of the game is to place the mines in a correct configuration in order to destroy all the debris within a time limit.
 

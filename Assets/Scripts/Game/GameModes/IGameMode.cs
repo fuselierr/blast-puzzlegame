@@ -6,8 +6,8 @@ public interface IGameMode
     void StartGame();
     void StopGame();
     void ResetGame();
-    bool TryPlaceMine();
-    void ReturnMine();
+    bool TryPlaceMine(MineType mineType = MineType.Standard);
+    void ReturnMine(MineType mineType = MineType.Standard);
     void OnDetonate();
     int calculateScore();
 }

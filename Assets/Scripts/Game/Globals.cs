@@ -10,7 +10,7 @@ public enum TileType
     StrongDebris = 5,
     Mine = 6,
     None = 7,
-    Splitter = 8
+    Splitter = 8,
 }
 
 public enum MineType
@@ -64,4 +64,48 @@ public class Globals : ScriptableObject
                 return null;
         }
     }
+
+    public Sprite GetSprite(TileType tileType)
+    {
+        switch (tileType)
+        {
+            case TileType.Tile:
+                return tileSprite;
+            case TileType.Wall:
+                return wallSprite;
+            case TileType.Mirror:
+                return mirrorSprite;
+            case TileType.Teleporter:
+                return teleporterSprite;
+            case TileType.Debris:
+                return debrisSprite;
+            case TileType.StrongDebris:
+                return strongDebrisSprite;
+            case TileType.Mine:
+                return standardMineSprite;
+            case TileType.None:
+            default:
+                return null;
+        }
+    }
+
+    public Sprite GetSprite(MineType mineType)
+    {
+        switch (mineType)
+        {
+            case MineType.Standard:
+                return standardMineSprite;
+            case MineType.Cross:
+                return crossMineSprite;
+            case MineType.Diagonal:
+                return diagonalMineSprite;
+            case MineType.Double:
+                return doubleMineSprite;
+            default:
+                return null;
+        }
+    }
 }
+
+
+

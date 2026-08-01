@@ -84,7 +84,12 @@ public class Projectile : MonoBehaviour
             return;
         }
         Tile tile = other.GetComponentInParent<Tile>();
-        if (tile != null && tile.Type == TileType.Debris && IsOnShotPath(tile.transform.position))
+        if (tile != null && (tile.Type == TileType.Debris || tile.Type == TileType.StrongDebris) && IsOnShotPath(tile.transform.position))
+        {
+            hasHit = true;
+            StartCoroutine(ExplodeAtCenter(tile));
+        }
+        else if (tile != null && tile.Type == TileType.Wall && IsOnShotPath(tile.transform.position))
         {
             hasHit = true;
             StartCoroutine(ExplodeAtCenter(tile));
