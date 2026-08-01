@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
+    [SerializeField] private GameObject projectilePrefab;
     public Vector2 direction;
     public float speed = 4f;
     private bool hasHit;
+    private Tile ignoredSplitter;
 
     private const float destroyDistance = 15f;
     private const float pathHitTolerance = 0.15f;
@@ -15,7 +17,12 @@ public class Projectile : MonoBehaviour
 
     public void Init(Vector2 dir)
     {
-        direction = dir;
+        direction = dir.normalized;
+        hasHit = false;
+        launchPosition = transform.position;
+        // Important when gameObject is used as the fallback spawn source: do
+        // not inherit ownership of the original projectile's trail instance.
+        trailInstance = null;
     }
 
     void Update()
@@ -93,6 +100,65 @@ public class Projectile : MonoBehaviour
         {
             hasHit = true;
             StartCoroutine(ExplodeAtCenter(tile));
+        }
+        else if (tile != null && tile.Type == TileType.Splitter && IsOnShotPath(tile.transform.position))
+        {
+            // Split projectiles are born inside the splitter that created
+            // them. Ignore that one splitter so they can leave its collider.
+            if (tile == ignoredSplitter)
+            {
+                return;
+            }
+
+            hasHit = true;
+            SplitAt(tile);
+        }
+    }
+
+    private void SplitAt(Tile splitter)
+    {
+        if (splitter == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Vector2 splitPosition = splitter.transform.position;
+        Vector2 currentDirection = direction.normalized;
+        Vector2 reflected = new Vector2(-currentDirection.y, currentDirection.x);
+        Vector2 leftDirection = (currentDirection + reflected).normalized;
+        Vector2 rightDirection = (currentDirection - reflected).normalized;
+
+        SpawnSplitProjectile(splitPosition, leftDirection, splitter);
+        SpawnSplitProjectile(splitPosition, rightDirection, splitter);
+        Destroy(gameObject);
+    }
+
+    private void SpawnSplitProjectile(
+        Vector2 position,
+        Vector2 newDirection,
+        Tile sourceSplitter)
+    {
+        // Falling back to this object means the splitter still works even if
+        // projectilePrefab was not assigned on the prefab in the Inspector.
+        GameObject sourcePrefab = projectilePrefab != null
+            ? projectilePrefab
+            : gameObject;
+
+        GameObject newProjectileObject = Instantiate(
+            sourcePrefab,
+            position,
+            Quaternion.identity);
+
+        Projectile newProjectile = newProjectileObject.GetComponent<Projectile>();
+        if (newProjectile != null)
+        {
+            newProjectile.Init(newDirection);
+            newProjectile.ignoredSplitter = sourceSplitter;
+        }
+        else
+        {
+            Destroy(newProjectileObject);
         }
     }
 
