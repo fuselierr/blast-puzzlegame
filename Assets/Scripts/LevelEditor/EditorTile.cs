@@ -106,6 +106,9 @@ public class EditorTile : MonoBehaviour
                 return "W";
             case TileType.Splitter:
                 return "S";
+            case TileType.Teleporter:
+                // EditorManager supplies the actual pair number when saving.
+                return "T1";
             case TileType.Debris:
                 return "D";
             case TileType.StrongDebris:

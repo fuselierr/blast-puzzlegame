@@ -5,11 +5,6 @@ public class Tile : MonoBehaviour
     public Vector2Int GridPosition;
 
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Sprite tileSprite;
-    [SerializeField] private Sprite debrisSprite;
-    [SerializeField] private Sprite toughDebrisSprite;
-    [SerializeField] private Sprite mineSprite;
-    [SerializeField] private Sprite wallSprite;
 
     [Header("Flag Overlay")]
     [SerializeField] private SpriteRenderer flagRenderer;
@@ -76,7 +71,7 @@ public class Tile : MonoBehaviour
     {
         Type = TileType.Debris;
         SetFlagged(false);
-        spriteRenderer.sprite = debrisSprite;
+        spriteRenderer.sprite = globals != null ? globals.GetSprite(TileType.Debris) : null;
     }
 
     public void ExplodeDebris()
@@ -85,7 +80,7 @@ public class Tile : MonoBehaviour
         {
             Type = TileType.Tile;
             SetFlagged(false);
-            spriteRenderer.sprite = tileSprite;
+            spriteRenderer.sprite = globals != null ? globals.GetSprite(TileType.Tile) : null;
             SoundManager.Instance.PlayDebrisHit();
         }
         else if (Type == TileType.StrongDebris)
