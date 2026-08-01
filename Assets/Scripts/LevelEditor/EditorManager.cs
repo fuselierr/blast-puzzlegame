@@ -472,6 +472,7 @@ public class EditorManager : MonoBehaviour
         level.height = gridSpawner.Height;
 
         StringBuilder layout = new StringBuilder();
+        int teleporterIndex = 0;
 
         for (int y = 0; y < gridSpawner.Height; y++)
         {
@@ -484,7 +485,18 @@ public class EditorManager : MonoBehaviour
                     layout.Append(' ');
                 }
 
-                layout.Append(tile != null ? tile.GetTileToken() : "_");
+                if (tile != null && tile.Type == TileType.Teleporter)
+                {
+                    // Teleporters are paired in row-major placement order:
+                    // the first two are T1, the next two T2, and so on.
+                    int pairNumber = teleporterIndex / 2 + 1;
+                    layout.Append($"T{pairNumber}");
+                    teleporterIndex++;
+                }
+                else
+                {
+                    layout.Append(tile != null ? tile.GetTileToken() : "_");
+                }
             }
 
             if (y < gridSpawner.Height - 1)
@@ -569,6 +581,7 @@ public class EditorManager : MonoBehaviour
             "S" => TileType.Splitter,
             "D" => TileType.Debris,
             "H" => TileType.StrongDebris,
+            _ when token.StartsWith("T", StringComparison.OrdinalIgnoreCase) => TileType.Teleporter,
             "MH" or "MV" or "MR" or "ML" => TileType.Mirror,
             "NS" or "NC" or "NG" or "ND" => TileType.Mine,
             _ => TileType.None

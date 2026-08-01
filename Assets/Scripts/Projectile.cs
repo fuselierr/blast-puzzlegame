@@ -7,10 +7,14 @@ public class Projectile : MonoBehaviour
     public float speed = 4f;
     private bool hasHit;
     private Tile ignoredSplitter;
+    private Tile ignoredTeleporter;
 
     private const float destroyDistance = 15f;
     private const float pathHitTolerance = 0.15f;
+    private const float teleporterIgnoreDuration = 0.1f;
     private Vector2 launchPosition;
+    private float teleporterIgnoreTimer;
+    private Tile lastTeleporter;
 
     [SerializeField] private GameObject trailPrefab;
     private GameObject trailInstance;
@@ -29,6 +33,17 @@ public class Projectile : MonoBehaviour
     {
         Vector2 previousPosition = transform.position;
         transform.position += (Vector3)(direction * speed * Time.deltaTime);
+        if (teleporterIgnoreTimer > 0f)
+        {
+            teleporterIgnoreTimer -= Time.deltaTime;
+            if (teleporterIgnoreTimer < 0f)
+            {
+                teleporterIgnoreTimer = 0f;
+            }
+        }
+        ClearIgnoredTileAfterExit(ref ignoredTeleporter);
+        ClearIgnoredTileAfterExit(ref ignoredSplitter);
+
         if (trailInstance != null)
         {
             trailInstance.transform.position = transform.position;
@@ -101,6 +116,15 @@ public class Projectile : MonoBehaviour
             hasHit = true;
             StartCoroutine(ExplodeAtCenter(tile));
         }
+        else if (tile != null && tile.Type == TileType.Teleporter && IsOnShotPath(tile.transform.position))
+        {
+            if (tile == ignoredTeleporter || (teleporterIgnoreTimer > 0f && tile == lastTeleporter))
+            {
+                return;
+            }
+
+            TeleportThrough(tile);
+        }
         else if (tile != null && tile.Type == TileType.Splitter && IsOnShotPath(tile.transform.position))
         {
             // Split projectiles are born inside the splitter that created
@@ -112,6 +136,45 @@ public class Projectile : MonoBehaviour
 
             hasHit = true;
             SplitAt(tile);
+        }
+    }
+
+    private void ClearIgnoredTileAfterExit(ref Tile ignoredTile)
+    {
+        if (ignoredTile == null)
+        {
+            return;
+        }
+
+        Collider2D tileCollider = ignoredTile.GetComponentInChildren<Collider2D>();
+        if (tileCollider == null || !tileCollider.bounds.Contains(transform.position))
+        {
+            ignoredTile = null;
+        }
+    }
+
+    private void TeleportThrough(Tile entrance)
+    {
+        Tile exit = entrance.TeleporterPartner;
+        if (exit == null)
+        {
+            Debug.LogWarning(
+                $"Teleporter '{entrance.TeleporterPairId}' has no partner.",
+                entrance);
+            return;
+        }
+
+        // Preserve the shot direction. The exit tile is ignored until this
+        // projectile has left it, preventing an immediate teleport back.
+        transform.position = exit.transform.position;
+        launchPosition = exit.transform.position;
+        ignoredTeleporter = exit;
+        lastTeleporter = exit;
+        teleporterIgnoreTimer = teleporterIgnoreDuration;
+
+        if (trailInstance != null)
+        {
+            trailInstance.transform.position = transform.position;
         }
     }
 
