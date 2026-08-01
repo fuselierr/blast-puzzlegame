@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 [System.Serializable]
 public class CustomLevelTileData
 {
@@ -28,6 +30,94 @@ public class CustomLevelData
     public int likes;
     public int downloads;
     public string previewImage;
+
+    public CustomLevelData CreatePlayableCopy(out Dictionary<MineType, int> mineCounts)
+    {
+        mineCounts = new Dictionary<MineType, int>();
+
+        if (string.IsNullOrWhiteSpace(layout))
+        {
+            return new CustomLevelData
+            {
+                levelName = levelName,
+                fileName = fileName,
+                width = width,
+                height = height,
+                layout = string.Empty,
+                verified = verified,
+                likes = likes,
+                downloads = downloads,
+                previewImage = previewImage
+            };
+        }
+
+        string[] rows = (layout ?? string.Empty).Split(
+            new[] { '\n', '\r' },
+            System.StringSplitOptions.RemoveEmptyEntries);
+
+        List<string> strippedRows = new List<string>(rows.Length);
+
+        foreach (string row in rows)
+        {
+            string[] tokens = row.Split(
+                new[] { ' ', '\t' },
+                System.StringSplitOptions.RemoveEmptyEntries);
+
+            List<string> cleanedTokens = new List<string>(tokens.Length);
+            foreach (string token in tokens)
+            {
+                string trimmedToken = token.Trim();
+                if (TryParseMineToken(trimmedToken, out MineType mineType))
+                {
+                    mineCounts[mineType] = mineCounts.TryGetValue(mineType, out int count)
+                        ? count + 1
+                        : 1;
+                    cleanedTokens.Add("-");
+                }
+                else
+                {
+                    cleanedTokens.Add(trimmedToken);
+                }
+            }
+
+            strippedRows.Add(string.Join(" ", cleanedTokens));
+        }
+
+        return new CustomLevelData
+        {
+            levelName = levelName,
+            fileName = fileName,
+            width = width,
+            height = height,
+            layout = string.Join("\n", strippedRows),
+            verified = verified,
+            likes = likes,
+            downloads = downloads,
+            previewImage = previewImage
+        };
+    }
+
+    private static bool TryParseMineToken(string token, out MineType mineType)
+    {
+        switch ((token ?? string.Empty).Trim().ToUpperInvariant())
+        {
+            case "NS":
+                mineType = MineType.Standard;
+                return true;
+            case "NC":
+                mineType = MineType.Cross;
+                return true;
+            case "NG":
+                mineType = MineType.Diagonal;
+                return true;
+            case "ND":
+                mineType = MineType.Double;
+                return true;
+            default:
+                mineType = MineType.Standard;
+                return false;
+        }
+    }
 
     // Returns [x, row], where row 0 is the top line of the layout string.
     public CustomLevelTileData[,] ToTileGrid()

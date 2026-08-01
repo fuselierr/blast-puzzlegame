@@ -87,6 +87,178 @@ public static class CustomLevelStorage
         Debug.Log("Saved custom level to: " + path);
     }
 
+    public static CustomLevelData Duplicate(CustomLevelData source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        // JSON round-tripping gives the duplicate its own data object instead
+        // of sharing the entry's in-memory instance.
+        CustomLevelData copy = JsonUtility.FromJson<CustomLevelData>(
+            JsonUtility.ToJson(source));
+
+        if (copy == null)
+        {
+            return null;
+        }
+
+        copy.levelName = GetUniqueCopyName(source.levelName);
+        copy.fileName = GetUniqueFileName(copy.levelName);
+
+        // Keep the preview, but give the duplicate its own image file so
+        // deleting either level cannot break the other one's thumbnail.
+        copy.previewImage = CopyPreview(source.previewImage, copy.fileName);
+
+        // A duplicate is a new local level with no community engagement yet.
+        copy.likes = 0;
+        copy.downloads = 0;
+
+        Save(copy);
+        return copy;
+    }
+
+    public static bool Delete(CustomLevelData level)
+    {
+        if (level == null || string.IsNullOrWhiteSpace(level.fileName))
+        {
+            return false;
+        }
+
+        try
+        {
+            string levelPath = Path.Combine(
+                Application.persistentDataPath,
+                Path.GetFileName(level.fileName));
+
+            if (!File.Exists(levelPath))
+            {
+                return false;
+            }
+
+            File.Delete(levelPath);
+
+            if (!string.IsNullOrWhiteSpace(level.previewImage))
+            {
+                string previewPath = Path.Combine(
+                    Application.persistentDataPath,
+                    Path.GetFileName(level.previewImage));
+
+                if (File.Exists(previewPath))
+                {
+                    File.Delete(previewPath);
+                }
+            }
+
+            Debug.Log("Deleted custom level: " + levelPath);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError("Could not delete custom level: " + exception.Message);
+            return false;
+        }
+    }
+
+    private static string GetUniqueCopyName(string sourceName)
+    {
+        string baseName = string.IsNullOrWhiteSpace(sourceName)
+            ? "Untitled Level Copy"
+            : sourceName.Trim() + " Copy";
+
+        string candidate = baseName;
+        int suffix = 2;
+
+        while (LevelNameExists(candidate))
+        {
+            candidate = $"{baseName} {suffix}";
+            suffix++;
+        }
+
+        return candidate;
+    }
+
+    private static bool LevelNameExists(string levelName)
+    {
+        foreach (string path in Directory.GetFiles(
+                     Application.persistentDataPath,
+                     "*.json"))
+        {
+            CustomLevelData existing = LoadFromPath(path);
+            if (existing != null && string.Equals(
+                    existing.levelName,
+                    levelName,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string GetUniqueFileName(string levelName)
+    {
+        string safeName = string.IsNullOrWhiteSpace(levelName)
+            ? "custom_level"
+            : levelName.Trim().Replace(" ", "_");
+
+        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
+        {
+            safeName = safeName.Replace(invalidCharacter, '_');
+        }
+
+        string candidate = safeName + ".json";
+        int suffix = 2;
+
+        while (File.Exists(Path.Combine(
+                   Application.persistentDataPath,
+                   candidate)))
+        {
+            candidate = $"{safeName}_{suffix}.json";
+            suffix++;
+        }
+
+        return candidate;
+    }
+
+    private static string CopyPreview(
+        string sourcePreviewFileName,
+        string duplicateLevelFileName)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePreviewFileName))
+        {
+            return string.Empty;
+        }
+
+        string sourcePath = Path.Combine(
+            Application.persistentDataPath,
+            Path.GetFileName(sourcePreviewFileName));
+
+        if (!File.Exists(sourcePath))
+        {
+            return string.Empty;
+        }
+
+        string extension = Path.GetExtension(sourcePreviewFileName);
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            extension = ".png";
+        }
+
+        string duplicatePreviewFileName =
+            Path.GetFileNameWithoutExtension(duplicateLevelFileName) +
+            "_preview" + extension;
+
+        string destinationPath = Path.Combine(
+            Application.persistentDataPath,
+            duplicatePreviewFileName);
+
+        File.Copy(sourcePath, destinationPath, true);
+        return duplicatePreviewFileName;
+    }
+
     public static CustomLevelData Load(string identifier)
     {
         if (string.IsNullOrWhiteSpace(identifier))

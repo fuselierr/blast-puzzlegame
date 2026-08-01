@@ -14,6 +14,7 @@ public class MyLevelEntryUI : MonoBehaviour
     [SerializeField] private TMP_Text verifiedText;
     [SerializeField] private Image previewImage;
     [SerializeField] private Sprite defaultPreviewSprite;
+    [SerializeField] private Button playButton;
     [SerializeField] private Button kebabButton;
 
     private CustomLevelData level;
@@ -59,6 +60,8 @@ public class MyLevelEntryUI : MonoBehaviour
 
         kebabButton.onClick.RemoveListener(OpenKebabMenu);
         kebabButton.onClick.AddListener(OpenKebabMenu);
+        playButton.onClick.RemoveListener(PlayLevel);
+        playButton.onClick.AddListener(PlayLevel);
     }
 
     private Sprite LoadPreviewSprite(CustomLevelData levelData)
@@ -109,6 +112,19 @@ public class MyLevelEntryUI : MonoBehaviour
         );
     }
 
+    private void PlayLevel()
+    {
+        if (level == null)
+        {
+            Debug.LogError("No level data was assigned to this entry.", this);
+            return;
+        }
+
+        GameManager.SelectedMode = GameMode.Freeplay;
+        GameManager.SelectedCustomLevel = level;
+        SceneManager.LoadScene("Game");
+    }
+
     public void EditLevel()
     {
         if (level == null)
@@ -130,9 +146,20 @@ public class MyLevelEntryUI : MonoBehaviour
 
     public void DuplicateLevel()
     {
-        Debug.Log($"Duplicate level: {level.levelName}");
+        if (level == null)
+        {
+            return;
+        }
 
-        // Create and save a copy here.
+        CustomLevelData duplicate = CustomLevelStorage.Duplicate(level);
+        if (duplicate == null)
+        {
+            Debug.LogError("Failed to duplicate the level.", this);
+            return;
+        }
+
+        Debug.Log($"Duplicated '{level.levelName}' as '{duplicate.levelName}'.", this);
+        RefreshLevelList();
     }
 
     public void UploadLevel()
@@ -144,9 +171,27 @@ public class MyLevelEntryUI : MonoBehaviour
 
     public void DeleteLevel()
     {
-        Debug.Log($"Delete level: {level.levelName}");
+        if (level == null)
+        {
+            return;
+        }
 
-        // Delete the JSON file and destroy or refresh this entry.
+        if (!CustomLevelStorage.Delete(level))
+        {
+            Debug.LogError($"Failed to delete '{level.levelName}'.", this);
+            return;
+        }
+
+        RefreshLevelList();
+    }
+
+    private void RefreshLevelList()
+    {
+        MyLevelsController controller = FindObjectOfType<MyLevelsController>();
+        if (controller != null)
+        {
+            controller.PopulateLevels();
+        }
     }
 
     private void OnDestroy()
