@@ -158,6 +158,7 @@ public class UIHandler : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
 
+        MainMenu.PageToOpen = MainMenuPage.Community;
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 

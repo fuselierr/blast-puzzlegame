@@ -20374,6 +20374,11 @@ MonoBehaviour:
   statsPanel: {fileID: 113086806}
   communityPanel: {fileID: 122230749}
   settingsPanel: {fileID: 537902896}
+  myLevelsPanel: {fileID: 1642583768}
+  discoverPanel: {fileID: 1787576916}
+  communityTabController: {fileID: 104848096}
+  myLevelsTabIndex: 1
+  discoverTabIndex: 0
   scoreText: {fileID: 1578137820}
   leaderboardPanel: {fileID: 2113274380}
 --- !u!4 &2053295182
