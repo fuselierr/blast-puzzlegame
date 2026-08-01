@@ -21,7 +21,6 @@ public class EditorManager : MonoBehaviour
     [Header("Initial Selection")]
     [SerializeField] private TileType selectedTileType = TileType.Tile;
     [SerializeField] private MineType selectedMineType = MineType.Standard;
-    [SerializeField] private TMP_InputField levelNameInput;
     [SerializeField] private TMP_InputField widthInput;
     [SerializeField] private TMP_InputField heightInput;
 
@@ -31,6 +30,22 @@ public class EditorManager : MonoBehaviour
     public event Action<TileType, MineType> SelectionChanged;
 
     private CustomLevelData currentLevel;
+
+    public string CurrentLevelName =>
+        currentLevel != null ? currentLevel.levelName : string.Empty;
+
+    private void Awake()
+    {
+        // This VerificationManager lives in the editor scene and is only
+        // started explicitly by VerifyCurrentLevel(). Disable it before any
+        // Start methods run so it cannot consume the pending edit level before
+        // EditorManager receives it. That pending object contains both the
+        // chosen display name and the original filename used for overwriting.
+        if (verificationManager != null)
+        {
+            verificationManager.enabled = false;
+        }
+    }
 
     private void Start()
     {
@@ -59,7 +74,6 @@ public class EditorManager : MonoBehaviour
 
         if (verificationManager != null)
         {
-            verificationManager.enabled = false;
             verificationManager.OnVerificationComplete += HandleVerificationComplete;
         }
 
@@ -75,17 +89,26 @@ public class EditorManager : MonoBehaviour
 
         CustomLevelData levelBeingEdited =
             CustomLevelStorage.TakePendingEdit();
-        if (levelBeingEdited != null)
-        {
-            Debug.Log($"EditorManager.Start: found pending edit level name='{levelBeingEdited.levelName}' file='{levelBeingEdited.fileName}'", this);
-        }
 
         if (levelBeingEdited != null)
         {
+            currentLevel = levelBeingEdited;
             ApplyLevelData(levelBeingEdited);
+
+            Debug.Log(
+                $"EditorManager received level " +
+                $"'{currentLevel.levelName}'.",
+                this);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "EditorManager did not receive pending level data. " +
+                "A new unnamed level will be used.",
+                this);
         }
 
-        RefreshInputFields(levelBeingEdited);
+        RefreshDimensionInputs();
 
         Debug.Log("EDITOR MANAGER CONNECTED TO GRID", this);
     }
@@ -354,15 +377,14 @@ public class EditorManager : MonoBehaviour
         return previewFileName;
     }
 
-    public void LoadLevel()
+    public void LoadLevel(string identifier)
     {
-        if (levelNameInput == null)
+        if (string.IsNullOrWhiteSpace(identifier))
         {
             return;
         }
 
-        string fileName = levelNameInput.text;
-        CustomLevelData level = CustomLevelStorage.Load(fileName);
+        CustomLevelData level = CustomLevelStorage.Load(identifier);
 
         if (level == null)
         {
@@ -375,17 +397,10 @@ public class EditorManager : MonoBehaviour
     private CustomLevelData BuildLevelData()
     {
         CustomLevelData level = currentLevel ?? new CustomLevelData();
-        // Preserve the existing level name if the UI input field is
-        // not assigned (to avoid overwriting a freshly-created name).
-        if (levelNameInput != null)
-        {
-            level.levelName = levelNameInput.text;
-        }
-        else if (!string.IsNullOrWhiteSpace(level.levelName))
-        {
-            // keep currentLevel.levelName as-is
-        }
-        else
+
+        // The name comes from CustomLevelStorage.BeginCreateNew() or from the
+        // existing level being edited. There is no scene UI dependency here.
+        if (string.IsNullOrWhiteSpace(level.levelName))
         {
             level.levelName = "Custom level";
         }
@@ -462,13 +477,8 @@ public class EditorManager : MonoBehaviour
         }
     }
 
-    private void RefreshInputFields(CustomLevelData loadedLevel)
+    private void RefreshDimensionInputs()
     {
-        if (levelNameInput != null && loadedLevel != null)
-        {
-            levelNameInput.text = loadedLevel.levelName;
-        }
-
         if (widthInput != null)
         {
             widthInput.text = gridSpawner.Width.ToString();
