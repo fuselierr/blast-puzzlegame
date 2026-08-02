@@ -158,7 +158,12 @@ public class UIHandler : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
 
-        MainMenu.PageToOpen = MainMenuPage.Community;
+        bool wasCustomLevel = GameManager.SelectedCustomLevel != null;
+        GameManager.SelectedCustomLevel = null;
+
+        MainMenu.PageToOpen = wasCustomLevel
+            ? MainMenuPage.Community
+            : MainMenuPage.Main;
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
