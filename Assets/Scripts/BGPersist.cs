@@ -29,6 +29,9 @@ public class BGPersist : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // The exit boost only applies while the transition is playing.
+        Projectile.ResetTransitionSpeedMultiplier();
+
         bool shouldShowBackground = scene.name != "Game" && scene.name != "Classic" && scene.name != "LevelEditor";
         gameObject.SetActive(shouldShowBackground);
 
@@ -45,6 +48,8 @@ public class BGPersist : MonoBehaviour
             SceneManager.LoadScene(sceneName);
             return;
         }
+
+        Projectile.SetTransitionSpeedMultiplier(3f);
 
         SlowRotate[] backgroundTiles = GetComponentsInChildren<SlowRotate>(includeInactive: false);
         if (backgroundTiles.Length == 0)
