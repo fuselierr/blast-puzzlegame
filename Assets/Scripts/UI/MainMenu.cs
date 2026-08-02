@@ -31,7 +31,6 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private int discoverTabIndex = 1;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
-
     [SerializeField] private GameObject leaderboardPanel;
     
     private int score;
@@ -48,14 +47,13 @@ public class MainMenu : MonoBehaviour
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.IsDailyChallenge = true;
         attemptedDailyChallenge = true;
-        SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
-        GameManager.IsDailyChallenge = false;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayCampaign()
@@ -67,7 +65,7 @@ public class MainMenu : MonoBehaviour
     public void PlayClassic()
     {
         GameManager.SelectedMode = GameMode.Classic;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void CheckStats()
@@ -125,7 +123,19 @@ public class MainMenu : MonoBehaviour
 
     public void OpenLevelEditor()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelEditor");
+        LoadSceneWithBackgroundExit("LevelEditor");
+    }
+
+    private void LoadSceneWithBackgroundExit(string sceneName)
+    {
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad(sceneName);
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -165,8 +175,7 @@ public class MainMenu : MonoBehaviour
             // load daily challenge playerdata
             score = SaveManager.Instance.LoadDailyChallengeScore();
             scoreText.text = score.ToString();
-        }
-        else
+        } else
         {
             scoreText.text = "N/A";
         }
