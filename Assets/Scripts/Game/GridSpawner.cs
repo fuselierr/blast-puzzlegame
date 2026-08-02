@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
@@ -89,6 +88,12 @@ public class GridSpawner : MonoBehaviour
             return;
         }
 
+        if (!data.HasValidLayout(out string layoutError))
+        {
+            Debug.LogError($"Campaign level '{data.levelName}' has an invalid layout: {layoutError}.");
+            return;
+        }
+
         Configure(data.width, data.height, 0f);
         GenerateGrid();
 
@@ -103,16 +108,96 @@ public class GridSpawner : MonoBehaviour
                     continue;
                 }
 
-                TileType type = data.GetTile(x, y);
+                TileType type = data.GetTile(x, height - 1 - y);
                 if (type == TileType.Debris)
                 {
                     tile.PlaceDebris();
                 }
                 else
                 {
-                    tile.SetTileType(TileType.Tile);
+                    tile.SetTileType(type);
                 }
             }
+        }
+    }
+
+    public void LoadLevel(CustomLevelData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning(
+                "GridSpawner.LoadLevel called with null custom level data.");
+            return;
+        }
+
+        if (!data.TryToTileGrid(
+                out CustomLevelTileData[,] board,
+                out string layoutError))
+        {
+            Debug.LogError(
+                $"Custom level '{data.levelName}' has an invalid layout: " +
+                layoutError);
+            return;
+        }
+
+        Configure(data.width, data.height, 0f);
+        GenerateGrid();
+
+        Dictionary<string, List<Tile>> teleporters =
+            new Dictionary<string, List<Tile>>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Tile tile = GetTile(new Vector2Int(x, y));
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                // Layout strings are written top-to-bottom, while the world
+                // grid's y coordinate increases bottom-to-top.
+                CustomLevelTileData cell = board[x, height - 1 - y];
+
+                if (cell.tileType == TileType.Mine)
+                {
+                    tile.SetTileType(cell.mineType);
+                }
+                else if (cell.tileType == TileType.Mirror)
+                {
+                    tile.SetTileType(TileType.Mirror, cell.mineType);
+                }
+                else if (cell.tileType == TileType.Debris)
+                {
+                    tile.PlaceDebris();
+                }
+                else
+                {
+                    tile.SetTileType(cell.tileType);
+                }
+
+                if (cell.tileType == TileType.Teleporter)
+                {
+                    if (!teleporters.TryGetValue(
+                            cell.teleporterPairId,
+                            out List<Tile> pair))
+                    {
+                        pair = new List<Tile>();
+                        teleporters[cell.teleporterPairId] = pair;
+                    }
+
+                    pair.Add(tile);
+                }
+            }
+        }
+
+        foreach (var entry in teleporters)
+        {
+            Tile first = entry.Value[0];
+            Tile second = entry.Value[1];
+            first.SetTeleporterPair(entry.Key, second);
+            second.SetTeleporterPair(entry.Key, first);
         }
     }
 
@@ -503,7 +588,7 @@ public class GridSpawner : MonoBehaviour
                 if (tile != null && tile.Type == TileType.Mine)
                 {
                     anyMines = true;
-                    SpawnProjectiles(tileObject.transform.position);
+                    SpawnProjectiles(tileObject.transform.position, tile.mineType);
                     tile.SetTileType(TileType.Tile);
                 }
             }
@@ -525,7 +610,7 @@ public class GridSpawner : MonoBehaviour
         // have been created before we start polling for them.
         yield return null;
 
-        while (FindObjectsByType<Projectile>().Length > 0)
+        while (FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length > 0)
         {
             yield return null;
         }
@@ -554,25 +639,70 @@ public class GridSpawner : MonoBehaviour
 
     public bool AllDebrisCleared => DebrisRemaining() == 0;
 
-    private void SpawnProjectiles(Vector3 position)
+    private void SpawnProjectiles(Vector3 position, MineType mineType = MineType.Standard)
     {
         if (projectilePrefab == null)
         {
             Debug.LogWarning("No projectile prefab assigned to GridSpawner.");
             return;
         }
-
-        Vector2[] directions = new Vector2[]
+        Vector2[] directions;
+        switch (mineType)
         {
-            new Vector2(0, 1),
-            new Vector2(1, 1).normalized,
-            new Vector2(1, 0),
-            new Vector2(1, -1).normalized,
-            new Vector2(0, -1),
-            new Vector2(-1, -1).normalized,
-            new Vector2(-1, 0),
-            new Vector2(-1, 1).normalized
-        };
+            case MineType.Cross:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 0),
+                    new Vector2(0, -1),
+                    new Vector2(-1, 0),
+                };
+                break;
+            case MineType.Diagonal:
+                directions = new Vector2[]
+                {
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, -1).normalized,
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Double:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized,
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Standard:
+            default:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+        }
 
         foreach (var dir in directions)
         {
@@ -586,7 +716,6 @@ public class GridSpawner : MonoBehaviour
             p.Init(dir);
         }
     }
-
     private void GenerateSeededSolvableDebris(int targetDebrisCount, int mineBudget)
     {
         UnityEngine.Random.State previousState = UnityEngine.Random.state;

@@ -92,6 +92,6 @@ public class CampaignMode : GameModeBase
         }
     }
 
-    public override bool TryPlaceMine() => true; // infinite, nothing to track
-    public override void ReturnMine() { }
+    public override bool TryPlaceMine(MineType mineType = MineType.Standard) => true; // infinite, nothing to track
+    public override void ReturnMine(MineType mineType = MineType.Standard) { }
 }

@@ -1,2 +1,22 @@
 fileFormatVersion: 2
 guid: e171ee3cdad69ba4fb9707104bf0d6ae
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - tileSprite: {fileID: 7399533318584292489, guid: 8f5e24c0c9b998f488915d86c81a0aae, type: 3}
+  - wallSprite: {fileID: 2868539044483428322, guid: 0b88ad49c6d05354baef5141447f5fd4, type: 3}
+  - mirrorSprite: {fileID: -6728250628938413968, guid: 812159355bca4794e960e600c6e90cd7, type: 3}
+  - teleporterSprite: {fileID: 3519107522686806051, guid: bba6120f3617067488cf32922e36e97e, type: 3}
+  - splitterSprite: {fileID: 6667910881968864793, guid: 08d27171051875342b9428fb9a4eb973, type: 3}
+  - standardMineSprite: {instanceID: 0}
+  - crossMineSprite: {fileID: 7670227700825838776, guid: b8b394375df7bed458c05f5ab16c5b4f, type: 3}
+  - diagonalMineSprite: {fileID: -581534660479669388, guid: a999acb1fee04d5439d0981d284f1ada, type: 3}
+  - doubleMineSprite: {fileID: -8199840198811927050, guid: 5da2ee4e98b27324c835bde14ecb1a45, type: 3}
+  - debrisSprite: {fileID: 5725184139431673129, guid: 5d9e231b70e5d0c4cad512e7520d1a77, type: 3}
+  - strongDebrisSprite: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using System.Linq.Expressions;
 
 public class UIHandler : MonoBehaviour
 {
@@ -13,6 +14,11 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private TMP_Text crossText;
     [SerializeField] private TMP_Text diagonalText;
     [SerializeField] private TMP_Text doubleText;
+    [SerializeField] private ToggleGroup mineSelectToggleGroup;
+    [SerializeField] private Toggle standardMineToggle;
+    [SerializeField] private Toggle crossMineToggle;
+    [SerializeField] private Toggle diagonalMineToggle;
+    [SerializeField] private Toggle doubleMineToggle;
 
     [SerializeField] private TMP_Text levelText; // e.g. "Level 4/10", hidden if totalLevels <= 1
 
@@ -41,6 +47,14 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnLevelCleared += HandleLevelCleared;
             GameManager.Instance.OnGameWon += HandleGameWon;
             GameManager.Instance.OnGameLost += HandleGameLost;
+            GameManager.Instance.OnSelectedMineChange += HandleSelectedMineChange;
+
+            standardMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Standard;});
+            crossMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Cross;});
+            diagonalMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Diagonal;});
+            doubleMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Double;});
+
+            HandleSelectedMineChange(GameManager.Instance.SelectedMineType);
         }
     }
 
@@ -52,6 +66,12 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnLevelCleared -= HandleLevelCleared;
             GameManager.Instance.OnGameWon -= HandleGameWon;
             GameManager.Instance.OnGameLost -= HandleGameLost;
+            GameManager.Instance.OnSelectedMineChange -= HandleSelectedMineChange;
+
+            standardMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Standard;});
+            crossMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Cross;});
+            diagonalMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Diagonal;});
+            doubleMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Double;});
         }
     }
 
@@ -138,6 +158,7 @@ public class UIHandler : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
 
+        MainMenu.PageToOpen = MainMenuPage.Community;
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
@@ -246,6 +267,34 @@ public class UIHandler : MonoBehaviour
             StartCoroutine(ShowPanelAfterDelay(gameOverPanel));
         }
     }
+
+    private void HandleSelectedMineChange(MineType mineType)
+    {
+        switch (mineType)
+        {
+            // Setting Toggle.isOn directly invokes onValueChanged callback. Using SetIsOnWithoutNotify to avoid circling calls. 
+            case MineType.Standard:
+                standardMineToggle.SetIsOnWithoutNotify(true);
+                break;
+            case MineType.Cross:
+                crossMineToggle.SetIsOnWithoutNotify(true);
+                break;
+            case MineType.Diagonal:
+                diagonalMineToggle.SetIsOnWithoutNotify(true);
+                break;
+            case MineType.Double:
+                doubleMineToggle.SetIsOnWithoutNotify(true);
+                break;
+        }
+    }
+
+    // private void SetMineSelectCallbacks()
+    // {
+    //     standardMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Standard;});
+    //     crossMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Cross;});
+    //     diagonalMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Diagonal;});
+    //     doubleMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Double;});
+    // }
 
     private void SetMineCountText(TMP_Text text, MineType type)
     {
