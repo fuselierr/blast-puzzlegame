@@ -1358,7 +1358,10 @@ MonoBehaviour:
   gameWon: {fileID: 8300000, guid: 5392217fa832e6541bfa63f0a5e8ca48, type: 3}
   gameLost: {fileID: 8300000, guid: d4ef20267e9928a49ab049c9b3cab683, type: 3}
   uiClick: {fileID: 8300000, guid: 64fea0a012e174f4799891c46a7dd716, type: 3}
+  masterVolume: 1
+  musicVolume: 1
   sfxVolume: 1
+  musicEnabled: 1
   poolSize: 8
 --- !u!4 &2140596148
 Transform:
