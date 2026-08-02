@@ -364,7 +364,15 @@ public class EditorManager : MonoBehaviour
     private void LoadMainMenu()
     {
         MainMenu.PageToOpen = MainMenuPage.Community;
-        SceneManager.LoadScene("MainMenu");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("MainMenu");
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     private Rect GetGridCaptureRect()

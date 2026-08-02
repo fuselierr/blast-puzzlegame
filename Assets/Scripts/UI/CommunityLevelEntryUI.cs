@@ -164,7 +164,15 @@ public class CommunityLevelEntryUI : MonoBehaviour
 
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.SelectedCustomLevel = level;
-        SceneManager.LoadScene("Game");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("Game");
+        }
+        else
+        {
+            SceneManager.LoadScene("Game");
+        }
     }
 
     private void PopulateTileUsagePreview(CustomLevelData levelData)

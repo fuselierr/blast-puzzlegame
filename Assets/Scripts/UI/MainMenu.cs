@@ -47,13 +47,13 @@ public class MainMenu : MonoBehaviour
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.IsDailyChallenge = true;
         attemptedDailyChallenge = true;
-        SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayCampaign()
@@ -65,7 +65,7 @@ public class MainMenu : MonoBehaviour
     public void PlayClassic()
     {
         GameManager.SelectedMode = GameMode.Classic;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void CheckStats()
@@ -123,7 +123,19 @@ public class MainMenu : MonoBehaviour
 
     public void OpenLevelEditor()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelEditor");
+        LoadSceneWithBackgroundExit("LevelEditor");
+    }
+
+    private void LoadSceneWithBackgroundExit(string sceneName)
+    {
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad(sceneName);
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

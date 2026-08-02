@@ -164,7 +164,15 @@ public class UIHandler : MonoBehaviour
         MainMenu.PageToOpen = wasCustomLevel
             ? MainMenuPage.Community
             : MainMenuPage.Main;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("MainMenu");
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
     }
 
     private void HandleLevelStart(int levelNumber, int totalLevels)

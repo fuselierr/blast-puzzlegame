@@ -264,7 +264,15 @@ public class MyLevelEntryUI : MonoBehaviour
 
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.SelectedCustomLevel = level;
-        SceneManager.LoadScene("Game");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("Game");
+        }
+        else
+        {
+            SceneManager.LoadScene("Game");
+        }
     }
 
     public void EditLevel()
@@ -276,7 +284,15 @@ public class MyLevelEntryUI : MonoBehaviour
         }
 
         CustomLevelStorage.BeginEdit(level);
-        SceneManager.LoadScene("LevelEditor");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("LevelEditor");
+        }
+        else
+        {
+            SceneManager.LoadScene("LevelEditor");
+        }
     }
 
     public void RenameLevel()

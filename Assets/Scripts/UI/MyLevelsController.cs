@@ -41,7 +41,15 @@ public class MyLevelsController : MonoBehaviour
             if (string.IsNullOrWhiteSpace(newName)) return;
 
             CustomLevelData level = CustomLevelStorage.BeginCreateNew(newName);
-            SceneManager.LoadScene("LevelEditor");
+
+            if (BGPersist.Instance != null)
+            {
+                BGPersist.Instance.AnimateExitThenLoad("LevelEditor");
+            }
+            else
+            {
+                SceneManager.LoadScene("LevelEditor");
+            }
         });
     }
 
