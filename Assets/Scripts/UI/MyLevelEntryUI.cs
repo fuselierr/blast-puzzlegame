@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
@@ -16,6 +17,12 @@ public class MyLevelEntryUI : MonoBehaviour
     [SerializeField] private Sprite defaultPreviewSprite;
     [SerializeField] private Button playButton;
     [SerializeField] private Button kebabButton;
+    [SerializeField] private GridLayoutGroup tilesUsedGrid;
+    [SerializeField] private Vector2 tileIconSize = new Vector2(24f, 24f);
+
+    [Header("Tile Sprites")]
+    [Tooltip("Assign the same Globals asset used by the game. This avoids Unity finding an unrelated loaded Globals asset.")]
+    [SerializeField] private Globals globals;
 
     private CustomLevelData level;
     private KebabMenuController kebabMenuController;
@@ -58,10 +65,145 @@ public class MyLevelEntryUI : MonoBehaviour
             previewImage.sprite = LoadPreviewSprite(levelData);
         }
 
+        PopulateTileUsagePreview(levelData);
+
         kebabButton.onClick.RemoveListener(OpenKebabMenu);
         kebabButton.onClick.AddListener(OpenKebabMenu);
         playButton.onClick.RemoveListener(PlayLevel);
         playButton.onClick.AddListener(PlayLevel);
+    }
+
+    private void PopulateTileUsagePreview(CustomLevelData levelData)
+    {
+        if (levelData == null)
+        {
+            return;
+        }
+
+        GridLayoutGroup targetGrid = tilesUsedGrid;
+        if (targetGrid == null)
+        {
+            Debug.LogWarning("MyLevelEntryUI has no tilesUsedGrid assigned.", this);
+            return;
+        }
+
+        for (int i = targetGrid.transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = targetGrid.transform.GetChild(i);
+            if (child != null && child.name.StartsWith("UsedTileIcon_"))
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(levelData.layout))
+        {
+            return;
+        }
+
+        if (!levelData.TryToTileGrid(out CustomLevelTileData[,] grid, out string error))
+        {
+            Debug.LogWarning($"MyLevelEntryUI could not parse tile preview for {levelData.fileName}: {error}", this);
+            return;
+        }
+
+        HashSet<string> usedTileKeys = new HashSet<string>();
+
+        for (int y = 0; y < grid.GetLength(1); y++)
+        {
+            for (int x = 0; x < grid.GetLength(0); x++)
+            {
+                CustomLevelTileData tile = grid[x, y];
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                if (tile.tileType == TileType.Tile ||
+                    tile.tileType == TileType.None)
+                {
+                    continue;
+                }
+
+                string key = tile.tileType == TileType.Mine
+                    ? $"{tile.tileType}:{tile.mineType}"
+                    : tile.tileType.ToString();
+
+                usedTileKeys.Add(key);
+            }
+        }
+
+        foreach (string key in usedTileKeys)
+        {
+            string[] parts = key.Split(':');
+            TileType tileType = parts.Length > 0 ? (TileType)System.Enum.Parse(typeof(TileType), parts[0]) : TileType.None;
+            MineType mineType = parts.Length > 1 ? (MineType)System.Enum.Parse(typeof(MineType), parts[1]) : MineType.Standard;
+
+            GameObject iconObject = new GameObject($"UsedTileIcon_{key}", typeof(RectTransform), typeof(Image));
+            iconObject.transform.SetParent(targetGrid.transform, false);
+
+            RectTransform iconRect = iconObject.GetComponent<RectTransform>();
+            iconRect.sizeDelta = tileIconSize;
+
+            Image iconImage = iconObject.GetComponent<Image>();
+            iconImage.raycastTarget = false;
+            iconImage.preserveAspect = true;
+            iconImage.type = Image.Type.Simple;
+            iconImage.sprite = GetSpriteForTileType(tileType, mineType);
+            iconImage.color = iconImage.sprite != null ? Color.white : new Color(1f, 1f, 1f, 0f);
+
+            LayoutElement layoutElement = iconObject.AddComponent<LayoutElement>();
+            layoutElement.preferredWidth = tileIconSize.x;
+            layoutElement.preferredHeight = tileIconSize.y;
+            layoutElement.flexibleWidth = 0f;
+            layoutElement.flexibleHeight = 0f;
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(targetGrid.GetComponent<RectTransform>());
+    }
+
+    private Sprite GetSpriteForTileType(TileType tileType, MineType mineType = MineType.Standard)
+    {
+        if (globals != null)
+        {
+            Sprite sprite = globals.GetSpriteForTileType(tileType, mineType);
+            if (sprite != null)
+            {
+                return sprite;
+            }
+        }
+
+        return CreateFallbackSprite(tileType, mineType);
+    }
+
+    private Sprite CreateFallbackSprite(TileType tileType, MineType mineType)
+    {
+        Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+        Color background = tileType == TileType.Mine
+            ? new Color(0.82f, 0.22f, 0.22f, 1f)
+            : tileType == TileType.Wall
+                ? new Color(0.35f, 0.35f, 0.35f, 1f)
+                : tileType == TileType.Mirror
+                    ? new Color(0.2f, 0.4f, 0.9f, 1f)
+                    : tileType == TileType.Teleporter
+                        ? new Color(0.25f, 0.75f, 0.8f, 1f)
+                        : tileType == TileType.Debris || tileType == TileType.StrongDebris
+                            ? new Color(0.55f, 0.35f, 0.15f, 1f)
+                            : tileType == TileType.Splitter
+                                ? new Color(0.75f, 0.35f, 0.95f, 1f)
+                                : new Color(0.2f, 0.2f, 0.2f, 1f);
+
+        for (int y = 0; y < texture.height; y++)
+        {
+            for (int x = 0; x < texture.width; x++)
+            {
+                bool isBorder = x < 2 || x > texture.width - 3 || y < 2 || y > texture.height - 3;
+                texture.SetPixel(x, y, isBorder ? Color.white : background);
+            }
+        }
+
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
     }
 
     private Sprite LoadPreviewSprite(CustomLevelData levelData)
@@ -122,7 +264,15 @@ public class MyLevelEntryUI : MonoBehaviour
 
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.SelectedCustomLevel = level;
-        SceneManager.LoadScene("Game");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("Game");
+        }
+        else
+        {
+            SceneManager.LoadScene("Game");
+        }
     }
 
     public void EditLevel()
@@ -134,7 +284,15 @@ public class MyLevelEntryUI : MonoBehaviour
         }
 
         CustomLevelStorage.BeginEdit(level);
-        SceneManager.LoadScene("LevelEditor");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("LevelEditor");
+        }
+        else
+        {
+            SceneManager.LoadScene("LevelEditor");
+        }
     }
 
     public void RenameLevel()

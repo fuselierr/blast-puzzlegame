@@ -48,6 +48,7 @@ public static class CustomLevelStorage
         level.width = 8;
         level.height = 8;
         level.layout = string.Empty;
+        level.author = string.Empty;
 
         Debug.Log($"BeginCreateNew: created pending level with name='{level.levelName}' file='{level.fileName}'");
         BeginEdit(level);

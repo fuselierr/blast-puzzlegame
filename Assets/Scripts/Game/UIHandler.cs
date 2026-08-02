@@ -158,8 +158,21 @@ public class UIHandler : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
 
-        MainMenu.PageToOpen = MainMenuPage.Community;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        bool wasCustomLevel = GameManager.SelectedCustomLevel != null;
+        GameManager.SelectedCustomLevel = null;
+
+        MainMenu.PageToOpen = wasCustomLevel
+            ? MainMenuPage.Community
+            : MainMenuPage.Main;
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("MainMenu");
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
     }
 
     private void HandleLevelStart(int levelNumber, int totalLevels)

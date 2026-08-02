@@ -65,6 +65,16 @@ public class Globals : ScriptableObject
         }
     }
 
+    public Sprite GetSpriteForTileType(TileType tileType, MineType mineType = MineType.Standard)
+    {
+        if (tileType == TileType.Mine)
+        {
+            return GetSprite(mineType);
+        }
+
+        return GetSprite(tileType);
+    }
+
     public Sprite GetSprite(TileType tileType)
     {
         switch (tileType)

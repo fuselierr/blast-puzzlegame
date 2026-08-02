@@ -12,7 +12,15 @@ public class LevelButton : MonoBehaviour
     {
         GameManager.SelectedMode = GameMode.Campaign;
         GameManager.SelectedCampaignLevelIndex = levelIndex - 1;
-        SceneManager.LoadScene("Game");
+
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad("Game");
+        }
+        else
+        {
+            SceneManager.LoadScene("Game");
+        }
     }
 
     void Start()

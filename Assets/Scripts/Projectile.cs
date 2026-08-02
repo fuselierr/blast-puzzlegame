@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
+    private static float transitionSpeedMultiplier = 1f;
+
     [SerializeField] private GameObject projectilePrefab;
     public Vector2 direction;
     public float speed = 4f;
@@ -19,6 +21,16 @@ public class Projectile : MonoBehaviour
     [SerializeField] private GameObject trailPrefab;
     private GameObject trailInstance;
 
+    public static void SetTransitionSpeedMultiplier(float multiplier)
+    {
+        transitionSpeedMultiplier = Mathf.Max(0f, multiplier);
+    }
+
+    public static void ResetTransitionSpeedMultiplier()
+    {
+        transitionSpeedMultiplier = 1f;
+    }
+
     public void Init(Vector2 dir)
     {
         direction = dir.normalized;
@@ -32,7 +44,9 @@ public class Projectile : MonoBehaviour
     void Update()
     {
         Vector2 previousPosition = transform.position;
-        transform.position += (Vector3)(direction * speed * Time.deltaTime);
+        float currentSpeed = speed * transitionSpeedMultiplier;
+        transform.position +=
+            (Vector3)(direction * currentSpeed * Time.deltaTime);
         if (teleporterIgnoreTimer > 0f)
         {
             teleporterIgnoreTimer -= Time.deltaTime;

@@ -607,6 +607,9 @@ MonoBehaviour:
   defaultPreviewSprite: {fileID: -3153965109115938026, guid: 13d6b30a2b52c394daa08983f57fa4d5, type: 3}
   playButton: {fileID: 539879760032859500}
   kebabButton: {fileID: 7075750256108585164}
+  tilesUsedGrid: {fileID: 5196949810862989600}
+  tileIconSize: {x: 24, y: 24}
+  globals: {fileID: 11400000, guid: d93029da9ee3b55439018199c3a3d144, type: 2}
 --- !u!114 &5607939472726344117
 MonoBehaviour:
   m_ObjectHideFlags: 0

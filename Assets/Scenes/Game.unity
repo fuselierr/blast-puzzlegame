@@ -1313,7 +1313,7 @@ MonoBehaviour:
   text: {fileID: 790376320}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -5
+  pressedScale: 0.94
   speed: 12
 --- !u!114 &151823010
 MonoBehaviour:
@@ -4674,7 +4674,7 @@ MonoBehaviour:
   text: {fileID: 644484799}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -5
+  pressedScale: 0.94
   speed: 12
 --- !u!114 &707581114
 MonoBehaviour:
@@ -8902,7 +8902,7 @@ MonoBehaviour:
   text: {fileID: 977172139}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -5
+  pressedScale: 0.94
   speed: 12
 --- !u!114 &1526826323
 MonoBehaviour:
@@ -9589,7 +9589,7 @@ MonoBehaviour:
   text: {fileID: 250393914}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -5
+  pressedScale: 0.94
   speed: 12
 --- !u!114 &1622767658
 MonoBehaviour:
@@ -12682,6 +12682,10 @@ MonoBehaviour:
   height: 14
   tileSize: 0.5
   debrisChance: 0.15
+  animateEntrance: 1
+  entranceTotalDuration: 1.5
+  tileDropDuration: 0.6
+  spawnAboveScreen: 1
 --- !u!4 &2057569389
 Transform:
   m_ObjectHideFlags: 0

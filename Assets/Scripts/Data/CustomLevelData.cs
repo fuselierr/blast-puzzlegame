@@ -26,6 +26,7 @@ public class CustomLevelData
     public int width;
     public int height;
     public string layout;
+    public string author;
     public bool verified;
     public int likes;
     public int downloads;
@@ -44,6 +45,7 @@ public class CustomLevelData
                 width = width,
                 height = height,
                 layout = string.Empty,
+                author = author,
                 verified = verified,
                 likes = likes,
                 downloads = downloads,
@@ -90,6 +92,7 @@ public class CustomLevelData
             width = width,
             height = height,
             layout = string.Join("\n", strippedRows),
+            author = author,
             verified = verified,
             likes = likes,
             downloads = downloads,

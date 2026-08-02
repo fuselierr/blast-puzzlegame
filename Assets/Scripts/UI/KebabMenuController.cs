@@ -25,17 +25,35 @@ public class KebabMenuController : MonoBehaviour
     [SerializeField] private float screenPadding = 8f;
 
     private MyLevelEntryUI selectedEntry;
+    private bool initialized;
+    private bool isOpening;
 
     private void Awake()
     {
-        // Hide these first so an Inspector reference problem cannot leave the
-        // blocker or menu visible when the scene opens.
-        Close();
-
-        if (!ReferencesAreValid())
+        if (!EnsureInitialized())
         {
             enabled = false;
             return;
+        }
+
+        // If Awake was triggered by Open() activating an inactive PopupLayer,
+        // do not clear the entry that Open() is in the process of selecting.
+        if (!isOpening)
+        {
+            Close();
+        }
+    }
+
+    private bool EnsureInitialized()
+    {
+        if (initialized)
+        {
+            return true;
+        }
+
+        if (!ReferencesAreValid())
+        {
+            return false;
         }
 
         clickBlocker.onClick.AddListener(Close);
@@ -44,17 +62,28 @@ public class KebabMenuController : MonoBehaviour
         duplicateButton.onClick.AddListener(DuplicateSelected);
         uploadButton.onClick.AddListener(UploadSelected);
         deleteButton.onClick.AddListener(DeleteSelected);
+
+        initialized = true;
+        return true;
     }
 
     public void Open(
         RectTransform kebabButton,
         MyLevelEntryUI entry)
     {
-        Debug.Log($"KebabMenuController.Open invoked. kebabButton={(kebabButton!=null)}, entry={(entry!=null)}", this);
+        isOpening = true;
+
+        if (!EnsureInitialized())
+        {
+            isOpening = false;
+            enabled = false;
+            return;
+        }
 
         if (kebabButton == null || entry == null)
         {
             Debug.LogWarning($"KebabMenuController.Open called with null parameter: kebabButton={(kebabButton==null)}, entry={(entry==null)}", this);
+            isOpening = false;
             return;
         }
 
@@ -83,6 +112,7 @@ public class KebabMenuController : MonoBehaviour
         Canvas.ForceUpdateCanvases();
 
         PositionBeside(kebabButton);
+        isOpening = false;
     }
 
     public void Close()
@@ -345,6 +375,11 @@ public class KebabMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (!initialized)
+        {
+            return;
+        }
+
         if (clickBlocker != null)
         {
             clickBlocker.onClick.RemoveListener(Close);
