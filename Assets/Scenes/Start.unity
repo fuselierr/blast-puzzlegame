@@ -1046,8 +1046,8 @@ MonoBehaviour:
   spawnInterval: 0.75
   speed: 4
   projScale: 2
-  xExtent: 10
-  yExtent: 6
+  xExtent: 6
+  yExtent: 8
   spawnOffset: 1
 --- !u!1 &1295597812
 GameObject:
@@ -1215,7 +1215,7 @@ MonoBehaviour:
   text: {fileID: 721950963}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -12
+  pressedScale: 0.94
   speed: 6
 --- !u!1 &1393326560
 GameObject:
