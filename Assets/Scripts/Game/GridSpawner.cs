@@ -12,6 +12,12 @@ public class GridSpawner : MonoBehaviour
     [SerializeField] private float tileSize = 1f;
     [SerializeField] private float debrisChance = 0.15f;
 
+    [Header("Entrance Animation")]
+    [SerializeField] private bool animateEntrance = true;
+    [SerializeField, Min(0.1f)] private float entranceTotalDuration = 1f;
+    [SerializeField, Min(0.05f)] private float tileDropDuration = 0.35f;
+    [SerializeField, Min(0f)] private float spawnAboveScreen = 1f;
+
     private GameObject[,] tiles;
 
     private static readonly Vector2Int[] solverDirections =
@@ -51,6 +57,46 @@ public class GridSpawner : MonoBehaviour
         tiles = new GameObject[width, height];
 
         float spacing = tileSize;
+        int tileCount = width * height;
+        float moveDuration = Mathf.Min(
+            tileDropDuration,
+            entranceTotalDuration);
+        float delayRange = Mathf.Max(
+            0f,
+            entranceTotalDuration - moveDuration);
+        float delayStep = tileCount > 1
+            ? delayRange / (tileCount - 1)
+            : 0f;
+        float entranceStartY = GetEntranceStartY(spacing);
+
+        // Build a pool with each column repeated once per row, then shuffle it.
+        // Walking the shuffled pool and assigning each column its next row (in
+        // order) keeps every column bottom-first while randomizing which
+        // column drops next overall.
+        int[] pool = new int[tileCount];
+        int poolIndex = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                pool[poolIndex++] = x;
+            }
+        }
+        for (int i = pool.Length - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i + 1);
+            (pool[i], pool[j]) = (pool[j], pool[i]);
+        }
+
+        int[] nextRow = new int[width];
+        int[,] animationOrder = new int[width, height];
+        for (int i = 0; i < pool.Length; i++)
+        {
+            int x = pool[i];
+            int y = nextRow[x];
+            animationOrder[x, y] = i;
+            nextRow[x]++;
+        }
 
         for (int y = 0; y < height; y++)
         {
@@ -70,6 +116,23 @@ public class GridSpawner : MonoBehaviour
                 ApplyTileScale(tile);
                 tiles[x, y] = tile;
 
+                if (animateEntrance)
+                {
+                    // Start with the visual above the screen. Each column
+                    // always drops bottom row first, but the interleaving
+                    // across columns is randomized.
+                    tile.transform.position = new Vector3(
+                        position.x,
+                        entranceStartY,
+                        position.z);
+
+                    int animationIndex = animationOrder[x, y];
+
+                    LeanTween.move(tile, position, moveDuration)
+                        .setDelay(animationIndex * delayStep)
+                        .setEase(LeanTweenType.easeOutQuint);
+                }
+
                 Tile tileScript = tile.GetComponent<Tile>();
                 if (tileScript != null)
                 {
@@ -77,6 +140,23 @@ public class GridSpawner : MonoBehaviour
                 }
             }
         }
+    }
+
+    private float GetEntranceStartY(float spacing)
+    {
+        Camera camera = Camera.main;
+        if (camera != null)
+        {
+            float distanceFromCamera =
+                Mathf.Abs(transform.position.z - camera.transform.position.z);
+            Vector3 screenTop = camera.ViewportToWorldPoint(
+                new Vector3(0.5f, 1f, distanceFromCamera));
+
+            return screenTop.y + spawnAboveScreen;
+        }
+
+        float boardTop = (height - 1) * spacing / 2f;
+        return boardTop + spawnAboveScreen + spacing;
     }
 
     // Campaign: build the grid from a hand-authored layout instead of random debris.
@@ -205,7 +285,17 @@ public class GridSpawner : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            DestroyImmediate(transform.GetChild(i).gameObject);
+            GameObject tile = transform.GetChild(i).gameObject;
+            LeanTween.cancel(tile);
+
+            if (Application.isPlaying)
+            {
+                Destroy(tile);
+            }
+            else
+            {
+                DestroyImmediate(tile);
+            }
         }
     }
 

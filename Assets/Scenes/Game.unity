@@ -12682,6 +12682,10 @@ MonoBehaviour:
   height: 14
   tileSize: 0.5
   debrisChance: 0.15
+  animateEntrance: 1
+  entranceTotalDuration: 1.5
+  tileDropDuration: 0.6
+  spawnAboveScreen: 1
 --- !u!4 &2057569389
 Transform:
   m_ObjectHideFlags: 0

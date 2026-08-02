@@ -99,7 +99,7 @@ public class BGPersist : MonoBehaviour
 
             tileTransform.position = originalPosition + new Vector3(0f, DefaultExitDistance, 0f);
             LeanTween.move(tileTransform.gameObject, originalPosition, DefaultExitDuration)
-                .setEase(LeanTweenType.easeInQuad);
+                .setEase(LeanTweenType.easeOutQuad);
         }
 
         originalPositions.Clear();
