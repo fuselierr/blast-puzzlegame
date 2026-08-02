@@ -6,7 +6,7 @@ public class BGPersist : MonoBehaviour
 {
     private static BGPersist instance;
     private const float DefaultExitDuration = 2f;
-    private const float DefaultExitDistance = 12f;
+    private const float DefaultExitDistance = 14f;
 
     public static BGPersist Instance => instance;
 
