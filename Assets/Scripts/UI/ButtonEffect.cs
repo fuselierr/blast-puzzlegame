@@ -2,46 +2,85 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class UIButtonPressEffect : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class UIButtonPressEffect : MonoBehaviour,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IPointerExitHandler
 {
-    [SerializeField] private RectTransform target; // usually the button RectTransform
+    [SerializeField] private RectTransform target;
     [SerializeField] private TMP_Text text;
 
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color pressedColor = Color.red;
 
-    [SerializeField] private float pressedY = -5f;
+    [SerializeField, Range(0.5f, 1f)] private float pressedScale = 0.94f;
     [SerializeField] private float speed = 12f;
 
-    private Vector2 originalPos;
-    private Vector2 targetPos;
+    private Vector3 originalScale;
+    private Vector3 targetScale;
     private Color targetColor;
+    private bool initialized;
 
     void Awake()
     {
         if (target == null)
             target = GetComponent<RectTransform>();
 
-        originalPos = target.anchoredPosition;
-        targetPos = originalPos;
+        originalScale = target.localScale;
+        targetScale = originalScale;
         targetColor = normalColor;
+        initialized = true;
     }
 
     void Update()
     {
-        target.anchoredPosition = Vector2.Lerp(target.anchoredPosition, targetPos, Time.unscaledDeltaTime * speed);
-        text.color = Color.Lerp(text.color, targetColor, Time.unscaledDeltaTime * speed);
+        // Never change anchoredPosition here. A LayoutGroup owns that value.
+        target.localScale = Vector3.Lerp(
+            target.localScale,
+            targetScale,
+            Time.unscaledDeltaTime * speed);
+
+        if (text != null)
+        {
+            text.color = Color.Lerp(
+                text.color,
+                targetColor,
+                Time.unscaledDeltaTime * speed);
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        targetPos = originalPos + new Vector2(0, pressedY);
+        targetScale = originalScale * pressedScale;
         targetColor = pressedColor;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        targetPos = originalPos;
+        Release();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Release();
+    }
+
+    private void OnDisable()
+    {
+        if (initialized && target != null)
+        {
+            target.localScale = originalScale;
+        }
+
+        if (text != null)
+        {
+            text.color = normalColor;
+        }
+    }
+
+    private void Release()
+    {
+        targetScale = originalScale;
         targetColor = normalColor;
     }
 }
