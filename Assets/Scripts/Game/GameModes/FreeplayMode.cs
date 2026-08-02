@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // One level, hard difficulty, timer counts up, mines are limited.
@@ -13,11 +14,26 @@ public class FreeplayMode : GameModeBase
     {
         mineInventory.Infinite = false;
         mineInventory.ResetInventory();
-        mineInventory.SetMineCount(MineType.Standard, MineBudget);
 
-        gridSpawner.Configure(GridWidth, GridHeight, DebrisChance);
-        gridSpawner.GenerateGrid();
-        gridSpawner.GenerateDebris(isDailyChallenge: GameManager.IsDailyChallenge);
+        if (GameManager.SelectedCustomLevel != null)
+        {
+            CustomLevelData playableLevel = GameManager.SelectedCustomLevel.CreatePlayableCopy(out Dictionary<MineType, int> mineCounts);
+
+            foreach (var mineCount in mineCounts)
+            {
+                mineInventory.SetMineCount(mineCount.Key, mineCount.Value);
+            }
+
+            gridSpawner.LoadLevel(playableLevel);
+        }
+        else
+        {
+            mineInventory.SetMineCount(MineType.Standard, MineBudget);
+
+            gridSpawner.Configure(GridWidth, GridHeight, DebrisChance);
+            gridSpawner.GenerateGrid();
+            gridSpawner.GenerateDebris(isDailyChallenge: GameManager.IsDailyChallenge);
+        }
 
         timer.Configure(0f, countDown: false);
         timer.ResumeTimer();

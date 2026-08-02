@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour
     // that needs to change between "campaign", "freeplay" and "classic".
     public static GameMode SelectedMode = GameMode.Freeplay;
 
+    public static int SelectedCampaignLevelIndex = 0;
+
+    public static CustomLevelData SelectedCustomLevel;
+
     public static bool IsDailyChallenge = false;
 
     [Header("Shared Services (all live in this one scene)")]
@@ -23,9 +27,19 @@ public class GameManager : MonoBehaviour
 
     public GridSpawner GridSpawner => gridSpawner;
     public MineInventory MineInventory => mineInventory;
+    private MineType _SelectedMineType = MineType.Standard;
+    public MineType SelectedMineType { 
+        get => _SelectedMineType; 
+        set
+        {
+            _SelectedMineType = value;
+            OnSelectedMineChange?.Invoke(value);
+            Debug.Log($"SelectedMineType set to {value}");
+        } 
+    }
     public Timer Timer => timer;
     public CampaignLevelData[] CampaignLevels => campaignLevels;
-    public int CampaignStartIndex = 0;
+    public int CampaignStartIndex => SelectedCampaignLevelIndex;
 
     public bool gameStarted { get; set; }
 
@@ -38,6 +52,7 @@ public class GameManager : MonoBehaviour
     public event Action OnGameWon;
     public event Action OnGameLost;
     public event Action<bool> OnDetonateComplete; // debrisCleared
+    public event Action<MineType> OnSelectedMineChange; 
 
     private void Awake()
     {
@@ -76,14 +91,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool TryPlaceMine()
+    public bool TryPlaceMine(MineType mineType = MineType.Standard)
     {
-        return gameStarted && currentMode != null && currentMode.TryPlaceMine();
+        return gameStarted && currentMode != null && currentMode.TryPlaceMine(mineType);
     }
 
-    public void ReturnMine()
+    public void ReturnMine(MineType mineType = MineType.Standard)
     {
-        currentMode?.ReturnMine();
+        currentMode?.ReturnMine(mineType);
     }
 
     public void StopGame()

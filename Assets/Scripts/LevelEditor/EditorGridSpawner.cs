@@ -18,14 +18,21 @@ public class EditorGridSpawner : MonoBehaviour
     [SerializeField] private EditorTile editorTilePrefab;
 
     private EditorTile[,] tiles;
+    private bool tilesVisible = true;
 
     public int Width => width;
     public int Height => height;
+    public bool TilesVisible => tilesVisible;
     public event Action<EditorTile> TileClicked;
 
     private void Start()
     {
-        GenerateGrid();
+        // EditorManager may already have generated and loaded this grid in its
+        // Start method. Do not generate it again and overwrite that data.
+        if (tiles == null)
+        {
+            GenerateGrid();
+        }
     }
 
     public void GenerateGrid()
@@ -62,7 +69,12 @@ public class EditorGridSpawner : MonoBehaviour
                     existingRect.localScale = Vector3.one;
                     existingRect.localRotation = Quaternion.identity;
                     existingTile.name = $"EditorTile_{x}_{y}";
-                    existingTile.Initialize(globals, new Vector2Int(x, y));
+                    existingTile.Initialize(
+                        globals,
+                        new Vector2Int(x, y),
+                        existingTile.Type,
+                        existingTile.MineType);
+                    existingTile.gameObject.SetActive(tilesVisible);
                     tiles[x, y] = existingTile;
                     continue;
                 }
@@ -73,6 +85,7 @@ public class EditorGridSpawner : MonoBehaviour
                 newTileRect.localRotation = Quaternion.identity;
                 tile.Initialize(globals, new Vector2Int(x, y));
                 tile.Clicked += HandleTileClicked;
+                tile.gameObject.SetActive(tilesVisible);
                 tiles[x, y] = tile;
             }
         }
@@ -110,6 +123,11 @@ public class EditorGridSpawner : MonoBehaviour
         width = Mathf.Max(1, newWidth);
         height = Mathf.Max(1, newHeight);
         GenerateGrid();
+    }
+
+    public RectTransform GetPreviewCaptureTarget()
+    {
+        return viewport != null ? viewport : content;
     }
 
     public TileType GetTileType(int x, int y)
@@ -167,6 +185,27 @@ public class EditorGridSpawner : MonoBehaviour
         return tiles != null &&
                x >= 0 && x < width &&
                y >= 0 && y < height;
+    }
+
+    public void SetTilesVisible(bool visible)
+    {
+        tilesVisible = visible;
+        if (tiles == null)
+        {
+            return;
+        }
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                EditorTile tile = tiles[x, y];
+                if (tile != null)
+                {
+                    tile.gameObject.SetActive(visible);
+                }
+            }
+        }
     }
 
     private void ClearGrid()

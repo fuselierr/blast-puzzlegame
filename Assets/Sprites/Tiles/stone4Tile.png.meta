@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b660199d1c961d44086e7a61fc46ca71
+guid: a86a4af2ae190494e9967df23cf75838
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5725184139431673129
-    second: stone_0
+      213: -4500261076205833934
+    second: stone4Tile_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -110,7 +110,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: stone_0
+      name: stone4Tile_0
       rect:
         serializedVersion: 2
         x: 0
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 92d768834a0f37f40800000000000000
-      internalID: 5725184139431673129
+      spriteID: 231fb34056cdb81c0800000000000000
+      internalID: -4500261076205833934
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      stone_0: 5725184139431673129
+      stone4Tile_0: -4500261076205833934
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

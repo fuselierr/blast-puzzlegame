@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
@@ -12,6 +11,12 @@ public class GridSpawner : MonoBehaviour
     [SerializeField] private int height = 8;
     [SerializeField] private float tileSize = 1f;
     [SerializeField] private float debrisChance = 0.15f;
+
+    [Header("Entrance Animation")]
+    [SerializeField] private bool animateEntrance = true;
+    [SerializeField, Min(0.1f)] private float entranceTotalDuration = 1f;
+    [SerializeField, Min(0.05f)] private float tileDropDuration = 0.35f;
+    [SerializeField, Min(0f)] private float spawnAboveScreen = 1f;
 
     private GameObject[,] tiles;
 
@@ -52,6 +57,46 @@ public class GridSpawner : MonoBehaviour
         tiles = new GameObject[width, height];
 
         float spacing = tileSize;
+        int tileCount = width * height;
+        float moveDuration = Mathf.Min(
+            tileDropDuration,
+            entranceTotalDuration);
+        float delayRange = Mathf.Max(
+            0f,
+            entranceTotalDuration - moveDuration);
+        float delayStep = tileCount > 1
+            ? delayRange / (tileCount - 1)
+            : 0f;
+        float entranceStartY = GetEntranceStartY(spacing);
+
+        // Build a pool with each column repeated once per row, then shuffle it.
+        // Walking the shuffled pool and assigning each column its next row (in
+        // order) keeps every column bottom-first while randomizing which
+        // column drops next overall.
+        int[] pool = new int[tileCount];
+        int poolIndex = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                pool[poolIndex++] = x;
+            }
+        }
+        for (int i = pool.Length - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i + 1);
+            (pool[i], pool[j]) = (pool[j], pool[i]);
+        }
+
+        int[] nextRow = new int[width];
+        int[,] animationOrder = new int[width, height];
+        for (int i = 0; i < pool.Length; i++)
+        {
+            int x = pool[i];
+            int y = nextRow[x];
+            animationOrder[x, y] = i;
+            nextRow[x]++;
+        }
 
         for (int y = 0; y < height; y++)
         {
@@ -71,6 +116,23 @@ public class GridSpawner : MonoBehaviour
                 ApplyTileScale(tile);
                 tiles[x, y] = tile;
 
+                if (animateEntrance)
+                {
+                    // Start with the visual above the screen. Each column
+                    // always drops bottom row first, but the interleaving
+                    // across columns is randomized.
+                    tile.transform.position = new Vector3(
+                        position.x,
+                        entranceStartY,
+                        position.z);
+
+                    int animationIndex = animationOrder[x, y];
+
+                    LeanTween.move(tile, position, moveDuration)
+                        .setDelay(animationIndex * delayStep)
+                        .setEase(LeanTweenType.easeOutQuint);
+                }
+
                 Tile tileScript = tile.GetComponent<Tile>();
                 if (tileScript != null)
                 {
@@ -80,12 +142,35 @@ public class GridSpawner : MonoBehaviour
         }
     }
 
+    private float GetEntranceStartY(float spacing)
+    {
+        Camera camera = Camera.main;
+        if (camera != null)
+        {
+            float distanceFromCamera =
+                Mathf.Abs(transform.position.z - camera.transform.position.z);
+            Vector3 screenTop = camera.ViewportToWorldPoint(
+                new Vector3(0.5f, 1f, distanceFromCamera));
+
+            return screenTop.y + spawnAboveScreen;
+        }
+
+        float boardTop = (height - 1) * spacing / 2f;
+        return boardTop + spawnAboveScreen + spacing;
+    }
+
     // Campaign: build the grid from a hand-authored layout instead of random debris.
     public void LoadLevel(CampaignLevelData data)
     {
         if (data == null)
         {
             Debug.LogWarning("GridSpawner.LoadLevel called with null data.");
+            return;
+        }
+
+        if (!data.HasValidLayout(out string layoutError))
+        {
+            Debug.LogError($"Campaign level '{data.levelName}' has an invalid layout: {layoutError}.");
             return;
         }
 
@@ -103,16 +188,96 @@ public class GridSpawner : MonoBehaviour
                     continue;
                 }
 
-                TileType type = data.GetTile(x, y);
+                TileType type = data.GetTile(x, height - 1 - y);
                 if (type == TileType.Debris)
                 {
                     tile.PlaceDebris();
                 }
                 else
                 {
-                    tile.SetTileType(TileType.Tile);
+                    tile.SetTileType(type);
                 }
             }
+        }
+    }
+
+    public void LoadLevel(CustomLevelData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning(
+                "GridSpawner.LoadLevel called with null custom level data.");
+            return;
+        }
+
+        if (!data.TryToTileGrid(
+                out CustomLevelTileData[,] board,
+                out string layoutError))
+        {
+            Debug.LogError(
+                $"Custom level '{data.levelName}' has an invalid layout: " +
+                layoutError);
+            return;
+        }
+
+        Configure(data.width, data.height, 0f);
+        GenerateGrid();
+
+        Dictionary<string, List<Tile>> teleporters =
+            new Dictionary<string, List<Tile>>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Tile tile = GetTile(new Vector2Int(x, y));
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                // Layout strings are written top-to-bottom, while the world
+                // grid's y coordinate increases bottom-to-top.
+                CustomLevelTileData cell = board[x, height - 1 - y];
+
+                if (cell.tileType == TileType.Mine)
+                {
+                    tile.SetTileType(cell.mineType);
+                }
+                else if (cell.tileType == TileType.Mirror)
+                {
+                    tile.SetTileType(TileType.Mirror, cell.mineType);
+                }
+                else if (cell.tileType == TileType.Debris)
+                {
+                    tile.PlaceDebris();
+                }
+                else
+                {
+                    tile.SetTileType(cell.tileType);
+                }
+
+                if (cell.tileType == TileType.Teleporter)
+                {
+                    if (!teleporters.TryGetValue(
+                            cell.teleporterPairId,
+                            out List<Tile> pair))
+                    {
+                        pair = new List<Tile>();
+                        teleporters[cell.teleporterPairId] = pair;
+                    }
+
+                    pair.Add(tile);
+                }
+            }
+        }
+
+        foreach (var entry in teleporters)
+        {
+            Tile first = entry.Value[0];
+            Tile second = entry.Value[1];
+            first.SetTeleporterPair(entry.Key, second);
+            second.SetTeleporterPair(entry.Key, first);
         }
     }
 
@@ -120,7 +285,17 @@ public class GridSpawner : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            DestroyImmediate(transform.GetChild(i).gameObject);
+            GameObject tile = transform.GetChild(i).gameObject;
+            LeanTween.cancel(tile);
+
+            if (Application.isPlaying)
+            {
+                Destroy(tile);
+            }
+            else
+            {
+                DestroyImmediate(tile);
+            }
         }
     }
 
@@ -503,7 +678,7 @@ public class GridSpawner : MonoBehaviour
                 if (tile != null && tile.Type == TileType.Mine)
                 {
                     anyMines = true;
-                    SpawnProjectiles(tileObject.transform.position);
+                    SpawnProjectiles(tileObject.transform.position, tile.mineType);
                     tile.SetTileType(TileType.Tile);
                 }
             }
@@ -525,7 +700,7 @@ public class GridSpawner : MonoBehaviour
         // have been created before we start polling for them.
         yield return null;
 
-        while (FindObjectsByType<Projectile>().Length > 0)
+        while (FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length > 0)
         {
             yield return null;
         }
@@ -554,25 +729,70 @@ public class GridSpawner : MonoBehaviour
 
     public bool AllDebrisCleared => DebrisRemaining() == 0;
 
-    private void SpawnProjectiles(Vector3 position)
+    private void SpawnProjectiles(Vector3 position, MineType mineType = MineType.Standard)
     {
         if (projectilePrefab == null)
         {
             Debug.LogWarning("No projectile prefab assigned to GridSpawner.");
             return;
         }
-
-        Vector2[] directions = new Vector2[]
+        Vector2[] directions;
+        switch (mineType)
         {
-            new Vector2(0, 1),
-            new Vector2(1, 1).normalized,
-            new Vector2(1, 0),
-            new Vector2(1, -1).normalized,
-            new Vector2(0, -1),
-            new Vector2(-1, -1).normalized,
-            new Vector2(-1, 0),
-            new Vector2(-1, 1).normalized
-        };
+            case MineType.Cross:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 0),
+                    new Vector2(0, -1),
+                    new Vector2(-1, 0),
+                };
+                break;
+            case MineType.Diagonal:
+                directions = new Vector2[]
+                {
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, -1).normalized,
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Double:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized,
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+            case MineType.Standard:
+            default:
+                directions = new Vector2[]
+                {
+                    new Vector2(0, 1),
+                    new Vector2(1, 1).normalized,
+                    new Vector2(1, 0),
+                    new Vector2(1, -1).normalized,
+                    new Vector2(0, -1),
+                    new Vector2(-1, -1).normalized,
+                    new Vector2(-1, 0),
+                    new Vector2(-1, 1).normalized
+                };
+                break;
+        }
 
         foreach (var dir in directions)
         {
@@ -586,7 +806,6 @@ public class GridSpawner : MonoBehaviour
             p.Init(dir);
         }
     }
-
     private void GenerateSeededSolvableDebris(int targetDebrisCount, int mineBudget)
     {
         UnityEngine.Random.State previousState = UnityEngine.Random.state;

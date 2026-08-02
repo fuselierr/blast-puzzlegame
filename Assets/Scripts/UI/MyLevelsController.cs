@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MyLevelsController : MonoBehaviour
 {
@@ -14,9 +15,42 @@ public class MyLevelsController : MonoBehaviour
     [Header("Data")]
     [SerializeField] private List<CustomLevelData> customLevels = new List<CustomLevelData>();
 
+    [Header("Kebab Menu")]
+    [SerializeField] private KebabMenuController kebabMenuController;
+    [Header("Popups")]
+    [SerializeField] private LevelNamePopupController namePopup;
+
     private void Start()
     {
         PopulateLevels();
+    }
+
+    // Called from a UI Create button. Shows the shared name popup and
+    // creates a new custom level with the entered name, then opens the
+    // LevelEditor scene for editing.
+    public void OpenCreatePopup()
+    {
+        if (namePopup == null)
+        {
+            Debug.LogError("MyLevelsController has no LevelNamePopupController assigned.", this);
+            return;
+        }
+
+        namePopup.Show("New Level", newName =>
+        {
+            if (string.IsNullOrWhiteSpace(newName)) return;
+
+            CustomLevelData level = CustomLevelStorage.BeginCreateNew(newName);
+
+            if (BGPersist.Instance != null)
+            {
+                BGPersist.Instance.AnimateExitThenLoad("LevelEditor");
+            }
+            else
+            {
+                SceneManager.LoadScene("LevelEditor");
+            }
+        });
     }
 
     public void PopulateLevels()
@@ -42,6 +76,10 @@ public class MyLevelsController : MonoBehaviour
                 {
                     continue;
                 }
+
+                // Older level files may not contain their own filename.
+                // Keep it so editing saves back to this exact JSON file.
+                level.fileName = Path.GetFileName(filePath);
 
                 customLevels.Add(level);
                 CreateLevelEntry(level);
@@ -90,7 +128,7 @@ public class MyLevelsController : MonoBehaviour
             MyLevelEntryUI entryUI = entryObject.GetComponent<MyLevelEntryUI>();
             if (entryUI != null)
             {
-                entryUI.Setup(level);
+                entryUI.Setup(level, kebabMenuController);
                 return;
             }
 

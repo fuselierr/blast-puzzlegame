@@ -11,6 +11,12 @@ public enum MainMenuPage
     Settings
 }
 
+public enum CommunityTab
+{
+    MyLevels,
+    Discover
+}
+
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
@@ -18,6 +24,11 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject communityPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject myLevelsPanel;
+    [SerializeField] private GameObject discoverPanel;
+    [SerializeField] private TabController communityTabController;
+    [SerializeField] private int myLevelsTabIndex = 0;
+    [SerializeField] private int discoverTabIndex = 1;
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private GameObject leaderboardPanel;
@@ -25,6 +36,7 @@ public class MainMenu : MonoBehaviour
     private int score;
 
     public static MainMenuPage PageToOpen = MainMenuPage.Main;
+    public static CommunityTab CommunityTabToOpen = CommunityTab.MyLevels;
 
     public void PlayDailyChallenge()
     {
@@ -35,13 +47,13 @@ public class MainMenu : MonoBehaviour
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.IsDailyChallenge = true;
         attemptedDailyChallenge = true;
-        SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void PlayCampaign()
@@ -53,7 +65,7 @@ public class MainMenu : MonoBehaviour
     public void PlayClassic()
     {
         GameManager.SelectedMode = GameMode.Classic;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        LoadSceneWithBackgroundExit("Game");
     }
 
     public void CheckStats()
@@ -88,11 +100,42 @@ public class MainMenu : MonoBehaviour
     {
         mainMenuPanel.SetActive(false);
         communityPanel.SetActive(true);
+        OpenCommunityTab(CommunityTab.MyLevels);
+    }
+
+    public void OpenCommunityTab(CommunityTab tab)
+    {
+        if (communityPanel == null || myLevelsPanel == null || discoverPanel == null)
+        {
+            return;
+        }
+
+        communityPanel.SetActive(true);
+        myLevelsPanel.SetActive(tab == CommunityTab.MyLevels);
+        discoverPanel.SetActive(tab == CommunityTab.Discover);
+
+        if (communityTabController != null)
+        {
+            communityTabController.SelectTab(
+                tab == CommunityTab.MyLevels ? myLevelsTabIndex : discoverTabIndex);
+        }
     }
 
     public void OpenLevelEditor()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelEditor");
+        LoadSceneWithBackgroundExit("LevelEditor");
+    }
+
+    private void LoadSceneWithBackgroundExit(string sceneName)
+    {
+        if (BGPersist.Instance != null)
+        {
+            BGPersist.Instance.AnimateExitThenLoad(sceneName);
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -108,6 +151,7 @@ public class MainMenu : MonoBehaviour
 
             case MainMenuPage.Community:
                 communityPanel.SetActive(true);
+                OpenCommunityTab(CommunityTabToOpen);
                 break;
 
             case MainMenuPage.Stats:
