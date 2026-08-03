@@ -36,7 +36,7 @@ public class GridSpawner : MonoBehaviour
     {
         // Only auto-run in isolation (e.g. testing this scene alone).
         // Normally GameManager -> IGameMode drives grid setup explicitly.
-        if (GameManager.Instance == null)
+        if (tiles == null &&GameManager.Instance == null)
         {
             GenerateGrid();
             GenerateDebris();

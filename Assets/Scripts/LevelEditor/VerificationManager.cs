@@ -107,6 +107,8 @@ public class VerificationManager : MonoBehaviour
 
     private void HandleDetonationResolved(bool debrisCleared)
     {
+        verificationStarted = false;
+
         if (debrisCleared)
         {
             HandleVerificationSuccess();
