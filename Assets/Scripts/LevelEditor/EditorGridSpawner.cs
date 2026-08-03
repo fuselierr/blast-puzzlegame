@@ -108,7 +108,17 @@ public class EditorGridSpawner : MonoBehaviour
                 }
             }
         }
-
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                EditorTile tile = tiles[x, y];
+                if (tile != null)
+                {
+                    tile.transform.SetSiblingIndex(y * width + x);
+                }
+            }
+        }
         ResizeAndCenterContent();
     }
 
