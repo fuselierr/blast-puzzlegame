@@ -718,7 +718,9 @@ public class GridSpawner : MonoBehaviour
             {
                 GameObject tileObject = tiles[x, y];
                 Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
-                if (tile != null && tile.Type == TileType.Debris)
+                if (tile != null &&
+                    (tile.Type == TileType.Debris ||
+                     tile.Type == TileType.StrongDebris))
                 {
                     count++;
                 }
