@@ -13,6 +13,7 @@ public class CampaignMode : GameModeBase
     private int levelIndex;
     private bool waitingForTutorial;
     private bool waitingForAdvance;
+    private bool hasDetonated;
     private BeginnerTutorialStep beginnerTutorialStep;
     private Vector2Int tutorialCenterPosition;
 
@@ -57,6 +58,7 @@ public class CampaignMode : GameModeBase
         manager.NotifyLevelStart(levelIndex + 1, levels.Length);
 
         waitingForAdvance = false;
+        hasDetonated = false;
         beginnerTutorialStep = BeginnerTutorialStep.None;
         waitingForTutorial = !data.interactiveBeginnerTutorial
             && !string.IsNullOrWhiteSpace(data.tutorialMessage);
@@ -91,7 +93,7 @@ public class CampaignMode : GameModeBase
 
     public override void OnDetonate()
     {
-        if (waitingForTutorial || waitingForAdvance)
+        if (waitingForTutorial || waitingForAdvance || hasDetonated)
         {
             return;
         }
@@ -110,6 +112,7 @@ public class CampaignMode : GameModeBase
             manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
         }
 
+        hasDetonated = true;
         timer.PauseTimer();
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
@@ -195,16 +198,9 @@ public class CampaignMode : GameModeBase
 
         if (!debrisCleared)
         {
-            if (GetRemainingMineCount() <= 0)
-            {
-                timer.PauseTimer();
-                manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
-                manager.NotifyGameLost();
-            }
-            else
-            {
-                timer.ResumeTimer();
-            }
+            timer.PauseTimer();
+            manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
+            manager.NotifyGameLost();
             return;
         }
 
@@ -213,14 +209,6 @@ public class CampaignMode : GameModeBase
         waitingForAdvance = true;
         manager.gameStarted = false;
         manager.NotifyLevelCleared(levelIndex + 1, manager.CampaignLevels.Length);
-    }
-
-    private int GetRemainingMineCount()
-    {
-        return Mathf.Max(0, mineInventory.GetCount(MineType.Standard))
-            + Mathf.Max(0, mineInventory.GetCount(MineType.Cross))
-            + Mathf.Max(0, mineInventory.GetCount(MineType.Diagonal))
-            + Mathf.Max(0, mineInventory.GetCount(MineType.Double));
     }
 
     public void AdvanceToNextLevel()

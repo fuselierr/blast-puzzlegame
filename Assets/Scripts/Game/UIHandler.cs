@@ -340,8 +340,8 @@ public class UIHandler : MonoBehaviour
         panelRect.anchorMin = new Vector2(0.5f, 1f);
         panelRect.anchorMax = new Vector2(0.5f, 1f);
         panelRect.pivot = new Vector2(0.5f, 1f);
-        panelRect.anchoredPosition = new Vector2(0f, -190f);
-        panelRect.sizeDelta = new Vector2(650f, 100f);
+        panelRect.anchoredPosition = new Vector2(0f, -280f);
+        panelRect.sizeDelta = new Vector2(900f, 180f);
 
         Image panelImage = panelObject.GetComponent<Image>();
         panelImage.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
@@ -352,14 +352,14 @@ public class UIHandler : MonoBehaviour
         campaignGuidanceText.raycastTarget = false;
         campaignGuidanceText.color = Color.white;
         ConfigurePanelText(campaignGuidanceText);
-        campaignGuidanceText.fontSizeMin = 16f;
-        campaignGuidanceText.fontSizeMax = 30f;
+        campaignGuidanceText.fontSizeMin = 24f;
+        campaignGuidanceText.fontSizeMax = 42f;
 
         RectTransform textRect = campaignGuidanceText.rectTransform;
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
         textRect.anchoredPosition = Vector2.zero;
-        textRect.sizeDelta = new Vector2(-30f, -14f);
+        textRect.sizeDelta = new Vector2(-50f, -24f);
         textRect.localScale = Vector3.one;
 
         campaignGuidancePanel = panelObject;
@@ -407,7 +407,8 @@ public class UIHandler : MonoBehaviour
 
         if (campaignGuidanceText != null)
         {
-            campaignGuidanceText.text = message;
+            campaignGuidanceText.text =
+                $"<color=#70C46B><b>TUTORIAL</b></color>\n{message}";
         }
         campaignGuidancePanel?.SetActive(true);
         SetDetonateHighlight(highlightDetonate);
@@ -593,7 +594,7 @@ public class UIHandler : MonoBehaviour
             }
             else if (GameManager.SelectedMode == GameMode.Campaign)
             {
-                gameOverMessageText.text = "Out of mines!\nRetry Level";
+                gameOverMessageText.text = "Debris remains!\nRetry Level";
             }
             else
             {
