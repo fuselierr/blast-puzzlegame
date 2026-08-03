@@ -30,7 +30,7 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private TMP_Text gameWonFinalScore;
     [SerializeField] private float gameOverDelay = 1f;
 
-    [Header("Classic Level Clear")]
+    [Header("Level Messages")]
     [SerializeField] private GameObject levelClearPanel;
     [SerializeField] private TMP_Text levelClearMessageText;
     [SerializeField] private TMP_Text levelClearScoreText;
@@ -38,7 +38,7 @@ public class UIHandler : MonoBehaviour
 
     [SerializeField] private Button advanceButton;
 
-
+    private bool showingCampaignTutorial;
 
     private void OnEnable()
     {
@@ -49,6 +49,7 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameWon += HandleGameWon;
             GameManager.Instance.OnGameLost += HandleGameLost;
             GameManager.Instance.OnSelectedMineChange += HandleSelectedMineChange;
+            GameManager.Instance.OnCampaignTutorial += HandleCampaignTutorial;
 
             standardMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
             crossMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
@@ -68,6 +69,7 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameWon -= HandleGameWon;
             GameManager.Instance.OnGameLost -= HandleGameLost;
             GameManager.Instance.OnSelectedMineChange -= HandleSelectedMineChange;
+            GameManager.Instance.OnCampaignTutorial -= HandleCampaignTutorial;
 
             standardMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
             crossMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
@@ -88,7 +90,7 @@ public class UIHandler : MonoBehaviour
             gameWonPanel.SetActive(false);
         }
 
-        if (levelClearPanel != null)
+        if (levelClearPanel != null && !showingCampaignTutorial)
         {
             levelClearPanel.SetActive(false);
         }
@@ -97,16 +99,6 @@ public class UIHandler : MonoBehaviour
         ConfigurePanelText(gameOverMessageText);
         ConfigurePanelText(gameWonScoreCalc);
         ConfigurePanelText(gameWonFinalScore);
-        if (advanceButton != null)
-        {
-            advanceButton.onClick.RemoveListener(
-                AdvanceClassicLevel
-            );
-
-            advanceButton.onClick.AddListener(
-                AdvanceClassicLevel
-            );
-        }
     }
     private void Update()
     {
@@ -232,13 +224,44 @@ public class UIHandler : MonoBehaviour
 
     public void AdvanceClassicLevel()
     {
-        Debug.Log("Advance button clicked successfully");
         if (levelClearPanel != null)
         {
             levelClearPanel.SetActive(false);
         }
 
+        if (showingCampaignTutorial)
+        {
+            showingCampaignTutorial = false;
+            GameManager.Instance?.DismissCampaignTutorial();
+            return;
+        }
+
         GameManager.Instance?.AdvanceClassicLevel();
+    }
+
+    private void HandleCampaignTutorial(string title, string message)
+    {
+        showingCampaignTutorial = true;
+
+        if (levelClearMessageText != null)
+        {
+            levelClearMessageText.text = title;
+        }
+
+        if (levelClearScoreText != null)
+        {
+            levelClearScoreText.text = message;
+        }
+
+        if (advanceButtonText != null)
+        {
+            advanceButtonText.text = "Start Level";
+        }
+
+        if (levelClearPanel != null)
+        {
+            levelClearPanel.SetActive(true);
+        }
     }
 
     private async void HandleGameWon()

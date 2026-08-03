@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_09
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: 
+  levelName: Choose Your Blast
   width: 7
   height: 7
+  tutorialMessage: Choose mine types based on the paths that are open. Walls can make one blast pattern more useful than another.
   layout: 'x-----x
 
     --x-x--

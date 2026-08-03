@@ -9,6 +9,9 @@ public class CampaignLevelData : ScriptableObject
     public int width = 8;
     public int height = 8;
 
+    [TextArea(3, 8)]
+    public string tutorialMessage;
+
     public string layout;
 
     private static readonly Dictionary<char, TileType> tiletype_decoder = new Dictionary<char, TileType>()

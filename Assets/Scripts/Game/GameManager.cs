@@ -54,7 +54,8 @@ public class GameManager : MonoBehaviour
     public event Action OnGameWon;
     public event Action OnGameLost;
     public event Action<bool> OnDetonateComplete; // debrisCleared
-    public event Action<MineType> OnSelectedMineChange; 
+    public event Action<MineType> OnSelectedMineChange;
+    public event Action<string, string> OnCampaignTutorial; // title, message
 
     private void Awake()
     {
@@ -137,6 +138,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void DismissCampaignTutorial()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.DismissTutorial();
+        }
+    }
+
 
     // --- Called by mode implementations to report state changes ---
 
@@ -165,5 +174,10 @@ public class GameManager : MonoBehaviour
     public void NotifyDetonateComplete(bool debrisCleared)
     {
         OnDetonateComplete?.Invoke(debrisCleared);
+    }
+
+    public void NotifyCampaignTutorial(string title, string message)
+    {
+        OnCampaignTutorial?.Invoke(title, message);
     }
 }

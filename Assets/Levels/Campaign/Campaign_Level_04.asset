@@ -15,6 +15,7 @@ MonoBehaviour:
   levelName: Split Decision
   width: 7
   height: 7
+  tutorialMessage: You can place several mines before detonating. Look for positions that cover different rows, columns, and diagonals.
   layout: 'x-----x
 
     --x-x--

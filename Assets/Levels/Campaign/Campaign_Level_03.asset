@@ -15,6 +15,7 @@ MonoBehaviour:
   levelName: Second Wave
   width: 7
   height: 7
+  tutorialMessage: A projectile destroys only the first debris it reaches. Debris behind it needs another blast.
   layout: '---x---
 
     ---x---

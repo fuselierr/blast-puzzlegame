@@ -15,6 +15,7 @@ MonoBehaviour:
   levelName: Eight Directions
   width: 7
   height: 7
+  tutorialMessage: Mine blasts travel horizontally, vertically, and diagonally. Line up one mine with every piece of debris.
   layout: 'x--x--x
 
     -------

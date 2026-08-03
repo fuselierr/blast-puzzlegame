@@ -5,6 +5,7 @@ using UnityEngine;
 public class CampaignMode : GameModeBase
 {
     private int levelIndex;
+    private bool waitingForTutorial;
 
     public override void Initialize(GameManager manager)
     {
@@ -43,11 +44,30 @@ public class CampaignMode : GameModeBase
         timer.PauseTimer(); // no timer in campaign
 
         manager.NotifyLevelStart(levelIndex + 1, levels.Length);
+
+        waitingForTutorial = !string.IsNullOrWhiteSpace(data.tutorialMessage);
+        if (waitingForTutorial)
+        {
+            string tutorialTitle = string.IsNullOrWhiteSpace(data.levelName)
+                ? $"Level {levelIndex + 1}"
+                : data.levelName;
+            manager.NotifyCampaignTutorial(tutorialTitle, data.tutorialMessage);
+        }
     }
 
     public override void OnDetonate()
     {
+        if (waitingForTutorial)
+        {
+            return;
+        }
+
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
+    }
+
+    public void DismissTutorial()
+    {
+        waitingForTutorial = false;
     }
 
     public override int calculateScore()
@@ -92,6 +112,6 @@ public class CampaignMode : GameModeBase
         }
     }
 
-    public override bool TryPlaceMine(MineType mineType = MineType.Standard) => true; // infinite, nothing to track
+    public override bool TryPlaceMine(MineType mineType = MineType.Standard) => !waitingForTutorial;
     public override void ReturnMine(MineType mineType = MineType.Standard) { }
 }

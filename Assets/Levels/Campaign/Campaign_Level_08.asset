@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_08
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: 
+  levelName: Mine Training
   width: 7
   height: 7
+  tutorialMessage: Use the mine selector to change blast patterns. Cross mines fire straight; diagonal mines fire diagonally; double mines fire twice.
   layout: 'x-----x
 
     --x-x--

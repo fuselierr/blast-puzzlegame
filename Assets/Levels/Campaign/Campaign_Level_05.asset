@@ -15,6 +15,7 @@ MonoBehaviour:
   levelName: Crossfire
   width: 7
   height: 7
+  tutorialMessage: Combine what you learned. Plan multiple blast lines before pressing DETONATE.
   layout: 'x--x--x
 
     -x---x-

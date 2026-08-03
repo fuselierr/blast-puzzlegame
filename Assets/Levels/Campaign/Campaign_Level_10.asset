@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_10
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: 
+  levelName: Final Challenge
   width: 7
   height: 7
+  tutorialMessage: 'Final challenge: combine mine types, work around walls, and clear every regular and strong debris tile.'
   layout: 'x-----x
 
     --x-x--
