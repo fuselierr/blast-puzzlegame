@@ -731,6 +731,17 @@ public class GridSpawner : MonoBehaviour
 
     public bool AllDebrisCleared => DebrisRemaining() == 0;
 
+    public void SetTutorialHighlight(Vector2Int position, bool highlighted)
+    {
+        if (tiles == null || !IsInsideGrid(position))
+        {
+            return;
+        }
+
+        Tile tile = GetTile(position);
+        tile?.SetTutorialHighlight(highlighted);
+    }
+
     private void SpawnProjectiles(Vector3 position, MineType mineType = MineType.Standard)
     {
         if (projectilePrefab == null)

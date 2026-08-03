@@ -3,9 +3,18 @@ using UnityEngine;
 // Many hand-placed levels (ScriptableObjects), played in order.
 public class CampaignMode : GameModeBase
 {
+    private enum BeginnerTutorialStep
+    {
+        None,
+        PlaceCenterMine,
+        Detonate
+    }
+
     private int levelIndex;
     private bool waitingForTutorial;
     private bool waitingForAdvance;
+    private BeginnerTutorialStep beginnerTutorialStep;
+    private Vector2Int tutorialCenterPosition;
 
     public override void Initialize(GameManager manager)
     {
@@ -40,6 +49,7 @@ public class CampaignMode : GameModeBase
 
         gridSpawner.LoadLevel(data);
         ConfigureMineInventory(data);
+        SelectFirstAvailableMine(data);
 
         timer.Configure(0f, countDown: false);
         timer.PauseTimer();
@@ -47,7 +57,25 @@ public class CampaignMode : GameModeBase
         manager.NotifyLevelStart(levelIndex + 1, levels.Length);
 
         waitingForAdvance = false;
-        waitingForTutorial = !string.IsNullOrWhiteSpace(data.tutorialMessage);
+        beginnerTutorialStep = BeginnerTutorialStep.None;
+        waitingForTutorial = !data.interactiveBeginnerTutorial
+            && !string.IsNullOrWhiteSpace(data.tutorialMessage);
+
+        if (data.interactiveBeginnerTutorial)
+        {
+            tutorialCenterPosition = new Vector2Int(data.width / 2, data.height / 2);
+            beginnerTutorialStep = BeginnerTutorialStep.PlaceCenterMine;
+            gridSpawner.SetTutorialHighlight(tutorialCenterPosition, true);
+            manager.NotifyCampaignGuidance(
+                "Step 1: Tap the highlighted center tile to place your Standard mine.",
+                highlightDetonate: false);
+            timer.ResumeTimer();
+        }
+        else
+        {
+            manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
+        }
+
         if (waitingForTutorial)
         {
             string tutorialTitle = string.IsNullOrWhiteSpace(data.levelName)
@@ -68,6 +96,20 @@ public class CampaignMode : GameModeBase
             return;
         }
 
+        if (beginnerTutorialStep == BeginnerTutorialStep.PlaceCenterMine)
+        {
+            manager.NotifyCampaignGuidance(
+                "Place the Standard mine on the highlighted center tile first.",
+                highlightDetonate: false);
+            return;
+        }
+
+        if (beginnerTutorialStep == BeginnerTutorialStep.Detonate)
+        {
+            beginnerTutorialStep = BeginnerTutorialStep.None;
+            manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
+        }
+
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
@@ -86,6 +128,61 @@ public class CampaignMode : GameModeBase
         mineInventory.SetMineCount(MineType.Double, data.doubleMines);
     }
 
+    private void SelectFirstAvailableMine(CampaignLevelData data)
+    {
+        if (data.standardMines > 0)
+        {
+            manager.SelectedMineType = MineType.Standard;
+        }
+        else if (data.crossMines > 0)
+        {
+            manager.SelectedMineType = MineType.Cross;
+        }
+        else if (data.diagonalMines > 0)
+        {
+            manager.SelectedMineType = MineType.Diagonal;
+        }
+        else if (data.doubleMines > 0)
+        {
+            manager.SelectedMineType = MineType.Double;
+        }
+    }
+
+    public void HandleMinePlaced(Vector2Int position, MineType mineType)
+    {
+        if (beginnerTutorialStep != BeginnerTutorialStep.PlaceCenterMine)
+        {
+            return;
+        }
+
+        if (position != tutorialCenterPosition || mineType != MineType.Standard)
+        {
+            manager.NotifyCampaignGuidance(
+                "Tap that mine again to pick it up, then place the Standard mine on the highlighted center tile.",
+                highlightDetonate: false);
+            return;
+        }
+
+        gridSpawner.SetTutorialHighlight(tutorialCenterPosition, false);
+        beginnerTutorialStep = BeginnerTutorialStep.Detonate;
+        manager.NotifyCampaignGuidance(
+            "Step 2: Great! Now press the highlighted DETONATE button.",
+            highlightDetonate: true);
+    }
+
+    public void HandleMineReturned(Vector2Int position, MineType mineType)
+    {
+        if (beginnerTutorialStep == BeginnerTutorialStep.Detonate
+            && position == tutorialCenterPosition)
+        {
+            beginnerTutorialStep = BeginnerTutorialStep.PlaceCenterMine;
+            gridSpawner.SetTutorialHighlight(tutorialCenterPosition, true);
+            manager.NotifyCampaignGuidance(
+                "Step 1: Tap the highlighted center tile to place your Standard mine.",
+                highlightDetonate: false);
+        }
+    }
+
     public override int calculateScore()
     {
         return 0;
@@ -97,6 +194,12 @@ public class CampaignMode : GameModeBase
 
         if (!debrisCleared)
         {
+            if (GetRemainingMineCount() <= 0)
+            {
+                timer.PauseTimer();
+                manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
+                manager.NotifyGameLost();
+            }
             return;
         }
 
@@ -105,6 +208,14 @@ public class CampaignMode : GameModeBase
         waitingForAdvance = true;
         manager.gameStarted = false;
         manager.NotifyLevelCleared(levelIndex + 1, manager.CampaignLevels.Length);
+    }
+
+    private int GetRemainingMineCount()
+    {
+        return Mathf.Max(0, mineInventory.GetCount(MineType.Standard))
+            + Mathf.Max(0, mineInventory.GetCount(MineType.Cross))
+            + Mathf.Max(0, mineInventory.GetCount(MineType.Diagonal))
+            + Mathf.Max(0, mineInventory.GetCount(MineType.Double));
     }
 
     public void AdvanceToNextLevel()

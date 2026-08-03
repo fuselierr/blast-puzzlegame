@@ -42,10 +42,28 @@ public class UIHandler : MonoBehaviour
     private Button campaignMainMenuButton;
     private Vector2 advanceButtonOriginalPosition;
     private Vector2 advanceButtonOriginalSize;
+    private GameObject campaignGuidancePanel;
+    private TMP_Text campaignGuidanceText;
+    private Button detonateButton;
+    private Color detonateButtonOriginalColor = Color.white;
 
     private void Awake()
     {
         CreateCampaignMainMenuButton();
+        CreateCampaignGuidancePanel();
+
+        GameObject detonateObject = GameObject.Find("DetonatorButton");
+        if (detonateObject != null)
+        {
+            detonateButton = detonateObject.GetComponent<Button>();
+            Image detonateImage = detonateButton != null
+                ? detonateButton.GetComponent<Image>()
+                : null;
+            if (detonateImage != null)
+            {
+                detonateButtonOriginalColor = detonateImage.color;
+            }
+        }
     }
 
     private void OnEnable()
@@ -58,6 +76,7 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameLost += HandleGameLost;
             GameManager.Instance.OnSelectedMineChange += HandleSelectedMineChange;
             GameManager.Instance.OnCampaignTutorial += HandleCampaignTutorial;
+            GameManager.Instance.OnCampaignGuidance += HandleCampaignGuidance;
 
             standardMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
             crossMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
@@ -78,6 +97,7 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameLost -= HandleGameLost;
             GameManager.Instance.OnSelectedMineChange -= HandleSelectedMineChange;
             GameManager.Instance.OnCampaignTutorial -= HandleCampaignTutorial;
+            GameManager.Instance.OnCampaignGuidance -= HandleCampaignGuidance;
 
             standardMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
             crossMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
@@ -133,6 +153,7 @@ public class UIHandler : MonoBehaviour
 
     public void RestartGame()
     {
+        HideCampaignGuidance();
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -197,6 +218,7 @@ public class UIHandler : MonoBehaviour
     private void HandleLevelCleared(int levelNumber, int totalLevels)
     {
         showingCampaignTutorial = false;
+        HideCampaignGuidance();
 
         if (levelText != null)
         {
@@ -274,6 +296,7 @@ public class UIHandler : MonoBehaviour
     private void HandleCampaignTutorial(string title, string message)
     {
         showingCampaignTutorial = true;
+        HideCampaignGuidance();
         SetCampaignClearButtons(false);
 
         if (levelClearMessageText != null)
@@ -294,6 +317,86 @@ public class UIHandler : MonoBehaviour
         if (levelClearPanel != null)
         {
             levelClearPanel.SetActive(true);
+        }
+    }
+
+    private void CreateCampaignGuidancePanel()
+    {
+        if (levelClearPanel == null || levelClearScoreText == null)
+        {
+            return;
+        }
+
+        Transform canvasTransform = levelClearPanel.transform.parent;
+        GameObject panelObject = new GameObject(
+            "CampaignGuidancePanel",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image));
+        panelObject.transform.SetParent(canvasTransform, false);
+
+        RectTransform panelRect = panelObject.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.5f, 1f);
+        panelRect.anchorMax = new Vector2(0.5f, 1f);
+        panelRect.pivot = new Vector2(0.5f, 1f);
+        panelRect.anchoredPosition = new Vector2(0f, -115f);
+        panelRect.sizeDelta = new Vector2(680f, 90f);
+
+        Image panelImage = panelObject.GetComponent<Image>();
+        panelImage.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
+        panelImage.raycastTarget = false;
+
+        campaignGuidanceText = Instantiate(levelClearScoreText, panelObject.transform);
+        campaignGuidanceText.name = "CampaignGuidanceText";
+        campaignGuidanceText.raycastTarget = false;
+        campaignGuidanceText.color = Color.white;
+        ConfigurePanelText(campaignGuidanceText);
+        campaignGuidanceText.fontSizeMin = 16f;
+        campaignGuidanceText.fontSizeMax = 30f;
+
+        RectTransform textRect = campaignGuidanceText.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.anchoredPosition = Vector2.zero;
+        textRect.sizeDelta = new Vector2(-30f, -14f);
+        textRect.localScale = Vector3.one;
+
+        campaignGuidancePanel = panelObject;
+        campaignGuidancePanel.SetActive(false);
+    }
+
+    private void HandleCampaignGuidance(string message, bool highlightDetonate)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            HideCampaignGuidance();
+            return;
+        }
+
+        if (campaignGuidanceText != null)
+        {
+            campaignGuidanceText.text = message;
+        }
+        campaignGuidancePanel?.SetActive(true);
+        SetDetonateHighlight(highlightDetonate);
+    }
+
+    private void HideCampaignGuidance()
+    {
+        campaignGuidancePanel?.SetActive(false);
+        SetDetonateHighlight(false);
+    }
+
+    private void SetDetonateHighlight(bool highlighted)
+    {
+        Image detonateImage = detonateButton != null
+            ? detonateButton.GetComponent<Image>()
+            : null;
+        if (detonateImage != null)
+        {
+            detonateImage.color = highlighted
+                ? new Color(1f, 0.82f, 0.2f, 1f)
+                : detonateButtonOriginalColor;
         }
     }
 
@@ -382,6 +485,7 @@ public class UIHandler : MonoBehaviour
 
     private async void HandleGameWon()
     {
+        HideCampaignGuidance();
         if (levelClearPanel != null)
         {
             levelClearPanel.SetActive(false);
@@ -448,11 +552,16 @@ public class UIHandler : MonoBehaviour
 
     private void HandleGameLost()
     {
+        HideCampaignGuidance();
         if (gameOverMessageText != null)
         {
             if (GameManager.SelectedMode == GameMode.Classic)
             {
                 gameOverMessageText.text = "Stage Failed!\nRestart Level";
+            }
+            else if (GameManager.SelectedMode == GameMode.Campaign)
+            {
+                gameOverMessageText.text = "Out of mines!\nRetry Level";
             }
             else
             {

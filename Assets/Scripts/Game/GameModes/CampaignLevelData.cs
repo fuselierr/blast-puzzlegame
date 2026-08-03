@@ -11,6 +11,7 @@ public class CampaignLevelData : ScriptableObject
 
     [TextArea(3, 8)]
     public string tutorialMessage;
+    public bool interactiveBeginnerTutorial;
 
     [Header("Mine Limits")]
     [Min(0)] public int standardMines;

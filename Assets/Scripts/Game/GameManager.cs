@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
     public event Action<bool> OnDetonateComplete; // debrisCleared
     public event Action<MineType> OnSelectedMineChange;
     public event Action<string, string> OnCampaignTutorial; // title, message
+    public event Action<string, bool> OnCampaignGuidance; // message, highlight detonate
 
     private void Awake()
     {
@@ -154,6 +155,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void NotifyMinePlaced(Vector2Int position, MineType mineType)
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.HandleMinePlaced(position, mineType);
+        }
+    }
+
+    public void NotifyMineReturned(Vector2Int position, MineType mineType)
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.HandleMineReturned(position, mineType);
+        }
+    }
+
 
     // --- Called by mode implementations to report state changes ---
 
@@ -187,5 +204,10 @@ public class GameManager : MonoBehaviour
     public void NotifyCampaignTutorial(string title, string message)
     {
         OnCampaignTutorial?.Invoke(title, message);
+    }
+
+    public void NotifyCampaignGuidance(string message, bool highlightDetonate)
+    {
+        OnCampaignGuidance?.Invoke(message, highlightDetonate);
     }
 }
