@@ -39,6 +39,14 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private Button advanceButton;
 
     private bool showingCampaignTutorial;
+    private Button campaignMainMenuButton;
+    private Vector2 advanceButtonOriginalPosition;
+    private Vector2 advanceButtonOriginalSize;
+
+    private void Awake()
+    {
+        CreateCampaignMainMenuButton();
+    }
 
     private void OnEnable()
     {
@@ -125,7 +133,6 @@ public class UIHandler : MonoBehaviour
 
     public void RestartGame()
     {
-        GameManager.Instance?.ResetGame();
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -138,11 +145,14 @@ public class UIHandler : MonoBehaviour
         {
             levelClearPanel.SetActive(false);
         }
+
+        GameManager.Instance?.ResetGame();
     }
 
     public void ReturnToMainMenu()
     {
         bool wasClassicLevel = GameManager.SelectedMode == GameMode.Classic;
+        bool wasCampaignLevel = GameManager.SelectedMode == GameMode.Campaign;
 
         if (GameManager.Instance != null)
         {
@@ -161,7 +171,9 @@ public class UIHandler : MonoBehaviour
             ? MainMenuPage.Community
             : wasClassicLevel
                 ? MainMenuPage.Classic
-            : MainMenuPage.Main;
+            : wasCampaignLevel
+                ? MainMenuPage.Campaign
+                : MainMenuPage.Main;
 
         if (BGPersist.Instance != null)
         {
@@ -184,6 +196,8 @@ public class UIHandler : MonoBehaviour
 
     private void HandleLevelCleared(int levelNumber, int totalLevels)
     {
+        showingCampaignTutorial = false;
+
         if (levelText != null)
         {
             levelText.text = $"Level {levelNumber} Clear!";
@@ -197,8 +211,15 @@ public class UIHandler : MonoBehaviour
 
         if (levelClearScoreText != null)
         {
-            int score = GameManager.Instance.CalculateScore();
-            levelClearScoreText.text = $"Current Score: {score}";
+            if (GameManager.SelectedMode == GameMode.Campaign)
+            {
+                levelClearScoreText.text = $"Time: {timer.GetFormattedTime()}";
+            }
+            else
+            {
+                int score = GameManager.Instance.CalculateScore();
+                levelClearScoreText.text = $"Current Score: {score}";
+            }
         }
 
         if (advanceButtonText != null)
@@ -220,10 +241,14 @@ public class UIHandler : MonoBehaviour
         {
             levelClearPanel.SetActive(true);
         }
+
+        SetCampaignClearButtons(GameManager.SelectedMode == GameMode.Campaign);
     }
 
     public void AdvanceClassicLevel()
     {
+        // The scene's shared advance button already points to this legacy
+        // method name, so route both Classic and Campaign from here.
         if (levelClearPanel != null)
         {
             levelClearPanel.SetActive(false);
@@ -236,12 +261,20 @@ public class UIHandler : MonoBehaviour
             return;
         }
 
-        GameManager.Instance?.AdvanceClassicLevel();
+        if (GameManager.SelectedMode == GameMode.Campaign)
+        {
+            GameManager.Instance?.AdvanceCampaignLevel();
+        }
+        else
+        {
+            GameManager.Instance?.AdvanceClassicLevel();
+        }
     }
 
     private void HandleCampaignTutorial(string title, string message)
     {
         showingCampaignTutorial = true;
+        SetCampaignClearButtons(false);
 
         if (levelClearMessageText != null)
         {
@@ -264,6 +297,89 @@ public class UIHandler : MonoBehaviour
         }
     }
 
+    private void CreateCampaignMainMenuButton()
+    {
+        if (advanceButton == null || advanceButtonText == null)
+        {
+            return;
+        }
+
+        RectTransform advanceRect = advanceButton.GetComponent<RectTransform>();
+        advanceButtonOriginalPosition = advanceRect.anchoredPosition;
+        advanceButtonOriginalSize = advanceRect.sizeDelta;
+
+        GameObject buttonObject = new GameObject(
+            "CampaignMainMenuButton",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image),
+            typeof(Button));
+        buttonObject.transform.SetParent(advanceButton.transform.parent, false);
+
+        RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+        buttonRect.anchorMin = advanceRect.anchorMin;
+        buttonRect.anchorMax = advanceRect.anchorMax;
+        buttonRect.pivot = advanceRect.pivot;
+        buttonRect.anchoredPosition = advanceButtonOriginalPosition;
+        buttonRect.sizeDelta = advanceButtonOriginalSize;
+
+        Image sourceImage = advanceButton.GetComponent<Image>();
+        Image buttonImage = buttonObject.GetComponent<Image>();
+        if (sourceImage != null)
+        {
+            buttonImage.sprite = sourceImage.sprite;
+            buttonImage.color = sourceImage.color;
+            buttonImage.material = sourceImage.material;
+            buttonImage.type = sourceImage.type;
+        }
+
+        campaignMainMenuButton = buttonObject.GetComponent<Button>();
+        campaignMainMenuButton.targetGraphic = buttonImage;
+        campaignMainMenuButton.transition = advanceButton.transition;
+        campaignMainMenuButton.colors = advanceButton.colors;
+        campaignMainMenuButton.onClick.AddListener(ReturnToMainMenu);
+
+        TMP_Text buttonText = Instantiate(advanceButtonText, buttonObject.transform);
+        buttonText.name = "CampaignMainMenuButtonText";
+        buttonText.text = "Main Menu";
+        buttonText.raycastTarget = false;
+
+        RectTransform textRect = buttonText.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.anchoredPosition = Vector2.zero;
+        textRect.sizeDelta = Vector2.zero;
+
+        campaignMainMenuButton.gameObject.SetActive(false);
+    }
+
+    private void SetCampaignClearButtons(bool showMainMenuButton)
+    {
+        if (advanceButton == null)
+        {
+            return;
+        }
+
+        RectTransform advanceRect = advanceButton.GetComponent<RectTransform>();
+        if (campaignMainMenuButton == null || !showMainMenuButton)
+        {
+            advanceRect.anchoredPosition = advanceButtonOriginalPosition;
+            advanceRect.sizeDelta = advanceButtonOriginalSize;
+            campaignMainMenuButton?.gameObject.SetActive(false);
+            return;
+        }
+
+        const float horizontalOffset = 180f;
+        Vector2 splitSize = new Vector2(330f, advanceButtonOriginalSize.y);
+        advanceRect.anchoredPosition = advanceButtonOriginalPosition + Vector2.right * horizontalOffset;
+        advanceRect.sizeDelta = splitSize;
+
+        RectTransform menuRect = campaignMainMenuButton.GetComponent<RectTransform>();
+        menuRect.anchoredPosition = advanceButtonOriginalPosition + Vector2.left * horizontalOffset;
+        menuRect.sizeDelta = splitSize;
+        campaignMainMenuButton.gameObject.SetActive(true);
+    }
+
     private async void HandleGameWon()
     {
         if (levelClearPanel != null)
@@ -277,6 +393,10 @@ public class UIHandler : MonoBehaviour
             {
                 gameWonScoreCalc.text = "remaining time: 100 points per second\n" + "unused mines: 200 points each";
             }
+            else if (GameManager.SelectedMode == GameMode.Campaign)
+            {
+                gameWonScoreCalc.text = "Campaign complete!";
+            }
             else
             {
                 gameWonScoreCalc.text = $"mines remaining: {inventory.GetCount(MineType.Standard)} * 200\ntime: {timer.GetFormattedTime()} * -1";
@@ -284,11 +404,20 @@ public class UIHandler : MonoBehaviour
         }
         if (gameWonFinalScore != null)
         {
-            int finalScore = GameManager.Instance.CalculateScore();
-            gameWonFinalScore.text = $"score: {finalScore}";
+            if (GameManager.SelectedMode == GameMode.Campaign)
+            {
+                gameWonFinalScore.text = "All campaign levels cleared";
+            }
+            else
+            {
+                int finalScore = GameManager.Instance.CalculateScore();
+                gameWonFinalScore.text = $"score: {finalScore}";
+            }
+
             // update playerdata
             if (GameManager.SelectedMode == GameMode.Freeplay && GameManager.IsDailyChallenge)
             {
+                int finalScore = GameManager.Instance.CalculateScore();
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance

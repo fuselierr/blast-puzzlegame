@@ -138,6 +138,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AdvanceCampaignLevel()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.AdvanceToNextLevel();
+        }
+    }
+
     public void DismissCampaignTutorial()
     {
         if (currentMode is CampaignMode campaignMode)

@@ -5,8 +5,8 @@ public class MineInventory : MonoBehaviour
 {
     public Dictionary<MineType, int> mines = new Dictionary<MineType, int>();
 
-    // Campaign mode sets this true so UseMine always succeeds and the UI
-    // can show "∞" instead of a number.
+    // Modes can set this true so UseMine always succeeds and the UI can
+    // show "∞" instead of a number.
     public bool Infinite { get; set; } = false;
 
     void Awake()

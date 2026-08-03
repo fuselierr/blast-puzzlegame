@@ -5,6 +5,7 @@ public class CampaignMode : GameModeBase
 {
     private int levelIndex;
     private bool waitingForTutorial;
+    private bool waitingForAdvance;
 
     public override void Initialize(GameManager manager)
     {
@@ -41,10 +42,11 @@ public class CampaignMode : GameModeBase
         ConfigureMineInventory(data);
 
         timer.Configure(0f, countDown: false);
-        timer.PauseTimer(); // no timer in campaign
+        timer.PauseTimer();
 
         manager.NotifyLevelStart(levelIndex + 1, levels.Length);
 
+        waitingForAdvance = false;
         waitingForTutorial = !string.IsNullOrWhiteSpace(data.tutorialMessage);
         if (waitingForTutorial)
         {
@@ -53,11 +55,15 @@ public class CampaignMode : GameModeBase
                 : data.levelName;
             manager.NotifyCampaignTutorial(tutorialTitle, data.tutorialMessage);
         }
+        else
+        {
+            timer.ResumeTimer();
+        }
     }
 
     public override void OnDetonate()
     {
-        if (waitingForTutorial)
+        if (waitingForTutorial || waitingForAdvance)
         {
             return;
         }
@@ -68,6 +74,7 @@ public class CampaignMode : GameModeBase
     public void DismissTutorial()
     {
         waitingForTutorial = false;
+        timer.ResumeTimer();
     }
 
     private void ConfigureMineInventory(CampaignLevelData data)
@@ -93,20 +100,34 @@ public class CampaignMode : GameModeBase
             return;
         }
 
-        MarkLevelCompleted(levelIndex);
+        timer.PauseTimer();
+        MarkLevelCompleted(levelIndex, timer.TimeValue);
+        waitingForAdvance = true;
+        manager.gameStarted = false;
+        manager.NotifyLevelCleared(levelIndex + 1, manager.CampaignLevels.Length);
+    }
 
+    public void AdvanceToNextLevel()
+    {
+        if (!waitingForAdvance)
+        {
+            return;
+        }
+
+        waitingForAdvance = false;
         levelIndex++;
+
         if (levelIndex >= manager.CampaignLevels.Length)
         {
             manager.NotifyGameWon();
+            return;
         }
-        else
-        {
-            BeginLevel();
-        }
+
+        manager.gameStarted = true;
+        BeginLevel();
     }
 
-    private void MarkLevelCompleted(int completedLevelIndex)
+    private void MarkLevelCompleted(int completedLevelIndex, float elapsedSeconds)
     {
         if (SaveManager.Instance == null || SaveManager.Instance.CurrentData == null)
         {
@@ -114,16 +135,50 @@ public class CampaignMode : GameModeBase
         }
 
         PlayerData data = SaveManager.Instance.CurrentData;
+        bool saveChanged = false;
+
+        if (data.completedCampaignLevels == null)
+        {
+            data.completedCampaignLevels = new System.Collections.Generic.List<int>();
+        }
+
         if (!data.completedCampaignLevels.Contains(completedLevelIndex))
         {
             data.completedCampaignLevels.Add(completedLevelIndex);
+            saveChanged = true;
+        }
+
+        if (data.campaignLevelResults == null)
+        {
+            data.campaignLevelResults = new System.Collections.Generic.List<CampaignLevelResult>();
+        }
+
+        CampaignLevelResult result = data.campaignLevelResults.Find(
+            item => item.levelIndex == completedLevelIndex);
+
+        if (result == null)
+        {
+            data.campaignLevelResults.Add(
+                new CampaignLevelResult(completedLevelIndex, elapsedSeconds));
+            saveChanged = true;
+        }
+        else if (elapsedSeconds < result.bestTimeSeconds)
+        {
+            result.bestTimeSeconds = elapsedSeconds;
+            saveChanged = true;
+        }
+
+        if (saveChanged)
+        {
             SaveManager.Instance.SaveData();
         }
     }
 
     public override bool TryPlaceMine(MineType mineType = MineType.Standard)
     {
-        return !waitingForTutorial && base.TryPlaceMine(mineType);
+        return !waitingForTutorial
+            && !waitingForAdvance
+            && base.TryPlaceMine(mineType);
     }
 
     public override void ReturnMine(MineType mineType = MineType.Standard)
