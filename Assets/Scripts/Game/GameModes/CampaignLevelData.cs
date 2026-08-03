@@ -12,6 +12,12 @@ public class CampaignLevelData : ScriptableObject
     [TextArea(3, 8)]
     public string tutorialMessage;
 
+    [Header("Mine Limits")]
+    [Min(0)] public int standardMines;
+    [Min(0)] public int crossMines;
+    [Min(0)] public int diagonalMines;
+    [Min(0)] public int doubleMines;
+
     public string layout;
 
     private static readonly Dictionary<char, TileType> tiletype_decoder = new Dictionary<char, TileType>()

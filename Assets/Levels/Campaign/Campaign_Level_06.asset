@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 5
   height: 5
   tutorialMessage: Walls block projectiles and cannot be destroyed. Place mines so their shots approach debris from an open direction.
+  standardMines: 4
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: '--x--
 
     --w--

@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 5
   height: 5
   tutorialMessage: Tap an empty tile to place a mine. Tap it again to pick it up. A standard mine fires in all 8 directions. Place one in the center, then press DETONATE.
+  standardMines: 1
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: '--x--
 
     -----

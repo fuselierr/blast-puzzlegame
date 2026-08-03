@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: Choose mine types based on the paths that are open. Walls can make one blast pattern more useful than another.
+  standardMines: 2
+  crossMines: 2
+  diagonalMines: 2
+  doubleMines: 2
   layout: 'x-----x
 
     --x-x--

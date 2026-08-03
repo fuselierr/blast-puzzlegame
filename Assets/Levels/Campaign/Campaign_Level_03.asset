@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: A projectile destroys only the first debris it reaches. Debris behind it needs another blast.
+  standardMines: 2
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: '---x---
 
     ---x---

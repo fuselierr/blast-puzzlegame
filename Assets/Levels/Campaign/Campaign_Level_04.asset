@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: You can place several mines before detonating. Look for positions that cover different rows, columns, and diagonals.
+  standardMines: 2
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: 'x-----x
 
     --x-x--

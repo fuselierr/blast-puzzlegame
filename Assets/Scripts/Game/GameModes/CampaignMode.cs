@@ -1,7 +1,6 @@
 using UnityEngine;
 
 // Many hand-placed levels (ScriptableObjects), played in order.
-// Infinite mines, no timer — pure puzzle pacing.
 public class CampaignMode : GameModeBase
 {
     private int levelIndex;
@@ -16,7 +15,7 @@ public class CampaignMode : GameModeBase
 
     public override void StartGame()
     {
-        mineInventory.Infinite = true;
+        mineInventory.Infinite = false;
         BeginLevel();
     }
 
@@ -39,6 +38,7 @@ public class CampaignMode : GameModeBase
         CampaignLevelData data = levels[levelIndex];
 
         gridSpawner.LoadLevel(data);
+        ConfigureMineInventory(data);
 
         timer.Configure(0f, countDown: false);
         timer.PauseTimer(); // no timer in campaign
@@ -68,6 +68,15 @@ public class CampaignMode : GameModeBase
     public void DismissTutorial()
     {
         waitingForTutorial = false;
+    }
+
+    private void ConfigureMineInventory(CampaignLevelData data)
+    {
+        mineInventory.ResetInventory();
+        mineInventory.SetMineCount(MineType.Standard, data.standardMines);
+        mineInventory.SetMineCount(MineType.Cross, data.crossMines);
+        mineInventory.SetMineCount(MineType.Diagonal, data.diagonalMines);
+        mineInventory.SetMineCount(MineType.Double, data.doubleMines);
     }
 
     public override int calculateScore()
@@ -112,6 +121,13 @@ public class CampaignMode : GameModeBase
         }
     }
 
-    public override bool TryPlaceMine(MineType mineType = MineType.Standard) => !waitingForTutorial;
-    public override void ReturnMine(MineType mineType = MineType.Standard) { }
+    public override bool TryPlaceMine(MineType mineType = MineType.Standard)
+    {
+        return !waitingForTutorial && base.TryPlaceMine(mineType);
+    }
+
+    public override void ReturnMine(MineType mineType = MineType.Standard)
+    {
+        base.ReturnMine(mineType);
+    }
 }

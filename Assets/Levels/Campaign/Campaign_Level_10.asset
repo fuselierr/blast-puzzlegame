@@ -15,7 +15,11 @@ MonoBehaviour:
   levelName: Final Challenge
   width: 7
   height: 7
-  tutorialMessage: 'Final challenge: combine mine types, work around walls, and clear every regular and strong debris tile.'
+  tutorialMessage: 'Final challenge: combine mine types, work around walls, and clear every debris tile.'
+  standardMines: 3
+  crossMines: 3
+  diagonalMines: 3
+  doubleMines: 3
   layout: 'x-----x
 
     --x-x--

@@ -16,6 +16,10 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: Use the mine selector to change blast patterns. Cross mines fire straight; diagonal mines fire diagonally; double mines fire twice.
+  standardMines: 2
+  crossMines: 2
+  diagonalMines: 2
+  doubleMines: 2
   layout: 'x-----x
 
     --x-x--
