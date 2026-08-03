@@ -21,12 +21,12 @@ public class AuthLauncher : MonoBehaviour
             if (currentSession?.User != null && !string.IsNullOrEmpty(currentSession.AccessToken))
             {
                 statusText.text = "Welcome back! Verifying profile...";
-                
+
                 // Extract username from email fallback (e.g. "testplayer@game.local" -> "testplayer")
                 string username = currentSession.User.Email.Split('@')[0];
                 await EnsureUserDataExists(currentSession.User.Id, username);
 
-                LoadMainMenu();
+                LoadStart();
             }
             else
             {
@@ -64,14 +64,14 @@ public class AuthLauncher : MonoBehaviour
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Account created! Loading game...";
-                LoadMainMenu();
+                LoadStart();
             }
         }
         catch (System.Exception ex)
         {
             Debug.LogError("Sign Up Error: " + ex);
-            statusText.text = ex.Message.Contains("already registered") 
-                ? "Username is already taken." 
+            statusText.text = ex.Message.Contains("already registered")
+                ? "Username is already taken."
                 : "Sign Up Failed. Check connection & try again.";
         }
     }
@@ -98,8 +98,8 @@ public class AuthLauncher : MonoBehaviour
                 statusText.text = "Verifying profile...";
                 await EnsureUserDataExists(session.User.Id, username);
 
-                statusText.text = "Success! Loading main menu...";
-                LoadMainMenu();
+                statusText.text = "Success! Loading start scene...";
+                LoadStart();
             }
         }
         catch (System.Exception ex)
@@ -147,8 +147,8 @@ public class AuthLauncher : MonoBehaviour
         }
     }
 
-    private void LoadMainMenu()
+    private void LoadStart()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("Start");
     }
 }

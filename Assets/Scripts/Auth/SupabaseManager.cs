@@ -24,9 +24,17 @@ public class SupabaseManager : MonoBehaviour
                 AutoConnectRealtime = true
             };
 
-            SupabaseClient = new Client(supabaseUrl, supabaseKey, options);
-            await SupabaseClient.InitializeAsync();
-            initTcs.TrySetResult(true);
+            try
+            {
+                SupabaseClient = new Client(supabaseUrl, supabaseKey, options);
+                await SupabaseClient.InitializeAsync();
+                initTcs.TrySetResult(true);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogError("Supabase initialization failed: " + exception.Message);
+                initTcs.TrySetException(exception);
+            }
         }
         else
         {
