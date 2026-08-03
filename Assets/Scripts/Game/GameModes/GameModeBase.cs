@@ -27,13 +27,37 @@ public abstract class GameModeBase : IGameMode
 
     public virtual bool TryPlaceMine(MineType mineType = MineType.Standard)
     {
-        SoundManager.Instance.PlayMinePlaced();
-        return mineInventory.UseMine(mineType);
+        if (mineInventory == null)
+        {
+            Debug.LogError($"{GetType().Name}: MineInventory is not assigned on GameManager.");
+            return false;
+        }
+
+        bool minePlaced = mineInventory.UseMine(mineType);
+        SoundManager soundManager = SoundManager.GetOrCreate();
+
+        if (minePlaced)
+        {
+            soundManager?.PlayMinePlaced();
+        }
+        else
+        {
+            soundManager?.PlayMineBlocked();
+        }
+
+        return minePlaced;
     }
 
     public virtual void ReturnMine(MineType mineType = MineType.Standard)
     {
-        SoundManager.Instance.PlayMineReturned();
+        SoundManager.GetOrCreate()?.PlayMineReturned();
+
+        if (mineInventory == null)
+        {
+            Debug.LogError($"{GetType().Name}: MineInventory is not assigned on GameManager.");
+            return;
+        }
+
         mineInventory.AddMine(mineType, 1);
     }
 
