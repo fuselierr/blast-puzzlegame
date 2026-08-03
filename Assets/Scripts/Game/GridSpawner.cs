@@ -18,6 +18,8 @@ public class GridSpawner : MonoBehaviour
     [SerializeField, Min(0.05f)] private float tileDropDuration = 0.35f;
     [SerializeField, Min(0f)] private float spawnAboveScreen = 1f;
 
+    private const float ResolutionVisualDelay = 1.4f;
+
     private GameObject[,] tiles;
 
     private static readonly Vector2Int[] solverDirections =
@@ -703,6 +705,14 @@ public class GridSpawner : MonoBehaviour
         while (FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length > 0)
         {
             yield return null;
+        }
+
+        // Projectile trails are separate particle objects that fade after the
+        // projectile itself is destroyed. Keep the result panel out of the
+        // way until that last visual feedback has had time to finish.
+        if (ResolutionVisualDelay > 0f)
+        {
+            yield return new WaitForSeconds(ResolutionVisualDelay);
         }
 
         IsDetonating = false;

@@ -110,6 +110,7 @@ public class CampaignMode : GameModeBase
             manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
         }
 
+        timer.PauseTimer();
         gridSpawner.DetonateMinesAndResolve(HandleDetonationResolved);
     }
 
@@ -199,6 +200,10 @@ public class CampaignMode : GameModeBase
                 timer.PauseTimer();
                 manager.NotifyCampaignGuidance(string.Empty, highlightDetonate: false);
                 manager.NotifyGameLost();
+            }
+            else
+            {
+                timer.ResumeTimer();
             }
             return;
         }

@@ -49,6 +49,7 @@ public class UIHandler : MonoBehaviour
 
     private void Awake()
     {
+        ConfigureLevelMessageLayout();
         CreateCampaignMainMenuButton();
         CreateCampaignGuidancePanel();
 
@@ -339,8 +340,8 @@ public class UIHandler : MonoBehaviour
         panelRect.anchorMin = new Vector2(0.5f, 1f);
         panelRect.anchorMax = new Vector2(0.5f, 1f);
         panelRect.pivot = new Vector2(0.5f, 1f);
-        panelRect.anchoredPosition = new Vector2(0f, -115f);
-        panelRect.sizeDelta = new Vector2(680f, 90f);
+        panelRect.anchoredPosition = new Vector2(0f, -190f);
+        panelRect.sizeDelta = new Vector2(650f, 100f);
 
         Image panelImage = panelObject.GetComponent<Image>();
         panelImage.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
@@ -363,6 +364,37 @@ public class UIHandler : MonoBehaviour
 
         campaignGuidancePanel = panelObject;
         campaignGuidancePanel.SetActive(false);
+    }
+
+    private void ConfigureLevelMessageLayout()
+    {
+        if (levelClearMessageText != null)
+        {
+            RectTransform titleRect = levelClearMessageText.rectTransform;
+            titleRect.anchoredPosition = new Vector2(0f, 140f);
+            titleRect.sizeDelta = new Vector2(650f, 90f);
+            ConfigurePanelText(levelClearMessageText);
+            levelClearMessageText.fontSizeMin = 20f;
+            levelClearMessageText.fontSizeMax = 44f;
+        }
+
+        if (levelClearScoreText != null)
+        {
+            RectTransform bodyRect = levelClearScoreText.rectTransform;
+            bodyRect.anchoredPosition = new Vector2(0f, -10f);
+            bodyRect.sizeDelta = new Vector2(650f, 170f);
+            ConfigurePanelText(levelClearScoreText);
+            levelClearScoreText.fontSizeMin = 16f;
+            levelClearScoreText.fontSizeMax = 30f;
+            levelClearScoreText.margin = new Vector4(20f, 10f, 20f, 10f);
+        }
+
+        if (advanceButton != null)
+        {
+            RectTransform buttonRect = advanceButton.GetComponent<RectTransform>();
+            buttonRect.anchoredPosition = new Vector2(0f, -190f);
+            buttonRect.sizeDelta = new Vector2(360f, 80f);
+        }
     }
 
     private void HandleCampaignGuidance(string message, bool highlightDetonate)
