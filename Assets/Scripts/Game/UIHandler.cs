@@ -25,6 +25,7 @@ public class UIHandler : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMP_Text gameOverMessageText;
     [SerializeField] private GameObject gameWonPanel;
+    [SerializeField] private GameObject settingsPanel;
     [SerializeField] private TMP_Text gameWonScoreCalc;
     [SerializeField] private TMP_Text gameWonFinalScore;
     [SerializeField] private float gameOverDelay = 1f;
@@ -91,6 +92,7 @@ public class UIHandler : MonoBehaviour
         {
             levelClearPanel.SetActive(false);
         }
+        settingsPanel?.SetActive(false);
 
         ConfigurePanelText(gameOverMessageText);
         ConfigurePanelText(gameWonScoreCalc);
@@ -371,5 +373,14 @@ public class UIHandler : MonoBehaviour
         text.enableWordWrapping = true;
         text.overflowMode = TextOverflowModes.Ellipsis;
         text.alignment = TextAlignmentOptions.Center;
+    }
+
+    public void OpenSettings()
+    {
+        settingsPanel.SetActive(true);
+    }
+    public void CloseSettings()
+    {
+        settingsPanel.SetActive(false);
     }
 }
