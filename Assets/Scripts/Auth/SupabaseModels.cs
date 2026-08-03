@@ -115,7 +115,8 @@ public class CustomLevelDataRow : BaseModel
             verified = Verified,
             likes = LikeCount,
             downloads = DownloadCount,
-            previewImage = null
+            previewImage = null,
+            createdAt = CreatedAt.ToString("O")
         };
     }
 }

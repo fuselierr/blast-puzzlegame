@@ -4903,7 +4903,8 @@ MonoBehaviour:
   content: {fileID: 1368155767}
   communityLevelEntryPrefab: {fileID: 6361945270326957409, guid: 5260649a76fd4bd448bf4ffb6c815b5b, type: 3}
   refreshButton: {fileID: 1771732629}
-  sortByMostLiked: 1
+  searchBar: {fileID: 1840495458}
+  sortDropdown: {fileID: 1122510968}
   loadingPanel: {fileID: 0}
   emptyPanel: {fileID: 0}
   errorPanel: {fileID: 0}

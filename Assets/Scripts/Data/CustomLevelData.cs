@@ -31,6 +31,7 @@ public class CustomLevelData
     public int likes;
     public int downloads;
     public string previewImage;
+    public string createdAt;
 
     public CustomLevelData CreatePlayableCopy(out Dictionary<MineType, int> mineCounts)
     {
@@ -49,7 +50,8 @@ public class CustomLevelData
                 verified = verified,
                 likes = likes,
                 downloads = downloads,
-                previewImage = previewImage
+                previewImage = previewImage,
+                createdAt = createdAt
             };
         }
 
@@ -96,7 +98,8 @@ public class CustomLevelData
             verified = verified,
             likes = likes,
             downloads = downloads,
-            previewImage = previewImage
+            previewImage = previewImage,
+            createdAt = createdAt
         };
     }
 

@@ -12,7 +12,8 @@ public class CommunityLevelManager : MonoBehaviour
 
     [Header("Controls")]
     [SerializeField] private Button refreshButton;
-    [SerializeField] private bool sortByMostLiked = true;
+    [SerializeField] private TMP_InputField searchBar;
+    [SerializeField] private TMP_Dropdown sortDropdown;
 
     [Header("List States")]
     [SerializeField] private GameObject loadingPanel;
@@ -25,6 +26,9 @@ public class CommunityLevelManager : MonoBehaviour
 
     private readonly HashSet<string> likedLevelIds =
         new HashSet<string>();
+
+    private readonly List<CustomLevelData> allLevels =
+        new List<CustomLevelData>();
 
     private List<CustomLevelData> currentLevels =
         new List<CustomLevelData>();
@@ -41,6 +45,18 @@ public class CommunityLevelManager : MonoBehaviour
         {
             refreshButton.onClick.RemoveListener(Refresh);
             refreshButton.onClick.AddListener(Refresh);
+        }
+
+        if (searchBar != null)
+        {
+            searchBar.onValueChanged.RemoveListener(HandleSearchChanged);
+            searchBar.onValueChanged.AddListener(HandleSearchChanged);
+        }
+
+        if (sortDropdown != null)
+        {
+            sortDropdown.onValueChanged.RemoveListener(HandleSortChanged);
+            sortDropdown.onValueChanged.AddListener(HandleSortChanged);
         }
 
         SetState(false, false, false);
@@ -114,8 +130,7 @@ public class CommunityLevelManager : MonoBehaviour
 
     public void PopulateLevels(IEnumerable<CustomLevelData> levels)
     {
-        ClearEntries();
-        currentLevels.Clear();
+        allLevels.Clear();
 
         if (levels != null)
         {
@@ -131,26 +146,53 @@ public class CommunityLevelManager : MonoBehaviour
                 string levelId = GetLevelId(level);
                 if (addedIds.Add(levelId))
                 {
-                    currentLevels.Add(level);
+                    allLevels.Add(level);
                 }
             }
         }
 
-        if (sortByMostLiked)
-        {
-            currentLevels.Sort((left, right) =>
-            {
-                int likeComparison = right.likes.CompareTo(left.likes);
-                if (likeComparison != 0)
-                {
-                    return likeComparison;
-                }
+        ApplySearchAndSort();
+    }
 
-                return string.Compare(
-                    left.levelName,
-                    right.levelName,
-                    StringComparison.OrdinalIgnoreCase);
-            });
+    private void HandleSearchChanged(string searchText)
+    {
+        ApplySearchAndSort();
+    }
+
+    private void HandleSortChanged(int option)
+    {
+        ApplySearchAndSort();
+    }
+
+    private void ApplySearchAndSort()
+    {
+        ClearEntries();
+        currentLevels.Clear();
+
+        string searchText = searchBar != null
+            ? searchBar.text.Trim()
+            : string.Empty;
+
+        foreach (CustomLevelData level in allLevels)
+        {
+            if (MatchesSearch(level, searchText))
+            {
+                currentLevels.Add(level);
+            }
+        }
+
+        int sortOption = sortDropdown != null ? sortDropdown.value : 0;
+        switch (sortOption)
+        {
+            case 1:
+                currentLevels.Sort(CompareLikes);
+                break;
+            case 2:
+                currentLevels.Sort(CompareTrending);
+                break;
+            default:
+                currentLevels.Sort(ComparePlays);
+                break;
         }
 
         if (content == null || communityLevelEntryPrefab == null)
@@ -178,6 +220,85 @@ public class CommunityLevelManager : MonoBehaviour
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
         }
+    }
+
+    private static bool MatchesSearch(
+        CustomLevelData level,
+        string searchText)
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            return true;
+        }
+
+        bool nameMatches =
+            !string.IsNullOrWhiteSpace(level.levelName) &&
+            level.levelName.IndexOf(
+                searchText,
+                StringComparison.OrdinalIgnoreCase) >= 0;
+
+        bool authorMatches =
+            !string.IsNullOrWhiteSpace(level.author) &&
+            level.author.IndexOf(
+                searchText,
+                StringComparison.OrdinalIgnoreCase) >= 0;
+
+        return nameMatches || authorMatches;
+    }
+
+    private static int ComparePlays(
+        CustomLevelData left,
+        CustomLevelData right)
+    {
+        int comparison = right.downloads.CompareTo(left.downloads);
+        return comparison != 0 ? comparison : CompareNames(left, right);
+    }
+
+    private static int CompareLikes(
+        CustomLevelData left,
+        CustomLevelData right)
+    {
+        int comparison = right.likes.CompareTo(left.likes);
+        return comparison != 0 ? comparison : CompareNames(left, right);
+    }
+
+    private static int CompareTrending(
+        CustomLevelData left,
+        CustomLevelData right)
+    {
+        int comparison = CalculateTrendingScore(right).CompareTo(
+            CalculateTrendingScore(left));
+        return comparison != 0 ? comparison : CompareNames(left, right);
+    }
+
+    private static int CompareNames(
+        CustomLevelData left,
+        CustomLevelData right)
+    {
+        return string.Compare(
+            left.levelName,
+            right.levelName,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static double CalculateTrendingScore(CustomLevelData level)
+    {
+        DateTime createdAt;
+        if (!DateTime.TryParse(
+                level.createdAt,
+                null,
+                System.Globalization.DateTimeStyles.RoundtripKind,
+                out createdAt))
+        {
+            createdAt = DateTime.UtcNow.AddDays(-30);
+        }
+
+        double ageInDays = Math.Max(
+            0.0,
+            (DateTime.UtcNow - createdAt.ToUniversalTime()).TotalDays);
+
+        double engagement = level.likes * 5.0 + level.downloads;
+        return engagement / Math.Pow(ageInDays + 2.0, 1.2);
     }
 
     public void SetLikedLevelIds(IEnumerable<string> levelIds)
@@ -250,6 +371,14 @@ public class CommunityLevelManager : MonoBehaviour
 
     private void HandleLikeChanged(CustomLevelData level, bool liked)
     {
+        bool wasLiked = IsLevelLiked(level);
+        if (wasLiked != liked)
+        {
+            level.likes = Math.Max(
+                0,
+                level.likes + (liked ? 1 : -1));
+        }
+
         SetLevelLiked(level, liked);
         LikeChanged?.Invoke(level, liked);
     }
@@ -323,6 +452,16 @@ public class CommunityLevelManager : MonoBehaviour
         if (refreshButton != null)
         {
             refreshButton.onClick.RemoveListener(Refresh);
+        }
+
+        if (searchBar != null)
+        {
+            searchBar.onValueChanged.RemoveListener(HandleSearchChanged);
+        }
+
+        if (sortDropdown != null)
+        {
+            sortDropdown.onValueChanged.RemoveListener(HandleSortChanged);
         }
     }
 }
