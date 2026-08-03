@@ -102,6 +102,25 @@ public class SupabaseManager : MonoBehaviour
             .ToList();
     }
 
+    public async Task<string> GetUsername(string userId)
+    {
+        await EnsureInitialized();
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return "Unknown Creator";
+        }
+
+        Profile profile = await SupabaseClient
+            .From<Profile>()
+            .Where(row => row.Id == userId)
+            .Single();
+
+        return profile != null && !string.IsNullOrWhiteSpace(profile.Username)
+            ? profile.Username
+            : "Unknown Creator";
+    }
+
     public async Task<List<CustomLevelDataRow>> GetMyCustomLevels()
     {
         await EnsureInitialized();

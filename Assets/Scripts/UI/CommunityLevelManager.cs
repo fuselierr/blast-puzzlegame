@@ -98,11 +98,28 @@ public class CommunityLevelManager : MonoBehaviour
             }
 
             List<CustomLevelData> levels = new List<CustomLevelData>();
+            Dictionary<string, string> usernamesByUserId =
+                new Dictionary<string, string>();
+
             foreach (CustomLevelDataRow row in rows)
             {
                 if (row != null)
                 {
-                    levels.Add(row.ToCustomLevelData());
+                    string authorId = row.AuthorId ?? string.Empty;
+
+                    if (!usernamesByUserId.TryGetValue(
+                            authorId,
+                            out string username))
+                    {
+                        username = await SupabaseManager.Instance.GetUsername(
+                            authorId);
+
+                        usernamesByUserId[authorId] = username;
+                    }
+
+                    CustomLevelData level = row.ToCustomLevelData();
+                    level.author = username;
+                    levels.Add(level);
                 }
             }
 
