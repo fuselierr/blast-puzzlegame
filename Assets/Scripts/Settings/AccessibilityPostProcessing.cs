@@ -27,6 +27,9 @@ public class AccessibilityPostProcessing : MonoBehaviour
     private bool colorblindEnabled;
     private bool highContrastEnabled;
 
+    public bool ColorblindEnabled => colorblindEnabled;
+    public bool HighContrastEnabled => highContrastEnabled;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
