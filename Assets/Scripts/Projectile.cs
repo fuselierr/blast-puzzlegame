@@ -1,15 +1,32 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
     private static float transitionSpeedMultiplier = 1f;
 
+    // Clockwise compass directions. A splitter sends a projectile into the
+    // two neighboring directions, which are exactly 45 degrees away.
+    private static readonly Vector2[] eightDirections =
+    {
+        Vector2.up,
+        new Vector2(1f, 1f).normalized,
+        Vector2.right,
+        new Vector2(1f, -1f).normalized,
+        Vector2.down,
+        new Vector2(-1f, -1f).normalized,
+        Vector2.left,
+        new Vector2(-1f, 1f).normalized
+    };
+
     [SerializeField] private GameObject projectilePrefab;
+    [SerializeField, Min(1)] private int maxSplitGenerations = 6;
     public Vector2 direction;
     public float speed = 4f;
     private bool hasHit;
-    private Tile ignoredSplitter;
     private Tile ignoredTeleporter;
+    private HashSet<int> triggeredSplitterIds = new HashSet<int>();
+    private int splitGeneration;
 
     private const float destroyDistance = 15f;
     private const float pathHitTolerance = 0.15f;
@@ -36,6 +53,8 @@ public class Projectile : MonoBehaviour
         direction = dir.normalized;
         hasHit = false;
         launchPosition = transform.position;
+        triggeredSplitterIds.Clear();
+        splitGeneration = 0;
         // Important when gameObject is used as the fallback spawn source: do
         // not inherit ownership of the original projectile's trail instance.
         trailInstance = null;
@@ -56,7 +75,6 @@ public class Projectile : MonoBehaviour
             }
         }
         ClearIgnoredTileAfterExit(ref ignoredTeleporter);
-        ClearIgnoredTileAfterExit(ref ignoredSplitter);
 
         if (trailInstance != null)
         {
@@ -141,9 +159,20 @@ public class Projectile : MonoBehaviour
         }
         else if (tile != null && tile.Type == TileType.Splitter && IsOnShotPath(tile.transform.position))
         {
-            // Split projectiles are born inside the splitter that created
-            // them. Ignore that one splitter so they can leave its collider.
-            if (tile == ignoredSplitter)
+            int splitterId = tile.GetInstanceID();
+
+            // A splitter may only affect a projectile lineage once. Children
+            // inherit this set, preventing splitter/teleporter loops from
+            // producing exponential clone storms.
+            if (triggeredSplitterIds.Contains(splitterId))
+            {
+                return;
+            }
+
+            triggeredSplitterIds.Add(splitterId);
+
+            // At the cap, let this projectile pass through without splitting.
+            if (splitGeneration >= maxSplitGenerations)
             {
                 return;
             }
@@ -201,14 +230,41 @@ public class Projectile : MonoBehaviour
         }
 
         Vector2 splitPosition = splitter.transform.position;
-        Vector2 currentDirection = direction.normalized;
-        Vector2 reflected = new Vector2(-currentDirection.y, currentDirection.x);
-        Vector2 leftDirection = (currentDirection + reflected).normalized;
-        Vector2 rightDirection = (currentDirection - reflected).normalized;
+        int directionIndex = GetClosestDirectionIndex(direction);
+        int previousIndex =
+            (directionIndex - 1 + eightDirections.Length) %
+            eightDirections.Length;
+        int nextIndex =
+            (directionIndex + 1) % eightDirections.Length;
+
+        Vector2 leftDirection = eightDirections[previousIndex];
+        Vector2 rightDirection = eightDirections[nextIndex];
 
         SpawnSplitProjectile(splitPosition, leftDirection, splitter);
         SpawnSplitProjectile(splitPosition, rightDirection, splitter);
         Destroy(gameObject);
+    }
+
+    private static int GetClosestDirectionIndex(Vector2 incomingDirection)
+    {
+        Vector2 normalizedDirection = incomingDirection.normalized;
+        int closestIndex = 0;
+        float highestDot = float.NegativeInfinity;
+
+        for (int i = 0; i < eightDirections.Length; i++)
+        {
+            float dot = Vector2.Dot(
+                normalizedDirection,
+                eightDirections[i]);
+
+            if (dot > highestDot)
+            {
+                highestDot = dot;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex;
     }
 
     private void SpawnSplitProjectile(
@@ -231,7 +287,15 @@ public class Projectile : MonoBehaviour
         if (newProjectile != null)
         {
             newProjectile.Init(newDirection);
-            newProjectile.ignoredSplitter = sourceSplitter;
+            newProjectile.splitGeneration = splitGeneration + 1;
+            newProjectile.triggeredSplitterIds =
+                new HashSet<int>(triggeredSplitterIds);
+
+            if (sourceSplitter != null)
+            {
+                newProjectile.triggeredSplitterIds.Add(
+                    sourceSplitter.GetInstanceID());
+            }
         }
         else
         {

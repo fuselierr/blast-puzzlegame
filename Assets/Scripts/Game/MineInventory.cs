@@ -63,7 +63,7 @@ public class MineInventory : MonoBehaviour
 
     public void ResetInventory()
     {
-        mines[MineType.Standard] = 5;
+        mines[MineType.Standard] = 0;
         mines[MineType.Cross] = 0;
         mines[MineType.Diagonal] = 0;
         mines[MineType.Double] = 0;

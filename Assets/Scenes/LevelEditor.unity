@@ -1619,7 +1619,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4757138332800204887, guid: 7455376edcc1a0c4ca9238060ce7d66f, type: 3}
   width: 8
   height: 8
-  tileSize: 0.3
+  tileSize: 0.4
   debrisChance: 0.15
   animateEntrance: 1
   entranceTotalDuration: 1

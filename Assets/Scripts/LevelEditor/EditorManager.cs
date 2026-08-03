@@ -553,7 +553,7 @@ public class EditorManager : MonoBehaviour
 
                 if (x < tokens.Length)
                 {
-                    tile.SetTile(ParseTileToken(tokens[x]));
+                    ApplyTileToken(tile, tokens[x]);
                 }
             }
 
@@ -574,26 +574,101 @@ public class EditorManager : MonoBehaviour
         }
     }
 
-    private TileType ParseTileToken(string token)
+    private void ApplyTileToken(EditorTile tile, string token)
     {
-        if (string.IsNullOrEmpty(token))
+        if (tile == null)
         {
-            return TileType.None;
+            return;
         }
 
-        return token switch
+        switch ((token ?? string.Empty).Trim().ToUpperInvariant())
         {
-            "_" => TileType.None,
-            "-" => TileType.Tile,
-            "W" => TileType.Wall,
-            "S" => TileType.Splitter,
-            "D" => TileType.Debris,
-            "H" => TileType.StrongDebris,
-            _ when token.StartsWith("T", StringComparison.OrdinalIgnoreCase) => TileType.Teleporter,
-            "MH" or "MV" or "MR" or "ML" => TileType.Mirror,
-            "NS" or "NC" or "NG" or "ND" => TileType.Mine,
-            _ => TileType.None
-        };
+            case "_":
+                tile.SetTile(TileType.None);
+                break;
+
+            case "-":
+                tile.SetTile(TileType.Tile);
+                break;
+
+            case "W":
+                tile.SetTile(TileType.Wall);
+                break;
+
+            case "S":
+                tile.SetTile(TileType.Splitter);
+                break;
+
+            case "D":
+                tile.SetTile(TileType.Debris);
+                break;
+
+            case "H":
+                tile.SetTile(TileType.StrongDebris);
+                break;
+
+            case "NS":
+                tile.SetTile(
+                    TileType.Mine,
+                    MineType.Standard);
+                break;
+
+            case "NC":
+                tile.SetTile(
+                    TileType.Mine,
+                    MineType.Cross);
+                break;
+
+            case "NG":
+                tile.SetTile(
+                    TileType.Mine,
+                    MineType.Diagonal);
+                break;
+
+            case "ND":
+                tile.SetTile(
+                    TileType.Mine,
+                    MineType.Double);
+                break;
+
+            case "MH":
+                tile.SetTile(
+                    TileType.Mirror,
+                    MineType.Standard);
+                break;
+
+            case "MV":
+                tile.SetTile(
+                    TileType.Mirror,
+                    MineType.Cross);
+                break;
+
+            case "MR":
+                tile.SetTile(
+                    TileType.Mirror,
+                    MineType.Diagonal);
+                break;
+
+            case "ML":
+                tile.SetTile(
+                    TileType.Mirror,
+                    MineType.Double);
+                break;
+
+            default:
+                if (token.StartsWith(
+                        "T",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    tile.SetTile(TileType.Teleporter);
+                }
+                else
+                {
+                    tile.SetTile(TileType.None);
+                }
+
+                break;
+        }
     }
 
 }
