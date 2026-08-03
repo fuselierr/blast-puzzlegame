@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class KebabMenuController : MonoBehaviour
 {
@@ -19,6 +20,11 @@ public class KebabMenuController : MonoBehaviour
     [Header("Popups")]
     [SerializeField] private LevelNamePopupController namePopup;
 
+    [Header("Upload Status")]
+    [SerializeField] private GameObject uploadStatusPanel;
+    [SerializeField] private TMP_Text uploadStatusText;
+    [SerializeField] private Button uploadDoneButton;
+
     [Header("Positioning")]
     [SerializeField] private float horizontalGap = 8f;
     [SerializeField] private float verticalGap = 4f;
@@ -27,6 +33,7 @@ public class KebabMenuController : MonoBehaviour
     private MyLevelEntryUI selectedEntry;
     private bool initialized;
     private bool isOpening;
+    private bool isUploading;
 
     private void Awake()
     {
@@ -41,6 +48,11 @@ public class KebabMenuController : MonoBehaviour
         if (!isOpening)
         {
             Close();
+        }
+
+        if (uploadStatusPanel != null)
+        {
+            uploadStatusPanel.SetActive(false);
         }
     }
 
@@ -61,6 +73,7 @@ public class KebabMenuController : MonoBehaviour
         renameButton.onClick.AddListener(RenameSelected);
         duplicateButton.onClick.AddListener(DuplicateSelected);
         uploadButton.onClick.AddListener(UploadSelected);
+        uploadDoneButton.onClick.AddListener(CloseUploadStatus);
         deleteButton.onClick.AddListener(DeleteSelected);
 
         initialized = true;
@@ -88,6 +101,8 @@ public class KebabMenuController : MonoBehaviour
         }
 
         selectedEntry = entry;
+        uploadButton.interactable =
+            entry.Level != null && entry.Level.verified;
 
         // Ensure the shared popup layer is active so child panels are visible.
         if (popupLayer != null && !popupLayer.gameObject.activeSelf)
@@ -185,16 +200,91 @@ public class KebabMenuController : MonoBehaviour
         entry.DuplicateLevel();
     }
 
-    public void UploadSelected()
+    public async void UploadSelected()
     {
-        if (selectedEntry == null)
+        if (selectedEntry == null || isUploading)
         {
             return;
         }
 
         MyLevelEntryUI entry = selectedEntry;
+
+        if (entry.Level == null || !entry.Level.verified)
+        {
+            Debug.LogWarning(
+                "Only verified levels can be uploaded.",
+                this);
+            return;
+        }
+
         Close();
-        entry.UploadLevel();
+
+        isUploading = true;
+        ShowUploadStatus("uploading...");
+
+        try
+        {
+            if (SupabaseManager.Instance == null)
+            {
+                throw new System.InvalidOperationException(
+                    "SupabaseManager was not found in the scene.");
+            }
+
+            CustomLevelDataRow uploadedLevel =
+                await SupabaseManager.Instance.PublishCustomLevel(
+                    entry.Level,
+                    true);
+
+            if (uploadedLevel == null)
+            {
+                throw new System.InvalidOperationException(
+                    "Supabase did not return the uploaded level.");
+            }
+
+            ShowUploadResult("level uploaded");
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogError(
+                $"Failed to upload level '{entry.Level.levelName}': " +
+                exception,
+                this);
+
+            ShowUploadResult("upload failed");
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+
+    private void ShowUploadStatus(string message)
+    {
+        if (popupLayer != null && !popupLayer.gameObject.activeSelf)
+        {
+            popupLayer.gameObject.SetActive(true);
+        }
+
+        uploadStatusText.text = message;
+        uploadDoneButton.interactable = false;
+        uploadStatusPanel.SetActive(true);
+        uploadStatusPanel.transform.SetAsLastSibling();
+    }
+
+    private void ShowUploadResult(string message)
+    {
+        uploadStatusText.text = message;
+        uploadDoneButton.interactable = true;
+        uploadStatusPanel.SetActive(true);
+        uploadStatusPanel.transform.SetAsLastSibling();
+    }
+
+    public void CloseUploadStatus()
+    {
+        if (!isUploading)
+        {
+            uploadStatusPanel.SetActive(false);
+        }
     }
 
     public void DeleteSelected()
@@ -363,6 +453,9 @@ public class KebabMenuController : MonoBehaviour
         Check(duplicateButton, nameof(duplicateButton));
         Check(uploadButton, nameof(uploadButton));
         Check(deleteButton, nameof(deleteButton));
+        Check(uploadStatusPanel, nameof(uploadStatusPanel));
+        Check(uploadStatusText, nameof(uploadStatusText));
+        Check(uploadDoneButton, nameof(uploadDoneButton));
 
         if (missing.Length > 0)
         {
@@ -403,6 +496,11 @@ public class KebabMenuController : MonoBehaviour
         if (uploadButton != null)
         {
             uploadButton.onClick.RemoveListener(UploadSelected);
+        }
+
+        if (uploadDoneButton != null)
+        {
+            uploadDoneButton.onClick.RemoveListener(CloseUploadStatus);
         }
 
         if (deleteButton != null)

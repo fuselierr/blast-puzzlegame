@@ -2,16 +2,10 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class CommunityLevelManager : MonoBehaviour
 {
-    [Serializable]
-    public class RefreshRequestedEvent : UnityEvent
-    {
-    }
-
     [Header("Level List")]
     [SerializeField] private Transform content;
     [SerializeField] private CommunityLevelEntryUI communityLevelEntryPrefab;
@@ -26,10 +20,6 @@ public class CommunityLevelManager : MonoBehaviour
     [SerializeField] private GameObject errorPanel;
     [SerializeField] private TMP_Text errorText;
 
-    [Header("Events")]
-    [Tooltip("Connect this to the method that fetches community levels from your backend.")]
-    [SerializeField] private RefreshRequestedEvent onRefreshRequested;
-
     private readonly List<CommunityLevelEntryUI> spawnedEntries =
         new List<CommunityLevelEntryUI>();
 
@@ -38,6 +28,8 @@ public class CommunityLevelManager : MonoBehaviour
 
     private List<CustomLevelData> currentLevels =
         new List<CustomLevelData>();
+
+    private bool isRefreshing;
 
     public event Action<CustomLevelData, bool> LikeChanged;
 
@@ -54,15 +46,70 @@ public class CommunityLevelManager : MonoBehaviour
         SetState(false, false, false);
     }
 
-    private void Start()
+    private void OnEnable()
     {
         Refresh();
     }
 
-    public void Refresh()
+    public async void Refresh()
     {
+        if (isRefreshing)
+        {
+            return;
+        }
+
+        isRefreshing = true;
         ShowLoading();
-        onRefreshRequested?.Invoke();
+
+        try
+        {
+            // OnEnable can run before another object's Awake. Yield once so
+            // SupabaseManager has a chance to establish its singleton.
+            await System.Threading.Tasks.Task.Yield();
+
+            if (SupabaseManager.Instance == null)
+            {
+                throw new InvalidOperationException(
+                    "SupabaseManager was not found in the scene.");
+            }
+
+            List<CustomLevelDataRow> rows =
+                await SupabaseManager.Instance.GetCommunityLevels();
+
+            if (this == null)
+            {
+                return;
+            }
+
+            List<CustomLevelData> levels = new List<CustomLevelData>();
+            foreach (CustomLevelDataRow row in rows)
+            {
+                if (row != null)
+                {
+                    levels.Add(row.ToCustomLevelData());
+                }
+            }
+
+            PopulateLevels(levels);
+        }
+        catch (Exception exception)
+        {
+            if (this != null)
+            {
+                Debug.LogError(
+                    "Failed to refresh community levels: " + exception,
+                    this);
+
+                ShowError("Could not load community levels. Please try again.");
+            }
+        }
+        finally
+        {
+            if (this != null)
+            {
+                isRefreshing = false;
+            }
+        }
     }
 
     public void PopulateLevels(IEnumerable<CustomLevelData> levels)
