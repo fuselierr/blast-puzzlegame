@@ -833,7 +833,7 @@ public class GridSpawner : MonoBehaviour
 
     private static int GetTodaySeed()
     {
-        DateTime today = DateTime.Today;
+        DateTime today = DateTime.UtcNow.Date;
         return today.Year * 10000 + today.Month * 100 + today.Day;
     }
 }

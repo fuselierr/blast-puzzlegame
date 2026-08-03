@@ -6,6 +6,7 @@ public enum MainMenuPage
 {
     Main,
     Campaign,
+    Classic,
     Community,
     Stats,
     Settings
@@ -21,6 +22,9 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
+
+    [SerializeField]
+    private GameObject classicProgressPanel;
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject communityPanel;
     [SerializeField] private GameObject settingsPanel;
@@ -32,24 +36,56 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private static bool attemptedDailyChallenge = false;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private GameObject leaderboardPanel;
-    
+
+    [SerializeField] private LeaderboardController leaderboardController;
+
+    private static bool dailyChallengeRequestRunning;
     private int score;
 
     public static MainMenuPage PageToOpen = MainMenuPage.Main;
     public static CommunityTab CommunityTabToOpen = CommunityTab.MyLevels;
 
-    public void PlayDailyChallenge()
+    public async void PlayDailyChallenge()
     {
-        if (attemptedDailyChallenge)
+        if (dailyChallengeRequestRunning)
         {
             return;
         }
-        GameManager.SelectedMode = GameMode.Freeplay;
+
+        dailyChallengeRequestRunning = true;
+
+        bool started =
+            await SupabaseGameService
+                .TryStartDailyChallenge();
+
+        if (!started)
+        {
+            int? savedScore =
+                await SupabaseGameService
+                    .GetTodayDailyScore();
+
+            if (
+                savedScore.HasValue &&
+                scoreText != null
+            )
+            {
+                scoreText.text =
+                    savedScore.Value.ToString();
+            }
+
+            dailyChallengeRequestRunning = false;
+            return;
+        }
+
+        GameManager.SelectedMode =
+            GameMode.Freeplay;
+
         GameManager.IsDailyChallenge = true;
         attemptedDailyChallenge = true;
+        dailyChallengeRequestRunning = false;
+
         LoadSceneWithBackgroundExit("Game");
     }
-
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
@@ -64,8 +100,17 @@ public class MainMenu : MonoBehaviour
 
     public void PlayClassic()
     {
-        GameManager.SelectedMode = GameMode.Classic;
-        LoadSceneWithBackgroundExit("Game");
+        HideAllPanels();
+
+        if (classicProgressPanel != null)
+        {
+            classicProgressPanel.SetActive(true);
+        }
+    }
+
+    public void StartClassicRun()
+    {
+        PlayClassic();
     }
 
     public void CheckStats()
@@ -89,6 +134,10 @@ public class MainMenu : MonoBehaviour
     public void OpenLeaderboard()
     {
         leaderboardPanel.SetActive(true);
+        if (leaderboardController != null)
+        {
+            leaderboardController.LoadDailyLeaderboard();
+        }
     }
 
     public void CloseLeaderboard()
@@ -139,15 +188,27 @@ public class MainMenu : MonoBehaviour
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private async void Start()
     {
+        dailyChallengeRequestRunning = false;
         HideAllPanels();
 
         switch (PageToOpen)
         {
             case MainMenuPage.Campaign:
-            campaignPanel.SetActive(true);
-            break;
+                campaignPanel.SetActive(true);
+                break;
+
+            case MainMenuPage.Classic:
+                if (classicProgressPanel != null)
+                {
+                    classicProgressPanel.SetActive(true);
+                }
+                else
+                {
+                    mainMenuPanel.SetActive(true);
+                }
+                break;
 
             case MainMenuPage.Community:
                 communityPanel.SetActive(true);
@@ -170,14 +231,16 @@ public class MainMenu : MonoBehaviour
 
         PageToOpen = MainMenuPage.Main;
 
-        if (attemptedDailyChallenge)
+        attemptedDailyChallenge = await SupabaseGameService.HasAttemptedDailyChallengeToday();
+
+        int? savedDailyScore = await SupabaseGameService.GetTodayDailyScore();
+
+        if (scoreText != null)
         {
-            // load daily challenge playerdata
-            score = SaveManager.Instance.LoadDailyChallengeScore();
-            scoreText.text = score.ToString();
-        } else
-        {
-            scoreText.text = "N/A";
+            scoreText.text =
+                savedDailyScore.HasValue
+                    ? savedDailyScore.Value.ToString()
+                    : "N/A";
         }
     }
 
@@ -185,6 +248,12 @@ public class MainMenu : MonoBehaviour
     {
         mainMenuPanel.SetActive(false);
         campaignPanel.SetActive(false);
+
+        if (classicProgressPanel != null)
+        {
+            classicProgressPanel.SetActive(false);
+        }
+
         communityPanel.SetActive(false);
         statsPanel.SetActive(false);
         settingsPanel.SetActive(false);

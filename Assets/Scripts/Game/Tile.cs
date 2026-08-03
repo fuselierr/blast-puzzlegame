@@ -81,14 +81,14 @@ public class Tile : MonoBehaviour
             Type = TileType.Tile;
             SetFlagged(false);
             spriteRenderer.sprite = globals != null ? globals.GetSprite(TileType.Tile) : null;
-            SoundManager.Instance.PlayDebrisHit();
+            SoundManager.GetOrCreate()?.PlayDebrisHit();
         }
         else if (Type == TileType.StrongDebris)
         {
             bool wasFlagged = IsFlagged;
             SetTileType(TileType.Debris);
             SetFlagged(wasFlagged);
-            SoundManager.Instance.PlayDebrisHit();
+            SoundManager.GetOrCreate()?.PlayDebrisHit();
         }
     }
 
@@ -98,7 +98,7 @@ public class Tile : MonoBehaviour
         {
             return;
         }
-        SoundManager.Instance.PlayFlagPlaced();
+        SoundManager.GetOrCreate()?.PlayFlagPlaced();
         SetFlagged(!IsFlagged);
     }
 
@@ -125,14 +125,18 @@ public class Tile : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (GameManager.Instance == null || !GameManager.Instance.gameStarted)
+        GameManager gameManager = GameManager.Instance;
+
+        if (gameManager == null || !gameManager.gameStarted)
         {
             return;
         }
+
         if (Type == TileType.Tile)
         {
-            MineType selectedMineType = GameManager.Instance.SelectedMineType; 
-            bool placedMine = GameManager.Instance == null || GameManager.Instance.TryPlaceMine(selectedMineType);
+            MineType selectedMineType = gameManager.SelectedMineType;
+            bool placedMine = gameManager.TryPlaceMine(selectedMineType);
+
             if (placedMine)
             {
                 SetTileType(selectedMineType);
@@ -140,9 +144,9 @@ public class Tile : MonoBehaviour
         }
         else if (Type == TileType.Mine)
         {
-            MineType prevMineType = mineType; 
+            MineType prevMineType = mineType;
             SetTileType(TileType.Tile);
-            GameManager.Instance?.ReturnMine(prevMineType);
+            gameManager.ReturnMine(prevMineType);
         }
         else if (Type == TileType.Debris)
         {

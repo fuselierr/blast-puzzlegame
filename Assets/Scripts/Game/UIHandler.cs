@@ -49,10 +49,10 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameLost += HandleGameLost;
             GameManager.Instance.OnSelectedMineChange += HandleSelectedMineChange;
 
-            standardMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Standard;});
-            crossMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Cross;});
-            diagonalMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Diagonal;});
-            doubleMineToggle.onValueChanged.AddListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Double;});
+            standardMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
+            crossMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
+            diagonalMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Diagonal; });
+            doubleMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Double; });
 
             HandleSelectedMineChange(GameManager.Instance.SelectedMineType);
         }
@@ -68,10 +68,10 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnGameLost -= HandleGameLost;
             GameManager.Instance.OnSelectedMineChange -= HandleSelectedMineChange;
 
-            standardMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Standard;});
-            crossMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Cross;});
-            diagonalMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Diagonal;});
-            doubleMineToggle.onValueChanged.RemoveListener((isOn) => {GameManager.Instance.SelectedMineType = MineType.Double;});
+            standardMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
+            crossMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
+            diagonalMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Diagonal; });
+            doubleMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Double; });
         }
     }
 
@@ -148,9 +148,11 @@ public class UIHandler : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
+        bool wasClassicLevel = GameManager.SelectedMode == GameMode.Classic;
+
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameStarted = false;
+            GameManager.Instance.StopGame();
         }
 
         if (gameOverPanel != null)
@@ -163,6 +165,8 @@ public class UIHandler : MonoBehaviour
 
         MainMenu.PageToOpen = wasCustomLevel
             ? MainMenuPage.Community
+            : wasClassicLevel
+                ? MainMenuPage.Classic
             : MainMenuPage.Main;
 
         if (BGPersist.Instance != null)
@@ -205,10 +209,17 @@ public class UIHandler : MonoBehaviour
 
         if (advanceButtonText != null)
         {
-            advanceButtonText.text =
-                levelNumber >= totalLevels
-                    ? "Finish"
-                    : $"Advance to Level {levelNumber + 1}";
+            if (GameManager.SelectedMode == GameMode.Classic)
+            {
+                advanceButtonText.text = "Back to Levels";
+            }
+            else
+            {
+                advanceButtonText.text =
+                    levelNumber >= totalLevels
+                        ? "Finish"
+                        : $"Advance to Level {levelNumber + 1}";
+            }
         }
 
         if (levelClearPanel != null)
@@ -228,7 +239,7 @@ public class UIHandler : MonoBehaviour
         GameManager.Instance?.AdvanceClassicLevel();
     }
 
-    private void HandleGameWon()
+    private async void HandleGameWon()
     {
         if (levelClearPanel != null)
         {
@@ -253,7 +264,26 @@ public class UIHandler : MonoBehaviour
             // update playerdata
             if (GameManager.SelectedMode == GameMode.Freeplay && GameManager.IsDailyChallenge)
             {
-                SaveManager.Instance.SaveDailyChallengeScore(finalScore);
+                if (SaveManager.Instance != null)
+                {
+                    SaveManager.Instance
+                        .SaveDailyChallengeScore(
+                            finalScore
+                        );
+                }
+
+                bool saved =
+                    await SupabaseGameService
+                        .SubmitDailyChallengeScore(
+                            finalScore
+                        );
+
+                if (!saved)
+                {
+                    Debug.LogError(
+                        "Daily Challenge score was not uploaded."
+                    );
+                }
             }
         }
         if (gameWonPanel != null)
@@ -268,7 +298,7 @@ public class UIHandler : MonoBehaviour
         {
             if (GameManager.SelectedMode == GameMode.Classic)
             {
-                gameOverMessageText.text = "Stage Failed!\nRestart from Level 1";
+                gameOverMessageText.text = "Stage Failed!\nRestart Level";
             }
             else
             {

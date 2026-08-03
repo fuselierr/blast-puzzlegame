@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // 10 auto-generated levels played back to back, no level select.
 // Timer counts down (~1 minute, shrinking slightly each level).
 // Clear all debris before time runs out to advance; finishing level 10 wins.
 // Running out of time fails the whole run and restarts from level 1.
+// Classic now starts the selected level and returns to the level panel after clear.
 public class ClassicMode : GameModeBase
 {
     private const int MaxLevel = 10;
@@ -36,7 +38,7 @@ public class ClassicMode : GameModeBase
 
     public override void StartGame()
     {
-        currentLevel = 1;
+        currentLevel = Mathf.Clamp(GameManager.SelectedClassicLevel, 1, MaxLevel);
         accumulatedRemainingTime = 0f;
         accumulatedRemainingMines = 0;
         BeginLevel();
@@ -45,6 +47,7 @@ public class ClassicMode : GameModeBase
     public override void ResetGame()
     {
         // A loss (or manual restart) sends the player back to level 1.
+        GameManager.SelectedClassicLevel = Mathf.Clamp(GameManager.SelectedClassicLevel, 1, MaxLevel);
         StartGame();
     }
 
@@ -117,7 +120,7 @@ public class ClassicMode : GameModeBase
         return timeScore + mineScore;
     }
 
-    private void HandleDetonationResolved(bool debrisCleared)
+    private async void HandleDetonationResolved(bool debrisCleared)
     {
         manager.NotifyDetonateComplete(debrisCleared);
 
@@ -131,6 +134,7 @@ public class ClassicMode : GameModeBase
         accumulatedRemainingTime += Mathf.Max(0f, timer.TimeValue);
         accumulatedRemainingMines += Mathf.Max(0, mineInventory.GetCount(MineType.Standard));
 
+        await SupabaseGameService.MarkClassicLevelCompleted(currentLevel);
         manager.NotifyLevelCleared(currentLevel, MaxLevel);
         waitingForAdvance = true;
         manager.gameStarted = false;
@@ -143,16 +147,17 @@ public class ClassicMode : GameModeBase
         }
 
         waitingForAdvance = false;
+        manager.StopGame();
+        MainMenu.PageToOpen = MainMenuPage.Classic;
 
-        if (currentLevel >= MaxLevel)
+        if (BGPersist.Instance != null)
         {
-            manager.NotifyGameWon();
-            return;
+            BGPersist.Instance.AnimateExitThenLoad("MainMenu");
         }
-
-        currentLevel++;
-        manager.gameStarted = true;
-        BeginLevel();
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
     private void HandleTimeUp()
     {

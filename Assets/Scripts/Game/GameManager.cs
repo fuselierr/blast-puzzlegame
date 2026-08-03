@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
 
     public static int SelectedCampaignLevelIndex = 0;
 
+    public static int SelectedClassicLevel = 1;
+
     public static CustomLevelData SelectedCustomLevel;
 
     public static bool IsDailyChallenge = false;

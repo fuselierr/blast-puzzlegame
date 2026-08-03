@@ -1,60 +1,99 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LeaderboardController : MonoBehaviour
 {
-    [Header("Scroll View")]
-    [SerializeField] private Transform contentParent;      // ScrollView/Viewport/Content
-    [SerializeField] private LeaderboardEntryUI rowPrefab;  // the row prefab
+    [SerializeField]
+    private Transform contentParent;
 
-    [Header("Optional")]
-    [SerializeField] private string currentPlayerName;      // to highlight the local player's row
+    private List<LeaderboardEntryUI> staticRows =
+        new List<LeaderboardEntryUI>();
 
-    private readonly List<LeaderboardEntryUI> spawnedRows = new List<LeaderboardEntryUI>();
+    private string currentPlayerName;
 
-    /// Call this whenever you have fresh leaderboard data to display.
-    public void Populate(List<LeaderboardEntryData> entries)
+    private void Awake()
     {
-        Clear();
+        FindStaticRows();
+    }
 
-        foreach (var entry in entries)
+    public async void LoadDailyLeaderboard()
+    {
+        if (staticRows.Count == 0)
         {
-            LeaderboardEntryUI row = Instantiate(rowPrefab, contentParent);
-            bool isCurrentPlayer = !string.IsNullOrEmpty(currentPlayerName)
-                                    && entry.playerName == currentPlayerName;
+            FindStaticRows();
+        }
 
-            row.Setup(entry, isCurrentPlayer);
-            spawnedRows.Add(row);
+        foreach (LeaderboardEntryUI row in staticRows)
+        {
+            row.gameObject.SetActive(false);
+        }
+
+        currentPlayerName =
+            await SupabaseGameService.GetCurrentUsername();
+
+        List<LeaderboardEntryData> entries =
+            await SupabaseGameService.GetDailyLeaderboard();
+
+        Populate(entries);
+    }
+
+    public void Populate(
+        List<LeaderboardEntryData> entries
+    )
+    {
+        int visibleRows =
+            Mathf.Min(entries.Count, staticRows.Count);
+
+        for (int index = 0;
+             index < staticRows.Count;
+             index++)
+        {
+            bool hasPlayer = index < visibleRows;
+
+            staticRows[index].gameObject.SetActive(
+                hasPlayer
+            );
+
+            if (!hasPlayer)
+            {
+                continue;
+            }
+
+            LeaderboardEntryData entry =
+                entries[index];
+
+            bool isCurrentPlayer =
+                !string.IsNullOrEmpty(currentPlayerName) &&
+                entry.playerName == currentPlayerName;
+
+            staticRows[index].Setup(
+                entry,
+                isCurrentPlayer
+            );
         }
     }
 
-    private void Clear()
+    private void FindStaticRows()
     {
-        foreach (var row in spawnedRows)
+        staticRows.Clear();
+
+        if (contentParent == null)
         {
-            if (row != null)
-                Destroy(row.gameObject);
+            Debug.LogError(
+                "Leaderboard Content Parent is not assigned."
+            );
+
+            return;
         }
-        spawnedRows.Clear();
-    }
 
-    // --- Example usage / test data ---
-    [ContextMenu("Populate With Test Data")]
-    private void PopulateTestData()
-    {
-        var testData = new List<LeaderboardEntryData>
-        {
-            new LeaderboardEntryData { rank = 1, playerName = "Ava",   score = 15420 },
-            new LeaderboardEntryData { rank = 2, playerName = "Kenji", score = 14980 },
-            new LeaderboardEntryData { rank = 3, playerName = "Mo",    score = 13750 },
-            new LeaderboardEntryData { rank = 4, playerName = "You",   score = 9200 },
-            new LeaderboardEntryData { rank = 5, playerName = "Liam",  score = 8700 },
-            new LeaderboardEntryData { rank = 6, playerName = "Zara",  score = 8100 },
-            new LeaderboardEntryData { rank = 7, playerName = "Ravi",  score = 7800 },
-            new LeaderboardEntryData { rank = 8, playerName = "Nia",   score = 7200 },
-            new LeaderboardEntryData { rank = 9, playerName = "Eli",   score = 6900 }
-        };
-        Populate(testData);
+        staticRows = contentParent
+            .GetComponentsInChildren<LeaderboardEntryUI>(
+                true
+            )
+            .OrderBy(
+                row => row.transform.GetSiblingIndex()
+            )
+            .ToList();
     }
-
 }
