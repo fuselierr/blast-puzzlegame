@@ -5154,8 +5154,6 @@ MonoBehaviour:
   emptyPanel: {fileID: 0}
   errorPanel: {fileID: 0}
   errorText: {fileID: 0}
-<<<<<<< HEAD
-=======
   onRefreshRequested:
     m_PersistentCalls:
       m_Calls: []
@@ -5296,7 +5294,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 533103451}
   m_CullTransparentMesh: 1
->>>>>>> 73ec017366679414a50722a3f8cf79f9e313d0ad
 --- !u!1 &537902896
 GameObject:
   m_ObjectHideFlags: 0
@@ -14587,17 +14584,10 @@ RectTransform:
   - {fileID: 790062583}
   m_Father: {fileID: 104848092}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-<<<<<<< HEAD
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 80.131, y: 0}
-=======
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 40.06555, y: -43.988037}
-  m_SizeDelta: {x: 80.131, y: 87.976074}
->>>>>>> 73ec017366679414a50722a3f8cf79f9e313d0ad
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1266859596
 MonoBehaviour:
