@@ -1,6 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum CampaignTutorialType
+{
+    None,
+    BasicControls,
+    BlastDirections,
+    MultipleMines,
+    Walls,
+    StrongDebris,
+    MineTypes
+}
+
 // A single hand-authored campaign level. Create these via
 [CreateAssetMenu(fileName = "CampaignLevel", menuName = "Minesweeper/Campaign Level")]
 public class CampaignLevelData : ScriptableObject
@@ -11,7 +22,9 @@ public class CampaignLevelData : ScriptableObject
 
     [TextArea(3, 8)]
     public string tutorialMessage;
-    public bool interactiveBeginnerTutorial;
+
+    [Header("Interactive Tutorial")]
+    public CampaignTutorialType tutorialType;
 
     [Header("Mine Limits")]
     [Min(0)] public int standardMines;

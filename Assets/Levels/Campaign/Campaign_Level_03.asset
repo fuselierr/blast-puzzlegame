@@ -16,6 +16,7 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: Some puzzles need more than one mine. Place one mine in each debris column, then press DETONATE once.
+  tutorialType: 3
   standardMines: 2
   crossMines: 0
   diagonalMines: 0

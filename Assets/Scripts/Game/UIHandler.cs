@@ -45,6 +45,10 @@ public class UIHandler : MonoBehaviour
     private GameObject campaignGuidancePanel;
     private TMP_Text campaignGuidanceText;
     private Button detonateButton;
+    private Button skipTutorialButton;
+    private Button startTutorialLevelButton;
+    private Button tutorialHelpButton;
+    private GameObject mineSelectorHint;
     private Color detonateButtonOriginalColor = Color.white;
 
     private void Awake()
@@ -65,6 +69,8 @@ public class UIHandler : MonoBehaviour
                 detonateButtonOriginalColor = detonateImage.color;
             }
         }
+
+        CreateMineSelectorHint();
     }
 
     private void OnEnable()
@@ -78,11 +84,15 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnSelectedMineChange += HandleSelectedMineChange;
             GameManager.Instance.OnCampaignTutorial += HandleCampaignTutorial;
             GameManager.Instance.OnCampaignGuidance += HandleCampaignGuidance;
+            GameManager.Instance.OnCampaignTutorialControls +=
+                HandleCampaignTutorialControls;
+            GameManager.Instance.OnCampaignMineSelectorHint +=
+                HandleCampaignMineSelectorHint;
 
-            standardMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
-            crossMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
-            diagonalMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Diagonal; });
-            doubleMineToggle.onValueChanged.AddListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Double; });
+            standardMineToggle.onValueChanged.AddListener(HandleStandardMineToggle);
+            crossMineToggle.onValueChanged.AddListener(HandleCrossMineToggle);
+            diagonalMineToggle.onValueChanged.AddListener(HandleDiagonalMineToggle);
+            doubleMineToggle.onValueChanged.AddListener(HandleDoubleMineToggle);
 
             HandleSelectedMineChange(GameManager.Instance.SelectedMineType);
         }
@@ -99,11 +109,15 @@ public class UIHandler : MonoBehaviour
             GameManager.Instance.OnSelectedMineChange -= HandleSelectedMineChange;
             GameManager.Instance.OnCampaignTutorial -= HandleCampaignTutorial;
             GameManager.Instance.OnCampaignGuidance -= HandleCampaignGuidance;
+            GameManager.Instance.OnCampaignTutorialControls -=
+                HandleCampaignTutorialControls;
+            GameManager.Instance.OnCampaignMineSelectorHint -=
+                HandleCampaignMineSelectorHint;
 
-            standardMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Standard; });
-            crossMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Cross; });
-            diagonalMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Diagonal; });
-            doubleMineToggle.onValueChanged.RemoveListener((isOn) => { GameManager.Instance.SelectedMineType = MineType.Double; });
+            standardMineToggle.onValueChanged.RemoveListener(HandleStandardMineToggle);
+            crossMineToggle.onValueChanged.RemoveListener(HandleCrossMineToggle);
+            diagonalMineToggle.onValueChanged.RemoveListener(HandleDiagonalMineToggle);
+            doubleMineToggle.onValueChanged.RemoveListener(HandleDoubleMineToggle);
         }
     }
 
@@ -220,6 +234,7 @@ public class UIHandler : MonoBehaviour
     {
         showingCampaignTutorial = false;
         HideCampaignGuidance();
+        HideCampaignTutorialControls();
 
         if (levelText != null)
         {
@@ -251,12 +266,11 @@ public class UIHandler : MonoBehaviour
             {
                 advanceButtonText.text = "Back to Levels";
             }
-            else
+            else if (GameManager.SelectedMode == GameMode.Campaign)
             {
-                advanceButtonText.text =
-                    levelNumber >= totalLevels
-                        ? "Finish"
-                        : $"Advance to Level {levelNumber + 1}";
+                advanceButtonText.text = levelNumber >= totalLevels
+                    ? "Finish"
+                    : "Next Level";
             }
         }
 
@@ -341,7 +355,7 @@ public class UIHandler : MonoBehaviour
         panelRect.anchorMax = new Vector2(0.5f, 1f);
         panelRect.pivot = new Vector2(0.5f, 1f);
         panelRect.anchoredPosition = new Vector2(0f, -280f);
-        panelRect.sizeDelta = new Vector2(900f, 180f);
+        panelRect.sizeDelta = new Vector2(960f, 220f);
 
         Image panelImage = panelObject.GetComponent<Image>();
         panelImage.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
@@ -353,17 +367,210 @@ public class UIHandler : MonoBehaviour
         campaignGuidanceText.color = Color.white;
         ConfigurePanelText(campaignGuidanceText);
         campaignGuidanceText.fontSizeMin = 24f;
-        campaignGuidanceText.fontSizeMax = 42f;
+        campaignGuidanceText.fontSizeMax = 44f;
 
         RectTransform textRect = campaignGuidanceText.rectTransform;
         textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.anchoredPosition = Vector2.zero;
-        textRect.sizeDelta = new Vector2(-50f, -24f);
+        textRect.anchorMax = new Vector2(0.78f, 1f);
+        textRect.anchoredPosition = new Vector2(20f, 0f);
+        textRect.sizeDelta = new Vector2(-30f, -24f);
         textRect.localScale = Vector3.one;
 
         campaignGuidancePanel = panelObject;
+        CreateCampaignTutorialControls(canvasTransform, panelObject.transform);
         campaignGuidancePanel.SetActive(false);
+    }
+
+    private void CreateCampaignTutorialControls(
+        Transform canvasTransform,
+        Transform guidanceTransform)
+    {
+        skipTutorialButton = CreateTutorialButton(
+            "SkipTutorialButton",
+            guidanceTransform,
+            "SKIP >>");
+
+        if (skipTutorialButton != null)
+        {
+            RectTransform skipRect =
+                skipTutorialButton.GetComponent<RectTransform>();
+            skipRect.anchorMin = new Vector2(1f, 0.5f);
+            skipRect.anchorMax = new Vector2(1f, 0.5f);
+            skipRect.pivot = new Vector2(1f, 0.5f);
+            skipRect.anchoredPosition = new Vector2(-24f, 0f);
+            skipRect.sizeDelta = new Vector2(170f, 70f);
+            skipTutorialButton.onClick.AddListener(
+                () => GameManager.Instance?.SkipCampaignTutorial());
+            skipTutorialButton.gameObject.SetActive(false);
+        }
+
+        startTutorialLevelButton = CreateTutorialButton(
+            "StartTutorialLevelButton",
+            guidanceTransform,
+            "START");
+
+        if (startTutorialLevelButton != null)
+        {
+            RectTransform startRect =
+                startTutorialLevelButton.GetComponent<RectTransform>();
+            startRect.anchorMin = new Vector2(1f, 0.5f);
+            startRect.anchorMax = new Vector2(1f, 0.5f);
+            startRect.pivot = new Vector2(1f, 0.5f);
+            startRect.anchoredPosition = new Vector2(-24f, 0f);
+            startRect.sizeDelta = new Vector2(170f, 70f);
+            startTutorialLevelButton.onClick.AddListener(
+                () => GameManager.Instance?.StartCampaignLevelAfterTutorial());
+            startTutorialLevelButton.gameObject.SetActive(false);
+        }
+
+        tutorialHelpButton = CreateTutorialButton(
+            "CampaignTutorialHelpButton",
+            canvasTransform,
+            "?");
+
+        if (tutorialHelpButton != null)
+        {
+            RectTransform helpRect =
+                tutorialHelpButton.GetComponent<RectTransform>();
+            RectTransform settingsRect = null;
+            GameObject settingsObject = GameObject.Find("SettingsButton");
+            if (settingsObject != null)
+            {
+                settingsRect = settingsObject.GetComponent<RectTransform>();
+            }
+
+            if (settingsRect != null)
+            {
+                helpRect.anchorMin = settingsRect.anchorMin;
+                helpRect.anchorMax = settingsRect.anchorMax;
+                helpRect.pivot = settingsRect.pivot;
+                helpRect.anchoredPosition = settingsRect.anchoredPosition
+                    + Vector2.down * 125f;
+            }
+            else
+            {
+                helpRect.anchorMin = Vector2.one;
+                helpRect.anchorMax = Vector2.one;
+                helpRect.pivot = Vector2.one;
+                helpRect.anchoredPosition = new Vector2(-30f, -170f);
+            }
+
+            helpRect.sizeDelta = new Vector2(80f, 70f);
+            tutorialHelpButton.onClick.AddListener(
+                () => GameManager.Instance?.ReplayCampaignTutorial());
+            tutorialHelpButton.gameObject.SetActive(false);
+        }
+    }
+
+    private Button CreateTutorialButton(
+        string objectName,
+        Transform parent,
+        string label)
+    {
+        if (advanceButton == null || advanceButtonText == null)
+        {
+            return null;
+        }
+
+        GameObject buttonObject = new GameObject(
+            objectName,
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image),
+            typeof(Button));
+        buttonObject.transform.SetParent(parent, false);
+
+        Image sourceImage = advanceButton.GetComponent<Image>();
+        Image buttonImage = buttonObject.GetComponent<Image>();
+        if (sourceImage != null)
+        {
+            buttonImage.sprite = sourceImage.sprite;
+            buttonImage.color = sourceImage.color;
+            buttonImage.material = sourceImage.material;
+            buttonImage.type = sourceImage.type;
+        }
+
+        Button button = buttonObject.GetComponent<Button>();
+        button.targetGraphic = buttonImage;
+        button.transition = advanceButton.transition;
+        button.colors = advanceButton.colors;
+
+        TMP_Text buttonText = Instantiate(
+            advanceButtonText,
+            buttonObject.transform);
+        buttonText.name = $"{objectName}Text";
+        buttonText.text = label;
+        buttonText.raycastTarget = false;
+
+        RectTransform textRect = buttonText.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.anchoredPosition = Vector2.zero;
+        textRect.sizeDelta = Vector2.zero;
+
+        return button;
+    }
+
+    private void CreateMineSelectorHint()
+    {
+        if (standardMineToggle == null)
+        {
+            return;
+        }
+
+        mineSelectorHint = new GameObject(
+            "MineSelectorTutorialArrow",
+            typeof(RectTransform));
+        mineSelectorHint.transform.SetParent(
+            standardMineToggle.transform,
+            false);
+
+        RectTransform hintRect =
+            mineSelectorHint.GetComponent<RectTransform>();
+        hintRect.anchorMin = new Vector2(0.5f, 1f);
+        hintRect.anchorMax = new Vector2(0.5f, 1f);
+        hintRect.pivot = new Vector2(0.5f, 0f);
+        hintRect.anchoredPosition = new Vector2(0f, 8f);
+        hintRect.sizeDelta = new Vector2(36f, 24f);
+
+        CreateChevronSegment(
+            mineSelectorHint.transform,
+            "Left",
+            new Vector2(-6f, 4f),
+            -35f);
+        CreateChevronSegment(
+            mineSelectorHint.transform,
+            "Right",
+            new Vector2(6f, 4f),
+            35f);
+
+        mineSelectorHint.SetActive(false);
+    }
+
+    private void CreateChevronSegment(
+        Transform parent,
+        string segmentName,
+        Vector2 position,
+        float rotation)
+    {
+        GameObject segment = new GameObject(
+            $"MineSelectorArrow{segmentName}",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image));
+        segment.transform.SetParent(parent, false);
+
+        RectTransform segmentRect = segment.GetComponent<RectTransform>();
+        segmentRect.anchorMin = new Vector2(0.5f, 0.5f);
+        segmentRect.anchorMax = new Vector2(0.5f, 0.5f);
+        segmentRect.pivot = new Vector2(0.5f, 0.5f);
+        segmentRect.anchoredPosition = position;
+        segmentRect.sizeDelta = new Vector2(20f, 5f);
+        segmentRect.localRotation = Quaternion.Euler(0f, 0f, rotation);
+
+        Image segmentImage = segment.GetComponent<Image>();
+        segmentImage.color = new Color(1f, 0.82f, 0.2f, 1f);
+        segmentImage.raycastTarget = false;
     }
 
     private void ConfigureLevelMessageLayout()
@@ -412,6 +619,63 @@ public class UIHandler : MonoBehaviour
         }
         campaignGuidancePanel?.SetActive(true);
         SetDetonateHighlight(highlightDetonate);
+    }
+
+    private void HandleCampaignTutorialControls(
+        bool available,
+        bool active,
+        bool readyToStart)
+    {
+        bool isCampaign = GameManager.SelectedMode == GameMode.Campaign;
+        skipTutorialButton?.gameObject.SetActive(
+            isCampaign && available && active);
+        startTutorialLevelButton?.gameObject.SetActive(
+            isCampaign && available && readyToStart);
+        tutorialHelpButton?.gameObject.SetActive(
+            isCampaign && available && !active && !readyToStart);
+    }
+
+    private void HandleCampaignMineSelectorHint(MineType? mineType)
+    {
+        if (mineSelectorHint == null || !mineType.HasValue)
+        {
+            mineSelectorHint?.SetActive(false);
+            return;
+        }
+
+        Toggle targetToggle = null;
+        switch (mineType.Value)
+        {
+            case MineType.Standard:
+                targetToggle = standardMineToggle;
+                break;
+            case MineType.Cross:
+                targetToggle = crossMineToggle;
+                break;
+            case MineType.Diagonal:
+                targetToggle = diagonalMineToggle;
+                break;
+            case MineType.Double:
+                targetToggle = doubleMineToggle;
+                break;
+        }
+
+        if (targetToggle == null)
+        {
+            mineSelectorHint.SetActive(false);
+            return;
+        }
+
+        mineSelectorHint.transform.SetParent(targetToggle.transform, false);
+        RectTransform hintRect =
+            mineSelectorHint.GetComponent<RectTransform>();
+        hintRect.anchorMin = new Vector2(0.5f, 1f);
+        hintRect.anchorMax = new Vector2(0.5f, 1f);
+        hintRect.pivot = new Vector2(0.5f, 0f);
+        hintRect.anchoredPosition = new Vector2(0f, 8f);
+        hintRect.localScale = Vector3.one;
+        mineSelectorHint.transform.SetAsLastSibling();
+        mineSelectorHint.SetActive(true);
     }
 
     private void HideCampaignGuidance()
@@ -519,6 +783,7 @@ public class UIHandler : MonoBehaviour
     private async void HandleGameWon()
     {
         HideCampaignGuidance();
+        HideCampaignTutorialControls();
         if (levelClearPanel != null)
         {
             levelClearPanel.SetActive(false);
@@ -586,6 +851,7 @@ public class UIHandler : MonoBehaviour
     private void HandleGameLost()
     {
         HideCampaignGuidance();
+        HideCampaignTutorialControls();
         if (gameOverMessageText != null)
         {
             if (GameManager.SelectedMode == GameMode.Classic)
@@ -625,6 +891,46 @@ public class UIHandler : MonoBehaviour
                 doubleMineToggle.SetIsOnWithoutNotify(true);
                 break;
         }
+    }
+
+    private void HandleStandardMineToggle(bool isOn)
+    {
+        if (isOn && GameManager.Instance != null)
+        {
+            GameManager.Instance.SelectedMineType = MineType.Standard;
+        }
+    }
+
+    private void HandleCrossMineToggle(bool isOn)
+    {
+        if (isOn && GameManager.Instance != null)
+        {
+            GameManager.Instance.SelectedMineType = MineType.Cross;
+        }
+    }
+
+    private void HandleDiagonalMineToggle(bool isOn)
+    {
+        if (isOn && GameManager.Instance != null)
+        {
+            GameManager.Instance.SelectedMineType = MineType.Diagonal;
+        }
+    }
+
+    private void HandleDoubleMineToggle(bool isOn)
+    {
+        if (isOn && GameManager.Instance != null)
+        {
+            GameManager.Instance.SelectedMineType = MineType.Double;
+        }
+    }
+
+    private void HideCampaignTutorialControls()
+    {
+        skipTutorialButton?.gameObject.SetActive(false);
+        startTutorialLevelButton?.gameObject.SetActive(false);
+        tutorialHelpButton?.gameObject.SetActive(false);
+        mineSelectorHint?.SetActive(false);
     }
 
     // private void SetMineSelectCallbacks()

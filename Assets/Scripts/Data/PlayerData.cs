@@ -23,6 +23,7 @@ public class PlayerData
     public int classicHighScore = 0;
 
     public List<int> completedCampaignLevels = new List<int>();
+    public List<int> completedCampaignTutorials = new List<int>();
     public List<CampaignLevelResult> campaignLevelResults = new List<CampaignLevelResult>();
     public string lastSaveTime = string.Empty;
 }
