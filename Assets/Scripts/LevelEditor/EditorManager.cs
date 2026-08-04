@@ -71,6 +71,7 @@ public class EditorManager : MonoBehaviour
         }
 
         gridSpawner.TileClicked += PaintTile;
+        gridSpawner.TileDoubleClicked += DeleteTile;
 
         if (gameplayGridSpawner != null)
         {
@@ -123,6 +124,7 @@ public class EditorManager : MonoBehaviour
         if (gridSpawner != null)
         {
             gridSpawner.TileClicked -= PaintTile;
+            gridSpawner.TileDoubleClicked -= DeleteTile;
         }
 
         if (verificationManager != null)
@@ -155,6 +157,21 @@ public class EditorManager : MonoBehaviour
         );
 
         tile.SetTile(selectedTileType, selectedMineType);
+    }
+
+    private void DeleteTile(EditorTile tile)
+    {
+        if (tile == null)
+        {
+            return;
+        }
+
+        Debug.Log(
+            $"RESETTING {tile.GridPosition} TO A NORMAL TILE",
+            this
+        );
+
+        tile.SetTile(TileType.Tile, MineType.Standard);
     }
 
     public void ResizeGridFromInputs()

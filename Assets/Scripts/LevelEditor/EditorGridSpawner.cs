@@ -24,6 +24,7 @@ public class EditorGridSpawner : MonoBehaviour
     public int Height => height;
     public bool TilesVisible => tilesVisible;
     public event Action<EditorTile> TileClicked;
+    public event Action<EditorTile> TileDoubleClicked;
 
     private void Start()
     {
@@ -85,6 +86,7 @@ public class EditorGridSpawner : MonoBehaviour
                 newTileRect.localRotation = Quaternion.identity;
                 tile.Initialize(globals, new Vector2Int(x, y));
                 tile.Clicked += HandleTileClicked;
+                tile.DoubleClicked += HandleTileDoubleClicked;
                 tile.gameObject.SetActive(tilesVisible);
                 tiles[x, y] = tile;
             }
@@ -102,6 +104,7 @@ public class EditorGridSpawner : MonoBehaviour
                         if (oldTile != null)
                         {
                             oldTile.Clicked -= HandleTileClicked;
+                            oldTile.DoubleClicked -= HandleTileDoubleClicked;
                             Destroy(oldTile.gameObject);
                         }
                     }
@@ -126,6 +129,16 @@ public class EditorGridSpawner : MonoBehaviour
     {
         Debug.Log($"GRID SPAWNER FORWARDING: {tile.GridPosition}", this);
         TileClicked?.Invoke(tile);
+    }
+
+    private void HandleTileDoubleClicked(EditorTile tile)
+    {
+        Debug.Log(
+            $"GRID SPAWNER FORWARDING DOUBLE-CLICK: " +
+            $"{tile.GridPosition}",
+            this);
+
+        TileDoubleClicked?.Invoke(tile);
     }
 
     public void ResizeGrid(int newWidth, int newHeight)
