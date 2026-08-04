@@ -212,6 +212,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void NotifyFlagChanged(Vector2Int position, bool flagged)
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.HandleFlagChanged(position, flagged);
+        }
+    }
+
 
     // --- Called by mode implementations to report state changes ---
 
