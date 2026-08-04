@@ -12,24 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_10
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: Final Challenge
+  levelName: Double Impact
   width: 7
   height: 7
-  tutorialMessage: 'Final challenge: combine mine types, work around walls, and clear every debris tile.'
-  standardMines: 3
-  crossMines: 3
-  diagonalMines: 3
-  doubleMines: 3
-  layout: 'x-----x
+  tutorialMessage: Double mines fire twice in every direction. Use one to clear strong debris with a single detonation.
+  tutorialType: 8
+  standardMines: 0
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 1
+  layout: '---t---
 
-    --x-x--
+    -------
 
-    ----www
+    -------
 
-    x-----x
+    t-----t
 
-    www----
+    -------
 
-    --x-x--
+    -------
 
-    x-----x'
+    ---t---'

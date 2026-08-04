@@ -4,7 +4,7 @@ public class LevelSelectGenerator : MonoBehaviour
 {
     public GameObject levelButtonPrefab;
     public Transform content;
-    public int numberOfLevels = 5;
+    public int numberOfLevels = 12;
 
     void Start()
     {

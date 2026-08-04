@@ -12,25 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_08
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: Mine Training
+  levelName: Cross Training
   width: 7
   height: 7
-  tutorialMessage: Use the mine selector to change blast patterns. Cross mines fire straight; diagonal mines fire diagonally; double mines fire twice.
+  tutorialMessage: Cross mines fire only horizontally and vertically. Use one mine to clear all four straight paths.
   tutorialType: 6
-  standardMines: 2
-  crossMines: 2
-  diagonalMines: 2
-  doubleMines: 2
-  layout: 'x-----x
+  standardMines: 0
+  crossMines: 1
+  diagonalMines: 0
+  doubleMines: 0
+  layout: '---x---
 
-    --x-x--
+    -------
 
-    ----www
+    -------
 
     x-----x
 
-    www----
+    -------
 
-    --x-x--
+    -------
 
-    x-----x'
+    ---x---'

@@ -22,6 +22,7 @@ public class CampaignMode : GameModeBase
     private TutorialStep tutorialStep;
     private CampaignLevelData currentLevel;
     private Vector2Int requiredMinePosition;
+    private MineType requiredMineType = MineType.Standard;
     private Vector2Int? highlightedPosition;
     private readonly HashSet<Vector2Int> tutorialMinePositions =
         new HashSet<Vector2Int>();
@@ -218,10 +219,10 @@ public class CampaignMode : GameModeBase
             return;
         }
 
-        if (position != requiredMinePosition || mineType != MineType.Standard)
+        if (position != requiredMinePosition || mineType != requiredMineType)
         {
             manager.NotifyCampaignGuidance(
-                "Tap that mine again to pick it up, then place a Standard mine on the highlighted tile.",
+                $"Tap that mine again to pick it up, then place a {requiredMineType} mine on the highlighted tile.",
                 highlightDetonate: false);
             return;
         }
@@ -249,6 +250,21 @@ public class CampaignMode : GameModeBase
                 CompleteTutorial(
                     "The centre mine gives each strong debris one hit. Press START when ready, then add another mine aligned with both.");
                 break;
+
+            case CampaignTutorialType.CrossMine:
+                CompleteTutorial(
+                    "Cross mines fire only up, down, left, and right. Press START when ready, then DETONATE.");
+                break;
+
+            case CampaignTutorialType.DiagonalMine:
+                CompleteTutorial(
+                    "Diagonal mines fire toward all four corners. Press START when ready, then DETONATE.");
+                break;
+
+            case CampaignTutorialType.DoubleMine:
+                CompleteTutorial(
+                    "Double mines send two blasts in every direction, clearing strong debris in one detonation. Press START when ready.");
+                break;
         }
     }
 
@@ -275,7 +291,7 @@ public class CampaignMode : GameModeBase
     {
         if (!tutorialActive
             || currentLevel == null
-            || currentLevel.tutorialType != CampaignTutorialType.MineTypes)
+            || !IsSpecialMineTutorial(currentLevel.tutorialType))
         {
             return;
         }
@@ -283,26 +299,23 @@ public class CampaignMode : GameModeBase
         if (tutorialStep == TutorialStep.SelectCrossMine
             && mineType == MineType.Cross)
         {
-            tutorialStep = TutorialStep.SelectDiagonalMine;
-            manager.NotifyCampaignMineSelectorHint(MineType.Diagonal);
-            manager.NotifyCampaignGuidance(
-                "Cross mines fire up, down, left, and right. Now tap the Diagonal mine selector.",
-                highlightDetonate: false);
+            BeginSpecialMinePlacement(
+                MineType.Cross,
+                "Cross mines fire up, down, left, and right. Place one on the highlighted centre tile.");
         }
         else if (tutorialStep == TutorialStep.SelectDiagonalMine
             && mineType == MineType.Diagonal)
         {
-            tutorialStep = TutorialStep.SelectDoubleMine;
-            manager.NotifyCampaignMineSelectorHint(MineType.Double);
-            manager.NotifyCampaignGuidance(
-                "Diagonal mines fire only along the four diagonals. Now tap the Double mine selector.",
-                highlightDetonate: false);
+            BeginSpecialMinePlacement(
+                MineType.Diagonal,
+                "Diagonal mines fire only along the four diagonals. Place one on the highlighted centre tile.");
         }
         else if (tutorialStep == TutorialStep.SelectDoubleMine
             && mineType == MineType.Double)
         {
-            CompleteTutorial(
-                "Double mines fire twice in all eight directions. Press START when ready, then choose the pattern that fits each open path.");
+            BeginSpecialMinePlacement(
+                MineType.Double,
+                "Double mines fire twice in all eight directions. Place one on the highlighted centre tile.");
         }
     }
 
@@ -315,6 +328,7 @@ public class CampaignMode : GameModeBase
         switch (data.tutorialType)
         {
             case CampaignTutorialType.BasicControls:
+                requiredMineType = MineType.Standard;
                 requiredMinePosition =
                     new Vector2Int(data.width / 2, data.height / 2);
                 tutorialStep = TutorialStep.PlaceRequiredMine;
@@ -325,6 +339,7 @@ public class CampaignMode : GameModeBase
                 break;
 
             case CampaignTutorialType.BlastDirections:
+                requiredMineType = MineType.Standard;
                 requiredMinePosition =
                     new Vector2Int(data.width / 2, data.height / 2);
                 tutorialStep = TutorialStep.PlaceRequiredMine;
@@ -342,6 +357,7 @@ public class CampaignMode : GameModeBase
                 break;
 
             case CampaignTutorialType.Walls:
+                requiredMineType = MineType.Standard;
                 requiredMinePosition =
                     new Vector2Int(0, data.height - 1);
                 tutorialStep = TutorialStep.PlaceRequiredMine;
@@ -352,6 +368,7 @@ public class CampaignMode : GameModeBase
                 break;
 
             case CampaignTutorialType.StrongDebris:
+                requiredMineType = MineType.Standard;
                 requiredMinePosition =
                     new Vector2Int(data.width / 2, data.height / 2);
                 tutorialStep = TutorialStep.PlaceRequiredMine;
@@ -361,11 +378,30 @@ public class CampaignMode : GameModeBase
                     highlightDetonate: false);
                 break;
 
-            case CampaignTutorialType.MineTypes:
+            case CampaignTutorialType.CrossMine:
                 tutorialStep = TutorialStep.SelectCrossMine;
+                manager.SelectedMineType = MineType.Standard;
                 manager.NotifyCampaignMineSelectorHint(MineType.Cross);
                 manager.NotifyCampaignGuidance(
-                    "Different mines use different blast patterns. Start by tapping the Cross mine selector.",
+                    "Cross mines use a straight-line blast pattern. Start by tapping the highlighted Cross mine selector.",
+                    highlightDetonate: false);
+                break;
+
+            case CampaignTutorialType.DiagonalMine:
+                tutorialStep = TutorialStep.SelectDiagonalMine;
+                manager.SelectedMineType = MineType.Standard;
+                manager.NotifyCampaignMineSelectorHint(MineType.Diagonal);
+                manager.NotifyCampaignGuidance(
+                    "Diagonal mines reach targets on diagonal paths. Start by tapping the highlighted Diagonal mine selector.",
+                    highlightDetonate: false);
+                break;
+
+            case CampaignTutorialType.DoubleMine:
+                tutorialStep = TutorialStep.SelectDoubleMine;
+                manager.SelectedMineType = MineType.Standard;
+                manager.NotifyCampaignMineSelectorHint(MineType.Double);
+                manager.NotifyCampaignGuidance(
+                    "Double mines fire twice and are ideal for strong debris. Start by tapping the highlighted Double mine selector.",
                     highlightDetonate: false);
                 break;
 
@@ -478,6 +514,27 @@ public class CampaignMode : GameModeBase
         return tutorialStep == TutorialStep.SelectCrossMine
             || tutorialStep == TutorialStep.SelectDiagonalMine
             || tutorialStep == TutorialStep.SelectDoubleMine;
+    }
+
+    private bool IsSpecialMineTutorial(CampaignTutorialType tutorialType)
+    {
+        return tutorialType == CampaignTutorialType.CrossMine
+            || tutorialType == CampaignTutorialType.DiagonalMine
+            || tutorialType == CampaignTutorialType.DoubleMine;
+    }
+
+    private void BeginSpecialMinePlacement(
+        MineType mineType,
+        string message)
+    {
+        requiredMineType = mineType;
+        requiredMinePosition = new Vector2Int(
+            currentLevel.width / 2,
+            currentLevel.height / 2);
+        tutorialStep = TutorialStep.PlaceRequiredMine;
+        manager.NotifyCampaignMineSelectorHint(null);
+        SetTutorialHighlight(requiredMinePosition);
+        manager.NotifyCampaignGuidance(message, highlightDetonate: false);
     }
 
     public override int calculateScore()

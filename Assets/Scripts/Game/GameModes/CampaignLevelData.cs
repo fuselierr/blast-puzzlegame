@@ -9,7 +9,9 @@ public enum CampaignTutorialType
     MultipleMines,
     Walls,
     StrongDebris,
-    MineTypes
+    CrossMine,
+    DiagonalMine,
+    DoubleMine
 }
 
 // A single hand-authored campaign level. Create these via
