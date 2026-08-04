@@ -89,6 +89,8 @@ public class MainMenu : MonoBehaviour
     public void PlayFreeplay()
     {
         GameManager.SelectedMode = GameMode.Freeplay;
+        GameManager.IsDailyChallenge = false;
+        GameManager.SelectedCustomLevel = null;
         LoadSceneWithBackgroundExit("Game");
     }
 

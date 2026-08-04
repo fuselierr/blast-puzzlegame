@@ -124,7 +124,7 @@ public class CustomLevelDataRow : BaseModel
 [Table("custom_level_data_likes")]
 public class CustomLevelDataLikeRow : BaseModel
 {
-    [PrimaryKey("level_id", false)]
+    [Column("level_id")]
     public string LevelId { get; set; }
 
     [Column("user_id")]

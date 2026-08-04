@@ -8,6 +8,8 @@ public static class SupabaseGameService
 {
     private const int ClassicLevelCount = 10;
     private const int LeaderboardLimit = 100;
+    private static DateTime? dailyChallengeStartUtc;
+    private static string dailyChallengeStartDate;
 
     public static async Task<HashSet<int>> GetCompletedClassicLevels()
     {
@@ -108,6 +110,10 @@ public static class SupabaseGameService
 
             if (string.IsNullOrEmpty(userId))
             {
+                Debug.LogWarning(
+                    "Cannot start Daily Challenge because no Supabase user is signed in."
+                );
+
                 return false;
             }
 
@@ -116,29 +122,17 @@ public static class SupabaseGameService
             var existing = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
-            if (existing.Models.Count > 0)
+            if (existing.Models.Any(IsCompletedDailyScore))
             {
                 return false;
             }
 
-            DailyChallengeScoreRow attempt =
-                new DailyChallengeScoreRow
-                {
-                    UserId = userId,
-                    ChallengeDate = today,
-                    Score = null,
-                    AttemptedAt = DateTime.UtcNow,
-                    CompletedAt = null
-                };
-
-            await SupabaseManager.Instance.SupabaseClient
-                .From<DailyChallengeScoreRow>()
-                .Insert(attempt);
+            dailyChallengeStartDate = today;
+            dailyChallengeStartUtc = DateTime.UtcNow;
 
             return true;
         }
@@ -170,12 +164,11 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
-            return response.Models.Count > 0;
+            return response.Models.Any(IsCompletedDailyScore);
         }
         catch (Exception exception)
         {
@@ -204,9 +197,8 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
             if (response.Models.Count == 0)
@@ -215,9 +207,9 @@ public static class SupabaseGameService
             }
 
             DailyChallengeScoreRow attempt =
-                response.Models[0];
+                response.Models.FirstOrDefault(IsCompletedDailyScore);
 
-            if (!attempt.Score.HasValue)
+            if (attempt == null)
             {
                 return null;
             }
@@ -255,35 +247,58 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
-            if (response.Models.Count == 0)
-            {
-                Debug.LogError(
-                    "Daily Challenge attempt row was not found."
-                );
-
-                return false;
-            }
-
             DailyChallengeScoreRow attempt =
-                response.Models[0];
+                response.Models.FirstOrDefault(IsCompletedDailyScore);
 
-            if (attempt.Score.HasValue)
+            if (attempt != null)
             {
                 return true;
             }
 
-            attempt.Score = score;
-            attempt.CompletedAt = DateTime.UtcNow;
+            bool insertNewRow =
+                response.Models.Count == 0;
 
-            await SupabaseManager.Instance
-                .SupabaseClient
-                .From<DailyChallengeScoreRow>()
-                .Update(attempt);
+            DateTime completedAt = DateTime.UtcNow;
+
+            attempt = insertNewRow
+                ? new DailyChallengeScoreRow
+                {
+                    UserId = userId,
+                    ChallengeDate = today
+                }
+                : response.Models[0];
+
+            if (attempt.AttemptedAt == default ||
+                attempt.AttemptedAt >= completedAt)
+            {
+                attempt.AttemptedAt =
+                    GetDailyChallengeStartTime(
+                        today,
+                        completedAt
+                    );
+            }
+
+            attempt.Score = score;
+            attempt.CompletedAt = completedAt;
+
+            if (insertNewRow)
+            {
+                await SupabaseManager.Instance
+                    .SupabaseClient
+                    .From<DailyChallengeScoreRow>()
+                    .Insert(attempt);
+            }
+            else
+            {
+                await SupabaseManager.Instance
+                    .SupabaseClient
+                    .From<DailyChallengeScoreRow>()
+                    .Update(attempt);
+            }
 
             Debug.Log(
                 $"Daily Challenge score saved: {score}"
@@ -293,6 +308,16 @@ public static class SupabaseGameService
         }
         catch (Exception exception)
         {
+            if (IsDuplicateRowError(exception))
+            {
+                Debug.LogError(
+                    "Daily Challenge score was blocked by a duplicate " +
+                    "database constraint. The daily_challenge_scores " +
+                    "unique constraint should include both user_id and " +
+                    "challenge_date."
+                );
+            }
+
             Debug.LogError(
                 "Could not save Daily score: " +
                 exception.Message
@@ -335,7 +360,7 @@ public static class SupabaseGameService
 
             List<DailyChallengeScoreRow> sorted =
                 scores.Models
-                    .Where(row => row.Score.HasValue)
+                    .Where(IsCompletedDailyScore)
                     .OrderByDescending(
                         row => row.Score.Value
                     )
@@ -407,11 +432,13 @@ public static class SupabaseGameService
             return null;
         }
 
+        // CurrentUser is updated when accounts change. Depending on the
+        // session persistence implementation, CurrentSession can briefly
+        // still reference the previous account during a switch.
         return SupabaseManager.Instance
             .SupabaseClient
             .Auth
-            .CurrentSession?
-            .User?
+            .CurrentUser?
             .Id;
     }
 
@@ -434,6 +461,61 @@ public static class SupabaseGameService
     private static string GetUtcDateKey()
     {
         return DateTime.UtcNow.ToString("yyyy-MM-dd");
+    }
+
+    private static DateTime GetDailyChallengeStartTime(
+        string today,
+        DateTime completedAt
+    )
+    {
+        if (dailyChallengeStartUtc.HasValue &&
+            dailyChallengeStartDate == today &&
+            dailyChallengeStartUtc.Value < completedAt)
+        {
+            return dailyChallengeStartUtc.Value;
+        }
+
+        return completedAt.AddSeconds(-1);
+    }
+
+    private static bool IsCompletedDailyScore(
+        DailyChallengeScoreRow row
+    )
+    {
+        if (row == null ||
+            !row.Score.HasValue ||
+            !row.CompletedAt.HasValue)
+        {
+            return false;
+        }
+
+        if (row.AttemptedAt == default)
+        {
+            return true;
+        }
+
+        return row.CompletedAt.Value > row.AttemptedAt;
+    }
+
+    private static bool IsDuplicateRowError(
+        Exception exception
+    )
+    {
+        return MessageContains(exception, "23505") ||
+            MessageContains(exception, "duplicate key");
+    }
+
+    private static bool MessageContains(
+        Exception exception,
+        string value
+    )
+    {
+        return exception != null &&
+            exception.Message != null &&
+            exception.Message.IndexOf(
+                value,
+                StringComparison.OrdinalIgnoreCase
+            ) >= 0;
     }
 
     private static string GetUsername(
