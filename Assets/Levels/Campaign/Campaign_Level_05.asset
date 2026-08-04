@@ -16,7 +16,7 @@ MonoBehaviour:
   width: 7
   height: 7
   tutorialMessage: Combine what you learned. Plan multiple blast lines before pressing DETONATE.
-  standardMines: 3
+  standardMines: 4
   crossMines: 0
   diagonalMines: 0
   doubleMines: 0
