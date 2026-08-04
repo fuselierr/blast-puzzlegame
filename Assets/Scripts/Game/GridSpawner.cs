@@ -18,6 +18,8 @@ public class GridSpawner : MonoBehaviour
     [SerializeField, Min(0.05f)] private float tileDropDuration = 0.35f;
     [SerializeField, Min(0f)] private float spawnAboveScreen = 1f;
 
+    private const float ResolutionVisualDelay = 1.4f;
+
     private GameObject[,] tiles;
 
     private static readonly Vector2Int[] solverDirections =
@@ -705,6 +707,14 @@ public class GridSpawner : MonoBehaviour
             yield return null;
         }
 
+        // Projectile trails are separate particle objects that fade after the
+        // projectile itself is destroyed. Keep the result panel out of the
+        // way until that last visual feedback has had time to finish.
+        if (ResolutionVisualDelay > 0f)
+        {
+            yield return new WaitForSeconds(ResolutionVisualDelay);
+        }
+
         IsDetonating = false;
         onResolved?.Invoke(AllDebrisCleared);
     }
@@ -718,7 +728,9 @@ public class GridSpawner : MonoBehaviour
             {
                 GameObject tileObject = tiles[x, y];
                 Tile tile = tileObject != null ? tileObject.GetComponent<Tile>() : null;
-                if (tile != null && tile.Type == TileType.Debris)
+                if (tile != null &&
+                    (tile.Type == TileType.Debris ||
+                     tile.Type == TileType.StrongDebris))
                 {
                     count++;
                 }
@@ -728,6 +740,17 @@ public class GridSpawner : MonoBehaviour
     }
 
     public bool AllDebrisCleared => DebrisRemaining() == 0;
+
+    public void SetTutorialHighlight(Vector2Int position, bool highlighted)
+    {
+        if (tiles == null || !IsInsideGrid(position))
+        {
+            return;
+        }
+
+        Tile tile = GetTile(position);
+        tile?.SetTutorialHighlight(highlighted);
+    }
 
     private void SpawnProjectiles(Vector3 position, MineType mineType = MineType.Standard)
     {

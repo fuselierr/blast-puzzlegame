@@ -103,6 +103,16 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         SetFlagged(!IsFlagged);
     }
 
+    public void SetTutorialHighlight(bool highlighted)
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = highlighted
+                ? new Color(1f, 0.82f, 0.2f, 1f)
+                : Color.white;
+        }
+    }
+
     private void SetFlagged(bool flagged)
     {
         IsFlagged = flagged;
@@ -142,6 +152,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             if (placedMine)
             {
                 SetTileType(selectedMineType);
+                gameManager.NotifyMinePlaced(GridPosition, selectedMineType);
             }
         }
         else if (Type == TileType.Mine)
@@ -149,6 +160,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             MineType prevMineType = mineType;
             SetTileType(TileType.Tile);
             gameManager.ReturnMine(prevMineType);
+            gameManager.NotifyMineReturned(GridPosition, prevMineType);
         }
         else if (Type == TileType.Debris)
         {

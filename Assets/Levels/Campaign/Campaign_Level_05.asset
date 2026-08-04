@@ -15,6 +15,11 @@ MonoBehaviour:
   levelName: Crossfire
   width: 7
   height: 7
+  tutorialMessage: Combine what you learned. Plan multiple blast lines before pressing DETONATE.
+  standardMines: 4
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: 'x--x--x
 
     -x---x-

@@ -12,19 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_03
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: Second Wave
+  levelName: Two-Mine Setup
   width: 7
   height: 7
-  layout: '---x---
-
-    ---x---
+  tutorialMessage: Some puzzles need more than one mine. Place one mine in each debris column, then press DETONATE once.
+  tutorialType: 3
+  standardMines: 2
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
+  layout: '-x---x-
 
     -------
 
-    xx---xx
+    -------
 
     -------
 
-    ---x---
+    -------
 
-    ---x---'
+    -------
+
+    -x---x-'

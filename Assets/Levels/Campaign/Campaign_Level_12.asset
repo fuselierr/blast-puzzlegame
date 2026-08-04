@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
+  m_Name: Campaign_Level_12
+  m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
+  levelName: Final Blast
+  width: 9
+  height: 9
+  tutorialMessage: Use everything you learned. Every mine type has one job, and all four mines must be placed before the final detonation.
+  standardMines: 1
+  crossMines: 1
+  diagonalMines: 1
+  doubleMines: 1
+  layout: '--x------
+
+    ---------
+
+    -x-xw-x--
+
+    --xxx----
+
+    ------x-x
+
+    --ww-x---
+
+    --------t
+
+    ---t-x---
+
+    --t-x---x'
