@@ -1824,6 +1824,7 @@ MonoBehaviour:
   usernameInput: {fileID: 499491395}
   passwordInput: {fileID: 51127760}
   statusText: {fileID: 447744384}
+  startGame: {fileID: 432629324}
 --- !u!1 &721950961
 GameObject:
   m_ObjectHideFlags: 0

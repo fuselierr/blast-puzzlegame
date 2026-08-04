@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using TMPro;
 using System.Threading.Tasks;
 
@@ -9,6 +8,17 @@ public class AuthLauncher : MonoBehaviour
     [SerializeField] private TMP_InputField usernameInput;
     [SerializeField] private TMP_InputField passwordInput;
     [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private StartGame startGame;
+
+    private bool isSubmitting;
+
+    private void Awake()
+    {
+        if (startGame == null)
+        {
+            startGame = FindObjectOfType<StartGame>();
+        }
+    }
 
     private async void Start()
     {
@@ -23,10 +33,13 @@ public class AuthLauncher : MonoBehaviour
                 statusText.text = "Welcome back! Verifying profile...";
 
                 // Extract username from email fallback (e.g. "testplayer@game.local" -> "testplayer")
-                string username = currentSession.User.Email.Split('@')[0];
+                string username = GetUsernameFromEmail(
+                    currentSession.User.Email);
                 await EnsureUserDataExists(currentSession.User.Id, username);
 
-                LoadMainMenu();
+                // StartGame detects this restored session and shows the Start
+                // button immediately. Do not skip directly to MainMenu.
+                statusText.text = string.Empty;
             }
             else
             {
@@ -37,6 +50,11 @@ public class AuthLauncher : MonoBehaviour
 
     public async void OnClickSignUp()
     {
+        if (isSubmitting)
+        {
+            return;
+        }
+
         string username = usernameInput.text.Trim();
         string password = passwordInput.text;
 
@@ -54,17 +72,24 @@ public class AuthLauncher : MonoBehaviour
 
         string email = $"{username.ToLower()}@game.local";
         statusText.text = "Creating account...";
+        isSubmitting = true;
 
         try
         {
             var session = await SupabaseManager.Instance.SupabaseClient.Auth.SignUp(email, password);
-            if (session?.User != null)
+            if (session?.User != null &&
+                !string.IsNullOrWhiteSpace(session.AccessToken))
             {
                 statusText.text = "Setting up profile...";
                 await EnsureUserDataExists(session.User.Id, username);
 
-                statusText.text = "Account created! Loading game...";
-                LoadMainMenu();
+                statusText.text = "Account created!";
+                NotifyAuthenticationSucceeded();
+            }
+            else
+            {
+                statusText.text =
+                    "Account created. Confirm your email before signing in.";
             }
         }
         catch (System.Exception ex)
@@ -74,10 +99,19 @@ public class AuthLauncher : MonoBehaviour
                 ? "Username is already taken."
                 : "Sign Up Failed. Check connection & try again.";
         }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 
     public async void OnClickLogin()
     {
+        if (isSubmitting)
+        {
+            return;
+        }
+
         string username = usernameInput.text.Trim();
         string password = passwordInput.text;
 
@@ -89,6 +123,7 @@ public class AuthLauncher : MonoBehaviour
 
         string email = $"{username.ToLower()}@game.local";
         statusText.text = "Logging in...";
+        isSubmitting = true;
 
         try
         {
@@ -98,14 +133,18 @@ public class AuthLauncher : MonoBehaviour
                 statusText.text = "Verifying profile...";
                 await EnsureUserDataExists(session.User.Id, username);
 
-                statusText.text = "Success! Loading Main Menu...";
-                LoadMainMenu();
+                statusText.text = "Login successful!";
+                NotifyAuthenticationSucceeded();
             }
         }
         catch (System.Exception ex)
         {
             Debug.LogError("Login Error: " + ex);
             statusText.text = "Login Failed: Invalid username or password.";
+        }
+        finally
+        {
+            isSubmitting = false;
         }
     }
 
@@ -147,8 +186,34 @@ public class AuthLauncher : MonoBehaviour
         }
     }
 
-    private void LoadMainMenu()
+    private void NotifyAuthenticationSucceeded()
     {
-        SceneManager.LoadScene("MainMenu");
+        if (startGame == null)
+        {
+            startGame = FindObjectOfType<StartGame>();
+        }
+
+        if (startGame == null)
+        {
+            Debug.LogError(
+                "AuthLauncher could not find StartGame.",
+                this);
+            return;
+        }
+
+        startGame.HandleLoginSucceeded();
+    }
+
+    private static string GetUsernameFromEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return "Player";
+        }
+
+        int separatorIndex = email.IndexOf('@');
+        return separatorIndex > 0
+            ? email.Substring(0, separatorIndex)
+            : email;
     }
 }
