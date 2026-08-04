@@ -263,6 +263,7 @@ public class MyLevelEntryUI : MonoBehaviour
         }
 
         GameManager.SelectedMode = GameMode.Freeplay;
+        GameManager.IsDailyChallenge = false;
         GameManager.SelectedCustomLevel = level;
 
         if (BGPersist.Instance != null)

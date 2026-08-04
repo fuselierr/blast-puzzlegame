@@ -86,6 +86,7 @@ public class AuthLauncher : MonoBehaviour
                 await SupabaseManager.Instance.SupabaseClient.Auth.SetSession(
                     session.AccessToken,
                     session.RefreshToken);
+                SupabaseManager.Instance.SaveCurrentSession();
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Account created!";
@@ -142,6 +143,7 @@ public class AuthLauncher : MonoBehaviour
                 await SupabaseManager.Instance.SupabaseClient.Auth.SetSession(
                     session.AccessToken,
                     session.RefreshToken);
+                SupabaseManager.Instance.SaveCurrentSession();
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Login successful!";
