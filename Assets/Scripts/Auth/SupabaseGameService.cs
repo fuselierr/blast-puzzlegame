@@ -116,9 +116,8 @@ public static class SupabaseGameService
             var existing = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
             if (existing.Models.Count > 0)
@@ -170,9 +169,8 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
             return response.Models.Count > 0;
@@ -204,9 +202,8 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
             if (response.Models.Count == 0)
@@ -255,9 +252,8 @@ public static class SupabaseGameService
             var response = await SupabaseManager.Instance
                 .SupabaseClient
                 .From<DailyChallengeScoreRow>()
-                .Where(row =>
-                    row.UserId == userId &&
-                    row.ChallengeDate == today)
+                .Where(row => row.UserId == userId)
+                .Where(row => row.ChallengeDate == today)
                 .Get();
 
             if (response.Models.Count == 0)
@@ -407,11 +403,13 @@ public static class SupabaseGameService
             return null;
         }
 
+        // CurrentUser is updated when accounts change. Depending on the
+        // session persistence implementation, CurrentSession can briefly
+        // still reference the previous account during a switch.
         return SupabaseManager.Instance
             .SupabaseClient
             .Auth
-            .CurrentSession?
-            .User?
+            .CurrentUser?
             .Id;
     }
 

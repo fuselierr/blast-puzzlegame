@@ -76,11 +76,16 @@ public class AuthLauncher : MonoBehaviour
 
         try
         {
+            await SupabaseManager.Instance.EnsureInitialized();
+
             var session = await SupabaseManager.Instance.SupabaseClient.Auth.SignUp(email, password);
             if (session?.User != null &&
                 !string.IsNullOrWhiteSpace(session.AccessToken))
             {
                 statusText.text = "Setting up profile...";
+                await SupabaseManager.Instance.SupabaseClient.Auth.SetSession(
+                    session.AccessToken,
+                    session.RefreshToken);
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Account created!";
@@ -127,10 +132,16 @@ public class AuthLauncher : MonoBehaviour
 
         try
         {
+            await SupabaseManager.Instance.EnsureInitialized();
+
             var session = await SupabaseManager.Instance.SupabaseClient.Auth.SignIn(email, password);
-            if (session?.User != null)
+            if (session?.User != null &&
+                !string.IsNullOrWhiteSpace(session.AccessToken))
             {
                 statusText.text = "Verifying profile...";
+                await SupabaseManager.Instance.SupabaseClient.Auth.SetSession(
+                    session.AccessToken,
+                    session.RefreshToken);
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Login successful!";
@@ -154,35 +165,43 @@ public class AuthLauncher : MonoBehaviour
     /// </summary>
     private async Task EnsureUserDataExists(string userId, string username)
     {
-        try
+        // Every call below is awaited. If an insert fails, let the exception
+        // reach the sign-up/login handler instead of reporting success.
+        var profileResult = await SupabaseManager.Instance.SupabaseClient
+            .From<Profile>()
+            .Where(p => p.Id == userId)
+            .Get();
+
+        if (profileResult.Models.Count == 0)
         {
-            // Check Profile
-            var profileResult = await SupabaseManager.Instance.SupabaseClient
+            var newProfile = new Profile
+            {
+                Id = userId,
+                Username = username,
+                Points = 0
+            };
+
+            await SupabaseManager.Instance.SupabaseClient
                 .From<Profile>()
-                .Where(p => p.Id == userId)
-                .Get();
-
-            if (profileResult.Models.Count == 0)
-            {
-                var newProfile = new Profile { Id = userId, Username = username, Points = 0 };
-                await SupabaseManager.Instance.SupabaseClient.From<Profile>().Insert(newProfile);
-            }
-
-            // Check Progress
-            var progressResult = await SupabaseManager.Instance.SupabaseClient
-                .From<Progress>()
-                .Where(p => p.Id == userId)
-                .Get();
-
-            if (progressResult.Models.Count == 0)
-            {
-                var newProgress = new Progress { Id = userId, Level = 1 };
-                await SupabaseManager.Instance.SupabaseClient.From<Progress>().Insert(newProgress);
-            }
+                .Insert(newProfile);
         }
-        catch (System.Exception ex)
+
+        var progressResult = await SupabaseManager.Instance.SupabaseClient
+            .From<Progress>()
+            .Where(p => p.Id == userId)
+            .Get();
+
+        if (progressResult.Models.Count == 0)
         {
-            Debug.LogError("Error ensuring user database rows: " + ex.Message);
+            var newProgress = new Progress
+            {
+                Id = userId,
+                Level = 1
+            };
+
+            await SupabaseManager.Instance.SupabaseClient
+                .From<Progress>()
+                .Insert(newProgress);
         }
     }
 
