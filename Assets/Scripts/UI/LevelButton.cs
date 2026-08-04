@@ -11,6 +11,8 @@ public class LevelButton : MonoBehaviour
     public void LoadLevel()
     {
         GameManager.SelectedMode = GameMode.Campaign;
+        GameManager.IsDailyChallenge = false;
+        GameManager.SelectedCustomLevel = null;
         GameManager.SelectedCampaignLevelIndex = levelIndex - 1;
 
         if (BGPersist.Instance != null)

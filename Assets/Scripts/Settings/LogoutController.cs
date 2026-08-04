@@ -47,6 +47,7 @@ public class LogoutController : MonoBehaviour
                 .SupabaseClient
                 .Auth
                 .SignOut();
+            SupabaseManager.Instance.ClearSavedSession();
 
             SceneManager.LoadScene(startSceneName);
         }

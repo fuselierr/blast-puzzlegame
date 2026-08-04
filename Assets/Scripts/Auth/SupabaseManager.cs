@@ -1,16 +1,21 @@
 using UnityEngine;
 using Supabase;
+using Supabase.Gotrue;
+using Supabase.Gotrue.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 public class SupabaseManager : MonoBehaviour
 {
     public static SupabaseManager Instance { get; private set; }
-    public Client SupabaseClient { get; private set; }
+    public Supabase.Client SupabaseClient { get; private set; }
 
     private TaskCompletionSource<bool> initTcs = new TaskCompletionSource<bool>();
+    private static readonly UnitySupabaseSessionHandler sessionHandler =
+        new UnitySupabaseSessionHandler();
 
     private string supabaseUrl = "https://bxmxhkkfqkfkzewpbgxs.supabase.co";
     private string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4bXhoa2tmcWtma3pld3BiZ3hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTMzMDMsImV4cCI6MjEwMDY2OTMwM30.DZl_rqN7d97_rB0zqapddpRNF-sFV1vU1hhjBPeeH4U";
@@ -24,12 +29,17 @@ public class SupabaseManager : MonoBehaviour
 
             var options = new SupabaseOptions
             {
-                AutoConnectRealtime = true
+                AutoRefreshToken = true,
+                AutoConnectRealtime = false,
+                SessionHandler = sessionHandler
             };
 
             try
             {
-                SupabaseClient = new Client(supabaseUrl, supabaseKey, options);
+                SupabaseClient = new Supabase.Client(
+                    supabaseUrl,
+                    supabaseKey,
+                    options);
                 await SupabaseClient.InitializeAsync();
                 initTcs.TrySetResult(true);
             }
@@ -48,6 +58,23 @@ public class SupabaseManager : MonoBehaviour
     public async Task EnsureInitialized()
     {
         await initTcs.Task;
+    }
+
+    public void SaveCurrentSession()
+    {
+        Session session = SupabaseClient?.Auth?.CurrentSession;
+
+        if (session == null)
+        {
+            return;
+        }
+
+        sessionHandler.SaveSession(session);
+    }
+
+    public void ClearSavedSession()
+    {
+        sessionHandler.DestroySession();
     }
 
     public async Task<CustomLevelDataRow> PublishCustomLevel(
@@ -290,5 +317,75 @@ public class SupabaseManager : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("A level ID is required.", parameterName);
+    }
+
+    private sealed class UnitySupabaseSessionHandler :
+        IGotrueSessionPersistence<Session>
+    {
+        private const string SessionPrefsKey =
+            "Blast.Supabase.Session";
+
+        public void SaveSession(Session session)
+        {
+            if (session == null)
+            {
+                return;
+            }
+
+            try
+            {
+                PlayerPrefs.SetString(
+                    SessionPrefsKey,
+                    JsonConvert.SerializeObject(session));
+                PlayerPrefs.Save();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    "Could not save Supabase session: " +
+                    exception.Message);
+            }
+        }
+
+        public Session LoadSession()
+        {
+            if (!PlayerPrefs.HasKey(SessionPrefsKey))
+            {
+                return null;
+            }
+
+            try
+            {
+                string sessionJson =
+                    PlayerPrefs.GetString(SessionPrefsKey);
+
+                if (string.IsNullOrWhiteSpace(sessionJson))
+                {
+                    return null;
+                }
+
+                return JsonConvert.DeserializeObject<Session>(
+                    sessionJson);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "Could not restore Supabase session: " +
+                    exception.Message);
+                DestroySession();
+                return null;
+            }
+        }
+
+        public void DestroySession()
+        {
+            if (!PlayerPrefs.HasKey(SessionPrefsKey))
+            {
+                return;
+            }
+
+            PlayerPrefs.DeleteKey(SessionPrefsKey);
+            PlayerPrefs.Save();
+        }
     }
 }
