@@ -30,6 +30,8 @@ public class CommunityLevelEntryUI : MonoBehaviour
 
     private CustomLevelData level;
     private bool isLiked;
+    private bool isLikeRequestPending;
+    private bool isLaunchingLevel;
     private int displayedLikes;
     private Action<CustomLevelData, bool> onLikeChanged;
 
@@ -113,18 +115,81 @@ public class CommunityLevelEntryUI : MonoBehaviour
         }
     }
 
-    private void ToggleLike()
+    private async void ToggleLike()
     {
-        if (level == null)
+        if (level == null || isLikeRequestPending)
         {
             return;
         }
 
-        isLiked = !isLiked;
-        displayedLikes = Mathf.Max(0, displayedLikes + (isLiked ? 1 : -1));
-        RefreshLikeUI();
+        if (SupabaseManager.Instance == null ||
+            string.IsNullOrWhiteSpace(level.fileName))
+        {
+            Debug.LogError(
+                "Cannot update this like because Supabase or the level ID is missing.",
+                this);
+            return;
+        }
 
-        onLikeChanged?.Invoke(level, isLiked);
+        isLikeRequestPending = true;
+        if (likeButton != null)
+        {
+            likeButton.interactable = false;
+        }
+
+        bool newLikedState = !isLiked;
+
+        try
+        {
+            bool databaseChanged;
+            if (newLikedState)
+            {
+                databaseChanged =
+                    await SupabaseManager.Instance.LikeCustomLevel(
+                    level.fileName);
+            }
+            else
+            {
+                databaseChanged =
+                    await SupabaseManager.Instance.UnlikeCustomLevel(
+                    level.fileName);
+            }
+
+            if (this == null)
+            {
+                return;
+            }
+
+            isLiked = newLikedState;
+            if (databaseChanged)
+            {
+                displayedLikes = Mathf.Max(
+                    0,
+                    displayedLikes + (isLiked ? 1 : -1));
+            }
+            level.likes = displayedLikes;
+            RefreshLikeUI();
+
+            onLikeChanged?.Invoke(level, isLiked);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                $"Could not update like for level '{level.levelName}': " +
+                exception,
+                this);
+        }
+        finally
+        {
+            if (this != null)
+            {
+                isLikeRequestPending = false;
+                if (likeButton != null)
+                {
+                    likeButton.interactable = true;
+                }
+            }
+        }
     }
 
     private void RefreshLikeUI()
@@ -154,11 +219,51 @@ public class CommunityLevelEntryUI : MonoBehaviour
         targetImage.color = isLiked ? likedColor : unlikedColor;
     }
 
-    private void PlayLevel()
+    private async void PlayLevel()
     {
-        if (level == null)
+        if (level == null || isLaunchingLevel)
         {
-            Debug.LogError("No community level was assigned to this entry.", this);
+            if (level == null)
+            {
+                Debug.LogError(
+                    "No community level was assigned to this entry.",
+                    this);
+            }
+            return;
+        }
+
+        isLaunchingLevel = true;
+        if (playButton != null)
+        {
+            playButton.interactable = false;
+        }
+
+        if (SupabaseManager.Instance != null &&
+            !string.IsNullOrWhiteSpace(level.fileName))
+        {
+            try
+            {
+                await SupabaseManager.Instance.RegisterCustomLevelDownload(
+                    level.fileName);
+
+                level.downloads++;
+                if (downloadsText != null)
+                {
+                    downloadsText.text = level.downloads.ToString();
+                }
+            }
+            catch (Exception exception)
+            {
+                // A temporary network/counting failure should not prevent play.
+                Debug.LogWarning(
+                    $"Could not register play for '{level.levelName}': " +
+                    exception.Message,
+                    this);
+            }
+        }
+
+        if (this == null)
+        {
             return;
         }
 
