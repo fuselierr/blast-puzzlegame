@@ -142,6 +142,13 @@ public class UIHandler : MonoBehaviour
         ConfigurePanelText(gameOverMessageText);
         ConfigurePanelText(gameWonScoreCalc);
         ConfigurePanelText(gameWonFinalScore);
+
+        if (GameManager.SelectedMode == GameMode.Classic || (GameManager.SelectedMode == GameMode.Freeplay && GameManager.SelectedCustomLevel == null))
+        {
+            crossMineToggle.gameObject.SetActive(false);
+            diagonalMineToggle.gameObject.SetActive(false);
+            doubleMineToggle.gameObject.SetActive(false);
+        }
     }
     private void Update()
     {
