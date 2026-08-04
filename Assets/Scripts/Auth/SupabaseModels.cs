@@ -133,3 +133,53 @@ public class CustomLevelDataLikeRow : BaseModel
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 }
+
+[Table("player_stats")]
+public class PlayerStatsRow : BaseModel
+{
+    [PrimaryKey("user_id", true)]
+    public string UserId { get; set; }
+
+    [Column("mines_placed")]
+    public int MinesPlaced { get; set; }
+
+    [Column("debris_broken")]
+    public int DebrisBroken { get; set; }
+
+    [Column("freeplay_wins")]
+    public int FreeplayWins { get; set; }
+
+    [Column("classic_wins")]
+    public int ClassicWins { get; set; }
+
+    [Column("custom_level_wins")]
+    public int CustomLevelWins { get; set; }
+
+    [Column("daily_challenge_high_score")]
+    public int DailyChallengeHighScore { get; set; }
+
+    [Column("freeplay_high_score")]
+    public int FreeplayHighScore { get; set; }
+
+    [Column("classic_high_score")]
+    public int ClassicHighScore { get; set; }
+
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; }
+}
+
+public enum PlayerStat
+{
+    MinesPlaced,
+    DebrisBroken,
+    FreeplayWins,
+    ClassicWins,
+    CustomLevelWins
+}
+
+public enum PlayerHighScore
+{
+    DailyChallenge,
+    Freeplay,
+    Classic
+}

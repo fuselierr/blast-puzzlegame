@@ -103,7 +103,18 @@ public class GameManager : MonoBehaviour
 
     public bool TryPlaceMine(MineType mineType = MineType.Standard)
     {
-        return gameStarted && currentMode != null && currentMode.TryPlaceMine(mineType);
+        if (!gameStarted || currentMode == null)
+        {
+            return false;
+        }
+
+        bool minePlaced = currentMode.TryPlaceMine(mineType);
+        if (minePlaced)
+        {
+            RecordPlayerStat(PlayerStat.MinesPlaced);
+        }
+
+        return minePlaced;
     }
 
     public void ReturnMine(MineType mineType = MineType.Standard)
@@ -228,7 +239,63 @@ public class GameManager : MonoBehaviour
 
     public void NotifyDetonateComplete(bool debrisCleared)
     {
+        if (gridSpawner != null &&
+            gridSpawner.LastDetonationDebrisBroken > 0)
+        {
+            RecordPlayerStat(
+                PlayerStat.DebrisBroken,
+                gridSpawner.LastDetonationDebrisBroken);
+        }
+
         OnDetonateComplete?.Invoke(debrisCleared);
+    }
+
+    public async void RecordPlayerStat(
+        PlayerStat stat,
+        int amount = 1)
+    {
+        if (amount <= 0 || SupabaseManager.Instance == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await SupabaseManager.Instance.IncrementPlayerStat(
+                stat,
+                amount);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                $"Could not increment player stat {stat}: " +
+                exception.Message,
+                this);
+        }
+    }
+
+    public async void RecordHighScore(
+        PlayerHighScore mode,
+        int score)
+    {
+        if (score < 0 || SupabaseManager.Instance == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await SupabaseManager.Instance.SubmitPlayerHighScore(
+                mode,
+                score);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                $"Could not submit {mode} high score: " +
+                exception.Message,
+                this);
+        }
     }
 
     public void NotifyCampaignTutorial(string title, string message)

@@ -52,7 +52,8 @@ public class FreeplayMode : GameModeBase
     {
         float timeElapsed = timer.TimeValue;
         int minesRemaining = mineInventory.GetCount(MineType.Standard);
-        return Mathf.RoundToInt(500f - timeElapsed + (minesRemaining * 200f));
+        int score = Mathf.RoundToInt(500f - timeElapsed + (minesRemaining * 200f));
+        return score;
     }
 
     private void HandleDetonationResolved(bool debrisCleared)
@@ -63,6 +64,26 @@ public class FreeplayMode : GameModeBase
         {
             manager.NotifyGameLost();
             return;
+        }
+
+        int finalScore = calculateScore();
+
+        if (GameManager.SelectedCustomLevel != null)
+        {
+            manager.RecordPlayerStat(PlayerStat.CustomLevelWins);
+        }
+        else if (GameManager.IsDailyChallenge)
+        {
+            manager.RecordHighScore(
+                PlayerHighScore.DailyChallenge,
+                finalScore);
+        }
+        else
+        {
+            manager.RecordPlayerStat(PlayerStat.FreeplayWins);
+            manager.RecordHighScore(
+                PlayerHighScore.Freeplay,
+                finalScore);
         }
 
         manager.NotifyGameWon();
