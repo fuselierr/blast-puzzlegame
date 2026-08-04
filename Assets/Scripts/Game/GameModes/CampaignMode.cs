@@ -9,7 +9,6 @@ public class CampaignMode : GameModeBase
         None,
         PlaceRequiredMine,
         PlaceMultipleMines,
-        ToggleFlag,
         SelectCrossMine,
         SelectDiagonalMine,
         SelectDoubleMine
@@ -231,14 +230,9 @@ public class CampaignMode : GameModeBase
         switch (currentLevel.tutorialType)
         {
             case CampaignTutorialType.BasicControls:
-                requiredMinePosition = new Vector2Int(
-                    currentLevel.width / 2,
-                    currentLevel.height - 1);
-                tutorialStep = TutorialStep.ToggleFlag;
-                SetTutorialHighlight(requiredMinePosition);
-                manager.NotifyCampaignGuidance(
-                    "Step 2: Tap the highlighted debris to add a visual flag.",
-                    highlightDetonate: false);
+                ClearTutorialHighlight();
+                CompleteTutorial(
+                    "The mine fires in all eight directions. Press START when you are ready, then press DETONATE.");
                 break;
 
             case CampaignTutorialType.BlastDirections:
@@ -291,28 +285,6 @@ public class CampaignMode : GameModeBase
                     : "Place one more mine before detonating.",
                 highlightDetonate: false);
         }
-    }
-
-    public void HandleFlagChanged(Vector2Int position, bool flagged)
-    {
-        if (!tutorialActive
-            || tutorialStep != TutorialStep.ToggleFlag
-            || position != requiredMinePosition)
-        {
-            return;
-        }
-
-        if (flagged)
-        {
-            manager.NotifyCampaignGuidance(
-                "Good. Tap the highlighted debris again to remove the flag.",
-                highlightDetonate: false);
-            return;
-        }
-
-        ClearTutorialHighlight();
-        CompleteTutorial(
-            "Flags mark debris as a blocked space where a mine cannot be placed. Press START when ready, then DETONATE.");
     }
 
     public void HandleMineSelected(MineType mineType)
