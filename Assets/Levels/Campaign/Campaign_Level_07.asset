@@ -12,9 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
   m_Name: Campaign_Level_07
   m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
-  levelName: Tough Debris
+  levelName: Strong Debris
   width: 5
   height: 5
+  tutorialMessage: Strong debris needs two hits. The first hit turns it into regular debris; the second clears it.
+  tutorialType: 5
+  standardMines: 2
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 0
   layout: '--x--
 
     -----

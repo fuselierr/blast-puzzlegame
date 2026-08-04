@@ -30,14 +30,18 @@ public class GameManager : MonoBehaviour
     public GridSpawner GridSpawner => gridSpawner;
     public MineInventory MineInventory => mineInventory;
     private MineType _SelectedMineType = MineType.Standard;
-    public MineType SelectedMineType { 
-        get => _SelectedMineType; 
+    public MineType SelectedMineType {
+        get => _SelectedMineType;
         set
         {
             _SelectedMineType = value;
             OnSelectedMineChange?.Invoke(value);
+            if (currentMode is CampaignMode campaignMode)
+            {
+                campaignMode.HandleMineSelected(value);
+            }
             Debug.Log($"SelectedMineType set to {value}");
-        } 
+        }
     }
     public Timer Timer => timer;
     public CampaignLevelData[] CampaignLevels => campaignLevels;
@@ -54,7 +58,11 @@ public class GameManager : MonoBehaviour
     public event Action OnGameWon;
     public event Action OnGameLost;
     public event Action<bool> OnDetonateComplete; // debrisCleared
-    public event Action<MineType> OnSelectedMineChange; 
+    public event Action<MineType> OnSelectedMineChange;
+    public event Action<string, string> OnCampaignTutorial; // title, message
+    public event Action<string, bool> OnCampaignGuidance; // message, highlight detonate
+    public event Action<bool, bool, bool> OnCampaignTutorialControls; // available, active, ready to start
+    public event Action<MineType?> OnCampaignMineSelectorHint;
 
     private void Awake()
     {
@@ -137,6 +145,62 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AdvanceCampaignLevel()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.AdvanceToNextLevel();
+        }
+    }
+
+    public void DismissCampaignTutorial()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.DismissTutorial();
+        }
+    }
+
+    public void SkipCampaignTutorial()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.SkipTutorial();
+        }
+    }
+
+    public void ReplayCampaignTutorial()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.ReplayTutorial();
+        }
+    }
+
+    public void StartCampaignLevelAfterTutorial()
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.StartLevelAfterTutorial();
+        }
+    }
+
+    public void NotifyMinePlaced(Vector2Int position, MineType mineType)
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.HandleMinePlaced(position, mineType);
+        }
+    }
+
+    public void NotifyMineReturned(Vector2Int position, MineType mineType)
+    {
+        if (currentMode is CampaignMode campaignMode)
+        {
+            campaignMode.HandleMineReturned(position, mineType);
+        }
+    }
+
 
     // --- Called by mode implementations to report state changes ---
 
@@ -165,5 +229,31 @@ public class GameManager : MonoBehaviour
     public void NotifyDetonateComplete(bool debrisCleared)
     {
         OnDetonateComplete?.Invoke(debrisCleared);
+    }
+
+    public void NotifyCampaignTutorial(string title, string message)
+    {
+        OnCampaignTutorial?.Invoke(title, message);
+    }
+
+    public void NotifyCampaignGuidance(string message, bool highlightDetonate)
+    {
+        OnCampaignGuidance?.Invoke(message, highlightDetonate);
+    }
+
+    public void NotifyCampaignTutorialControls(
+        bool available,
+        bool active,
+        bool readyToStart = false)
+    {
+        OnCampaignTutorialControls?.Invoke(
+            available,
+            active,
+            readyToStart);
+    }
+
+    public void NotifyCampaignMineSelectorHint(MineType? mineType)
+    {
+        OnCampaignMineSelectorHint?.Invoke(mineType);
     }
 }
