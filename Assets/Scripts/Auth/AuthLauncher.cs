@@ -26,7 +26,7 @@ public class AuthLauncher : MonoBehaviour
                 string username = currentSession.User.Email.Split('@')[0];
                 await EnsureUserDataExists(currentSession.User.Id, username);
 
-                LoadStart();
+                LoadMainMenu();
             }
             else
             {
@@ -64,7 +64,7 @@ public class AuthLauncher : MonoBehaviour
                 await EnsureUserDataExists(session.User.Id, username);
 
                 statusText.text = "Account created! Loading game...";
-                LoadStart();
+                LoadMainMenu();
             }
         }
         catch (System.Exception ex)
@@ -98,8 +98,8 @@ public class AuthLauncher : MonoBehaviour
                 statusText.text = "Verifying profile...";
                 await EnsureUserDataExists(session.User.Id, username);
 
-                statusText.text = "Success! Loading start scene...";
-                LoadStart();
+                statusText.text = "Success! Loading Main Menu...";
+                LoadMainMenu();
             }
         }
         catch (System.Exception ex)
@@ -147,8 +147,8 @@ public class AuthLauncher : MonoBehaviour
         }
     }
 
-    private void LoadStart()
+    private void LoadMainMenu()
     {
-        SceneManager.LoadScene("Start");
+        SceneManager.LoadScene("MainMenu");
     }
 }
