@@ -92,6 +92,9 @@ public class CommunityLevelManager : MonoBehaviour
             List<CustomLevelDataRow> rows =
                 await SupabaseManager.Instance.GetCommunityLevels();
 
+            List<string> likedIds =
+                await SupabaseManager.Instance.GetLikedCustomLevelIds();
+
             if (this == null)
             {
                 return;
@@ -123,6 +126,7 @@ public class CommunityLevelManager : MonoBehaviour
                 }
             }
 
+            SetLikedLevelIds(likedIds);
             PopulateLevels(levels);
         }
         catch (Exception exception)
@@ -388,14 +392,6 @@ public class CommunityLevelManager : MonoBehaviour
 
     private void HandleLikeChanged(CustomLevelData level, bool liked)
     {
-        bool wasLiked = IsLevelLiked(level);
-        if (wasLiked != liked)
-        {
-            level.likes = Math.Max(
-                0,
-                level.likes + (liked ? 1 : -1));
-        }
-
         SetLevelLiked(level, liked);
         LikeChanged?.Invoke(level, liked);
     }

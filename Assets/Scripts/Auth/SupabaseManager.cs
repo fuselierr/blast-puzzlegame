@@ -210,14 +210,31 @@ public class SupabaseManager : MonoBehaviour
         return response.Models.Count > 0;
     }
 
-    public async Task LikeCustomLevel(string levelId)
+    public async Task<List<string>> GetLikedCustomLevelIds()
+    {
+        await EnsureInitialized();
+        string userId = GetCurrentUserId();
+
+        var response = await SupabaseClient
+            .From<CustomLevelDataLikeRow>()
+            .Where(like => like.UserId == userId)
+            .Get();
+
+        return response.Models
+            .Where(like => !string.IsNullOrWhiteSpace(like.LevelId))
+            .Select(like => like.LevelId)
+            .Distinct()
+            .ToList();
+    }
+
+    public async Task<bool> LikeCustomLevel(string levelId)
     {
         await EnsureInitialized();
         string userId = GetCurrentUserId();
         RequireId(levelId, nameof(levelId));
 
         if (await HasLikedCustomLevel(levelId))
-            return;
+            return false;
 
         await SupabaseClient
             .From<CustomLevelDataLikeRow>()
@@ -227,18 +244,25 @@ public class SupabaseManager : MonoBehaviour
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow
             });
+
+        return true;
     }
 
-    public async Task UnlikeCustomLevel(string levelId)
+    public async Task<bool> UnlikeCustomLevel(string levelId)
     {
         await EnsureInitialized();
         string userId = GetCurrentUserId();
         RequireId(levelId, nameof(levelId));
 
+        if (!await HasLikedCustomLevel(levelId))
+            return false;
+
         await SupabaseClient
             .From<CustomLevelDataLikeRow>()
             .Where(like => like.LevelId == levelId && like.UserId == userId)
             .Delete();
+
+        return true;
     }
 
     public async Task RegisterCustomLevelDownload(string levelId)
