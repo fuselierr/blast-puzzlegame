@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class Tile : MonoBehaviour
+public class Tile : MonoBehaviour, IPointerClickHandler
 {
     public Vector2Int GridPosition;
 
@@ -123,7 +124,8 @@ public class Tile : MonoBehaviour
         }
     }
 
-    private void OnMouseDown()
+    // Using this instead of OnMouseDown() as it works with the new Unity event system raycasting which stops clicks from bleeding through UI panels. 
+    public void OnPointerClick(PointerEventData eventData)
     {
         GameManager gameManager = GameManager.Instance;
 
