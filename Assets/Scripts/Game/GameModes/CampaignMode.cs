@@ -27,6 +27,8 @@ public class CampaignMode : GameModeBase
     private Vector2Int? highlightedPosition;
     private readonly HashSet<Vector2Int> tutorialMinePositions =
         new HashSet<Vector2Int>();
+    private readonly HashSet<int> completedTutorialLevels =
+        new HashSet<int>();
 
     public override void Initialize(GameManager manager)
     {
@@ -35,9 +37,21 @@ public class CampaignMode : GameModeBase
         levelIndex = manager.CampaignStartIndex;
     }
 
-    public override void StartGame()
+    public override async void StartGame()
     {
         mineInventory.Infinite = false;
+
+        List<CampaignLevelProgressRow> progress =
+            await SupabaseGameService.GetCampaignProgress();
+
+        foreach (CampaignLevelProgressRow row in progress)
+        {
+            if (row.TutorialCompleted)
+            {
+                completedTutorialLevels.Add(row.LevelNumber);
+            }
+        }
+
         BeginLevel();
     }
 
@@ -80,7 +94,7 @@ public class CampaignMode : GameModeBase
 
         bool tutorialAvailable = data.tutorialType != CampaignTutorialType.None;
         bool shouldStartTutorial = tutorialAvailable
-            && (forceTutorial || !HasCompletedTutorial(data.tutorialType));
+            && (forceTutorial || !HasCompletedTutorial());
 
         manager.NotifyCampaignTutorialControls(
             tutorialAvailable,
@@ -485,37 +499,22 @@ public class CampaignMode : GameModeBase
         }
     }
 
-    private bool HasCompletedTutorial(CampaignTutorialType tutorialType)
+    private bool HasCompletedTutorial()
     {
-        PlayerData data = SaveManager.Instance != null
-            ? SaveManager.Instance.CurrentData
-            : null;
-
-        return data != null
-            && data.completedCampaignTutorials != null
-            && data.completedCampaignTutorials.Contains((int)tutorialType);
+        return completedTutorialLevels.Contains(levelIndex + 1);
     }
 
     private void MarkTutorialCompleted(CampaignTutorialType tutorialType)
     {
-        if (tutorialType == CampaignTutorialType.None
-            || SaveManager.Instance == null
-            || SaveManager.Instance.CurrentData == null)
+        if (tutorialType == CampaignTutorialType.None)
         {
             return;
         }
 
-        PlayerData data = SaveManager.Instance.CurrentData;
-        if (data.completedCampaignTutorials == null)
+        int levelNumber = levelIndex + 1;
+        if (completedTutorialLevels.Add(levelNumber))
         {
-            data.completedCampaignTutorials = new List<int>();
-        }
-
-        int tutorialId = (int)tutorialType;
-        if (!data.completedCampaignTutorials.Contains(tutorialId))
-        {
-            data.completedCampaignTutorials.Add(tutorialId);
-            SaveManager.Instance.SaveData();
+            _ = SupabaseGameService.MarkCampaignTutorialCompleted(levelNumber);
         }
     }
 
@@ -612,49 +611,9 @@ public class CampaignMode : GameModeBase
 
     private void MarkLevelCompleted(int completedLevelIndex, float elapsedSeconds)
     {
-        if (SaveManager.Instance == null || SaveManager.Instance.CurrentData == null)
-        {
-            return;
-        }
-
-        PlayerData data = SaveManager.Instance.CurrentData;
-        bool saveChanged = false;
-
-        if (data.completedCampaignLevels == null)
-        {
-            data.completedCampaignLevels = new System.Collections.Generic.List<int>();
-        }
-
-        if (!data.completedCampaignLevels.Contains(completedLevelIndex))
-        {
-            data.completedCampaignLevels.Add(completedLevelIndex);
-            saveChanged = true;
-        }
-
-        if (data.campaignLevelResults == null)
-        {
-            data.campaignLevelResults = new System.Collections.Generic.List<CampaignLevelResult>();
-        }
-
-        CampaignLevelResult result = data.campaignLevelResults.Find(
-            item => item.levelIndex == completedLevelIndex);
-
-        if (result == null)
-        {
-            data.campaignLevelResults.Add(
-                new CampaignLevelResult(completedLevelIndex, elapsedSeconds));
-            saveChanged = true;
-        }
-        else if (elapsedSeconds < result.bestTimeSeconds)
-        {
-            result.bestTimeSeconds = elapsedSeconds;
-            saveChanged = true;
-        }
-
-        if (saveChanged)
-        {
-            SaveManager.Instance.SaveData();
-        }
+        _ = SupabaseGameService.MarkCampaignLevelCompleted(
+            completedLevelIndex + 1,
+            elapsedSeconds);
     }
 
     public override bool TryPlaceMine(MineType mineType = MineType.Standard)

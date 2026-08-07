@@ -11,6 +11,131 @@ public static class SupabaseGameService
     private static DateTime? dailyChallengeStartUtc;
     private static string dailyChallengeStartDate;
 
+    public static async Task<List<CampaignLevelProgressRow>>
+        GetCampaignProgress()
+    {
+        try
+        {
+            string userId = await GetCurrentUserId();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new List<CampaignLevelProgressRow>();
+            }
+
+            var response = await SupabaseManager.Instance
+                .SupabaseClient
+                .From<CampaignLevelProgressRow>()
+                .Where(row => row.UserId == userId)
+                .Get();
+
+            return response.Models;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                "Could not load Campaign progress: " +
+                exception.Message
+            );
+
+            return new List<CampaignLevelProgressRow>();
+        }
+    }
+
+    public static Task MarkCampaignTutorialCompleted(int levelNumber)
+    {
+        return SaveCampaignProgress(levelNumber, null, true);
+    }
+
+    public static Task MarkCampaignLevelCompleted(
+        int levelNumber,
+        float elapsedSeconds)
+    {
+        return SaveCampaignProgress(levelNumber, elapsedSeconds, false);
+    }
+
+    private static async Task SaveCampaignProgress(
+        int levelNumber,
+        float? elapsedSeconds,
+        bool tutorialCompleted)
+    {
+        try
+        {
+            string userId = await GetCurrentUserId();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return;
+            }
+
+            var response = await SupabaseManager.Instance
+                .SupabaseClient
+                .From<CampaignLevelProgressRow>()
+                .Where(row => row.UserId == userId)
+                .Where(row => row.LevelNumber == levelNumber)
+                .Get();
+
+            CampaignLevelProgressRow progress = response.Models.FirstOrDefault();
+
+            if (progress == null)
+            {
+                progress = new CampaignLevelProgressRow
+                {
+                    UserId = userId,
+                    LevelNumber = levelNumber,
+                    CompletedAt = elapsedSeconds.HasValue
+                        ? DateTime.UtcNow
+                        : (DateTime?)null,
+                    BestTimeSeconds = elapsedSeconds,
+                    TutorialCompleted = tutorialCompleted
+                };
+
+                await SupabaseManager.Instance.SupabaseClient
+                    .From<CampaignLevelProgressRow>()
+                    .Insert(progress);
+                return;
+            }
+
+            bool changed = false;
+
+            if (tutorialCompleted && !progress.TutorialCompleted)
+            {
+                progress.TutorialCompleted = true;
+                changed = true;
+            }
+
+            if (elapsedSeconds.HasValue)
+            {
+                if (!progress.CompletedAt.HasValue)
+                {
+                    progress.CompletedAt = DateTime.UtcNow;
+                    changed = true;
+                }
+
+                if (!progress.BestTimeSeconds.HasValue
+                    || elapsedSeconds.Value < progress.BestTimeSeconds.Value)
+                {
+                    progress.BestTimeSeconds = elapsedSeconds.Value;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                await SupabaseManager.Instance.SupabaseClient
+                    .From<CampaignLevelProgressRow>()
+                    .Update(progress);
+            }
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                "Could not save Campaign progress: " +
+                exception.Message
+            );
+        }
+    }
+
     public static async Task<HashSet<int>> GetCompletedClassicLevels()
     {
         HashSet<int> completedLevels = new HashSet<int>();
