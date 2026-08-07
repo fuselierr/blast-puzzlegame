@@ -41,6 +41,28 @@ public class ClassicLevelProgressRow: BaseModel
     public DateTime CompletedAt {get; set;}
 }
 
+[Table("campaign_level_progress")]
+public class CampaignLevelProgressRow : BaseModel
+{
+    [PrimaryKey("id", false)]
+    public long Id { get; set; }
+
+    [Column("user_id")]
+    public string UserId { get; set; }
+
+    [Column("level_number")]
+    public int LevelNumber { get; set; }
+
+    [Column("completed_at")]
+    public DateTime? CompletedAt { get; set; }
+
+    [Column("best_time_seconds")]
+    public double? BestTimeSeconds { get; set; }
+
+    [Column("tutorial_completed")]
+    public bool TutorialCompleted { get; set; }
+}
+
 [Table("daily_challenge_scores")]
 public class DailyChallengeScoreRow: BaseModel
 {
