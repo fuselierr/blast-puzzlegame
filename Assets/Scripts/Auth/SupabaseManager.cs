@@ -303,6 +303,109 @@ public class SupabaseManager : MonoBehaviour
             new { p_level_id = levelId });
     }
 
+    public async Task<PlayerStats> GetPlayerStats()
+    {
+        await EnsureInitialized();
+        string userId = GetCurrentUserId();
+
+        // Defensive: the database trigger normally creates this row.
+        await SupabaseClient.Rpc(
+            "ensure_player_stats",
+            new Dictionary<string, object>());
+
+        Profile profile = await SupabaseClient
+            .From<Profile>()
+            .Where(row => row.Id == userId)
+            .Single();
+
+        PlayerStatsRow stats = await SupabaseClient
+            .From<PlayerStatsRow>()
+            .Where(row => row.UserId == userId)
+            .Single();
+
+        List<CustomLevelDataRow> ownedLevels = await GetMyCustomLevels();
+        long totalLikes = ownedLevels.Sum(level => (long)level.LikeCount);
+        long totalPlays = ownedLevels.Sum(level => (long)level.DownloadCount);
+
+        return new PlayerStats
+        {
+            userName = profile?.Username ?? "Unknown Player",
+            minesPlaced = stats?.MinesPlaced ?? 0,
+            debrisBroken = stats?.DebrisBroken ?? 0,
+            freeplayWins = stats?.FreeplayWins ?? 0,
+            classicWins = stats?.ClassicWins ?? 0,
+            customLevelWins = stats?.CustomLevelWins ?? 0,
+            dailyChallengeHighScore = stats?.DailyChallengeHighScore ?? 0,
+            freeplayHighScore = stats?.FreeplayHighScore ?? 0,
+            classicHighScore = stats?.ClassicHighScore ?? 0,
+            customLevelLikes = ClampToInt(totalLikes),
+            customLevelPlays = ClampToInt(totalPlays)
+        };
+    }
+
+    public async Task IncrementPlayerStat(PlayerStat stat, int amount = 1)
+    {
+        await EnsureInitialized();
+        GetCurrentUserId();
+
+        if (amount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
+
+        await SupabaseClient.Rpc(
+            "increment_player_stat",
+            new
+            {
+                p_stat = GetStatColumn(stat),
+                p_amount = amount
+            });
+    }
+
+    public async Task SubmitPlayerHighScore(PlayerHighScore mode, int score)
+    {
+        await EnsureInitialized();
+        GetCurrentUserId();
+
+        if (score < 0)
+            throw new ArgumentOutOfRangeException(nameof(score), "Score cannot be negative.");
+
+        await SupabaseClient.Rpc(
+            "submit_player_high_score",
+            new
+            {
+                p_mode = GetHighScoreColumn(mode),
+                p_score = score
+            });
+    }
+
+    private static string GetStatColumn(PlayerStat stat)
+    {
+        switch (stat)
+        {
+            case PlayerStat.MinesPlaced: return "mines_placed";
+            case PlayerStat.DebrisBroken: return "debris_broken";
+            case PlayerStat.FreeplayWins: return "freeplay_wins";
+            case PlayerStat.ClassicWins: return "classic_wins";
+            case PlayerStat.CustomLevelWins: return "custom_level_wins";
+            default: throw new ArgumentOutOfRangeException(nameof(stat));
+        }
+    }
+
+    private static string GetHighScoreColumn(PlayerHighScore mode)
+    {
+        switch (mode)
+        {
+            case PlayerHighScore.DailyChallenge: return "daily_challenge_high_score";
+            case PlayerHighScore.Freeplay: return "freeplay_high_score";
+            case PlayerHighScore.Classic: return "classic_high_score";
+            default: throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+    }
+
+    private static int ClampToInt(long value)
+    {
+        return value > int.MaxValue ? int.MaxValue : (int)value;
+    }
+
     private string GetCurrentUserId()
     {
         string userId = SupabaseClient?.Auth?.CurrentUser?.Id;

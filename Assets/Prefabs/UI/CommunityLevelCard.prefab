@@ -606,7 +606,7 @@ MonoBehaviour:
   text: {fileID: 6415585632258137234}
   normalColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   pressedColor: {r: 0.4339623, g: 0.09620862, b: 0.09620862, a: 1}
-  pressedY: -5
+  pressedScale: 0.94
   speed: 12
 --- !u!1 &4274038750117087536
 GameObject:
@@ -1126,7 +1126,7 @@ MonoBehaviour:
   likeButton: {fileID: 6780068850962010904}
   likeButtonImage: {fileID: 6093002491188873145}
   tilesUsedGrid: {fileID: 2307250219134934730}
-  tileIconSize: {x: 24, y: 24}
+  tileIconSize: {x: 32, y: 32}
   likedSprite: {fileID: -205270267638800340, guid: c95fd3d0bad428d488c1c5dc669e601d, type: 3}
   unlikedSprite: {fileID: -205270267638800340, guid: c95fd3d0bad428d488c1c5dc669e601d, type: 3}
   likedColor: {r: 1, g: 0.3, b: 0.4, a: 1}

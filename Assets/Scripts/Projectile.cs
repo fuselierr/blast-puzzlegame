@@ -27,6 +27,9 @@ public class Projectile : MonoBehaviour
     private Tile ignoredTeleporter;
     private HashSet<int> triggeredSplitterIds = new HashSet<int>();
     private int splitGeneration;
+    private bool hasEnteredScreen;
+
+    public bool HasEnteredScreen => hasEnteredScreen;
 
     private const float destroyDistance = 15f;
     private const float pathHitTolerance = 0.15f;
@@ -66,6 +69,8 @@ public class Projectile : MonoBehaviour
         float currentSpeed = speed * transitionSpeedMultiplier;
         transform.position +=
             (Vector3)(direction * currentSpeed * Time.deltaTime);
+
+        RefreshScreenEntryState();
         if (teleporterIgnoreTimer > 0f)
         {
             teleporterIgnoreTimer -= Time.deltaTime;
@@ -104,6 +109,7 @@ public class Projectile : MonoBehaviour
     private void Start()
     {
         launchPosition = transform.position;
+        RefreshScreenEntryState();
 
         if (trailPrefab != null)
         {
@@ -112,6 +118,30 @@ public class Projectile : MonoBehaviour
             trailInstance.transform.position = transform.position;
             DontDestroyOnLoad(trailInstance);
         }
+    }
+
+    public void RefreshScreenEntryState()
+    {
+        if (hasEnteredScreen)
+        {
+            return;
+        }
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            return;
+        }
+
+        Vector3 viewportPosition =
+            mainCamera.WorldToViewportPoint(transform.position);
+
+        hasEnteredScreen =
+            viewportPosition.z > 0f &&
+            viewportPosition.x >= 0f &&
+            viewportPosition.x <= 1f &&
+            viewportPosition.y >= 0f &&
+            viewportPosition.y <= 1f;
     }
 
 

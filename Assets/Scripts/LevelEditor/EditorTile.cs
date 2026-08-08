@@ -5,6 +5,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button), typeof(Image))]
 public class EditorTile : MonoBehaviour
 {
+    [Header("Input")]
+    [SerializeField, Min(0.1f)] private float doubleClickWindow = 0.3f;
+
     public Vector2Int GridPosition { get; private set; }
     public TileType Type { get; private set; }
     public MineType MineType { get; private set; }
@@ -12,7 +15,10 @@ public class EditorTile : MonoBehaviour
     private Globals globals;
     private Button button;
     private Image tileImage;
+    private float lastClickTime = float.NegativeInfinity;
+
     public event Action<EditorTile> Clicked;
+    public event Action<EditorTile> DoubleClicked;
 
     private void Awake()
     {
@@ -148,6 +154,26 @@ public class EditorTile : MonoBehaviour
 
     private void HandleClick()
     {
+        float clickTime = Time.unscaledTime;
+        bool isDoubleClick =
+            clickTime - lastClickTime <= doubleClickWindow;
+
+        if (isDoubleClick)
+        {
+            // Reset this so a rapid third click begins a new click sequence.
+            lastClickTime = float.NegativeInfinity;
+
+            Debug.Log(
+                $"GRID CELL DOUBLE-CLICKED: {GridPosition}",
+                gameObject
+            );
+
+            DoubleClicked?.Invoke(this);
+            return;
+        }
+
+        lastClickTime = clickTime;
+
         Debug.Log(
             $"GRID CELL CLICKED: {GridPosition}",
             gameObject

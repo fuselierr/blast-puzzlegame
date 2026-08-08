@@ -657,6 +657,7 @@ public class GridSpawner : MonoBehaviour
     // Modes (and GameManager) should avoid triggering another detonation
     // while this is true.
     public bool IsDetonating { get; private set; }
+    public int LastDetonationDebrisBroken { get; private set; }
 
     // Detonation is NOT instantaneous: projectiles take time to travel,
     // hit debris, and run their own explode coroutine. Checking
@@ -670,6 +671,8 @@ public class GridSpawner : MonoBehaviour
             return; // ignore re-entrant detonate calls mid-resolution
         }
 
+        int debrisBeforeDetonation = DebrisRemaining();
+        LastDetonationDebrisBroken = 0;
         bool anyMines = false;
         for (int x = 0; x < width; x++)
         {
@@ -688,15 +691,22 @@ public class GridSpawner : MonoBehaviour
 
         if (!anyMines)
         {
+            LastDetonationDebrisBroken = Mathf.Max(
+                0,
+                debrisBeforeDetonation - DebrisRemaining());
             onResolved?.Invoke(AllDebrisCleared);
             return;
         }
 
         IsDetonating = true;
-        StartCoroutine(WaitForProjectilesToResolve(onResolved));
+        StartCoroutine(WaitForProjectilesToResolve(
+            debrisBeforeDetonation,
+            onResolved));
     }
 
-    private IEnumerator WaitForProjectilesToResolve(Action<bool> onResolved)
+    private IEnumerator WaitForProjectilesToResolve(
+        int debrisBeforeDetonation,
+        Action<bool> onResolved)
     {
         // Wait a frame so this detonation's projectiles are guaranteed to
         // have been created before we start polling for them.
@@ -715,6 +725,9 @@ public class GridSpawner : MonoBehaviour
             yield return new WaitForSeconds(ResolutionVisualDelay);
         }
 
+        LastDetonationDebrisBroken = Mathf.Max(
+            0,
+            debrisBeforeDetonation - DebrisRemaining());
         IsDetonating = false;
         onResolved?.Invoke(AllDebrisCleared);
     }

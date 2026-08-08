@@ -134,6 +134,11 @@ public class ClassicMode : GameModeBase
         accumulatedRemainingTime += Mathf.Max(0f, timer.TimeValue);
         accumulatedRemainingMines += Mathf.Max(0, mineInventory.GetCount(MineType.Standard));
 
+        manager.RecordPlayerStat(PlayerStat.ClassicWins);
+        manager.RecordHighScore(
+            PlayerHighScore.Classic,
+            calculateScore());
+
         await SupabaseGameService.MarkClassicLevelCompleted(currentLevel);
         manager.NotifyLevelCleared(currentLevel, MaxLevel);
         waitingForAdvance = true;

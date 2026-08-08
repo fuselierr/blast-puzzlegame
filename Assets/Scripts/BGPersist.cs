@@ -35,6 +35,17 @@ public class BGPersist : MonoBehaviour
         bool shouldShowBackground = scene.name != "Game" && scene.name != "Classic" && scene.name != "LevelEditor";
         gameObject.SetActive(shouldShowBackground);
 
+        if (shouldShowBackground)
+        {
+            ProjectileSpawner[] spawners =
+                GetComponentsInChildren<ProjectileSpawner>(includeInactive: true);
+
+            for (int i = 0; i < spawners.Length; i++)
+            {
+                spawners[i].ResumeSpawning();
+            }
+        }
+
         if (scene.name == "MainMenu")
         {
             RestoreMainMenuBackground();
@@ -50,6 +61,14 @@ public class BGPersist : MonoBehaviour
         }
 
         Projectile.SetTransitionSpeedMultiplier(3f);
+
+        ProjectileSpawner[] projectileSpawners =
+            GetComponentsInChildren<ProjectileSpawner>(includeInactive: true);
+
+        for (int i = 0; i < projectileSpawners.Length; i++)
+        {
+            projectileSpawners[i].BeginExit();
+        }
 
         SlowRotate[] backgroundTiles = GetComponentsInChildren<SlowRotate>(includeInactive: false);
         if (backgroundTiles.Length == 0)

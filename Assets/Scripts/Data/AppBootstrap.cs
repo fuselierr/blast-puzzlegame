@@ -8,6 +8,8 @@ public static class AppBootstrap
         RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
         // Prevent duplicate bootstrap prefabs.
         if (Object.FindObjectOfType<PersistentSystemsMarker>() != null)
         {

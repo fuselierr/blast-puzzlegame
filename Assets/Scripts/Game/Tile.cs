@@ -101,7 +101,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
         SoundManager.GetOrCreate()?.PlayFlagPlaced();
         SetFlagged(!IsFlagged);
-        GameManager.Instance?.NotifyFlagChanged(GridPosition, IsFlagged);
     }
 
     public void SetTutorialHighlight(bool highlighted)

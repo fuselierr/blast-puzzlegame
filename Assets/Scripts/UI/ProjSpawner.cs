@@ -14,6 +14,7 @@ public class ProjectileSpawner : MonoBehaviour
     public float spawnOffset = 1f;
 
     private float timer;
+    private bool isExiting;
 
     private readonly Vector2[] directions =
     {
@@ -29,6 +30,11 @@ public class ProjectileSpawner : MonoBehaviour
 
     void Update()
     {
+        if (isExiting)
+        {
+            return;
+        }
+
         timer += Time.deltaTime;
 
         if (timer >= spawnInterval)
@@ -36,6 +42,38 @@ public class ProjectileSpawner : MonoBehaviour
             timer = 0f;
             SpawnProjectile();
         }
+    }
+
+    public void BeginExit()
+    {
+        isExiting = true;
+
+        Projectile[] spawnedProjectiles =
+            GetComponentsInChildren<Projectile>(includeInactive: true);
+
+        for (int i = 0; i < spawnedProjectiles.Length; i++)
+        {
+            Projectile projectile = spawnedProjectiles[i];
+            if (projectile == null)
+            {
+                continue;
+            }
+
+            // Catch projectiles that entered during this frame before the
+            // spawner received the exit request.
+            projectile.RefreshScreenEntryState();
+
+            if (!projectile.HasEnteredScreen)
+            {
+                Destroy(projectile.gameObject);
+            }
+        }
+    }
+
+    public void ResumeSpawning()
+    {
+        isExiting = false;
+        timer = 0f;
     }
 
     void SpawnProjectile()

@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1037, y: 60.502}
-  m_SizeDelta: {x: 46.8356, y: 40.2877}
+  m_AnchoredPosition: {x: 1030.3011, y: 73.08404}
+  m_SizeDelta: {x: 80.5476, y: 66.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2624668002342739080
 CanvasRenderer:
@@ -608,7 +608,7 @@ MonoBehaviour:
   playButton: {fileID: 539879760032859500}
   kebabButton: {fileID: 7075750256108585164}
   tilesUsedGrid: {fileID: 5196949810862989600}
-  tileIconSize: {x: 24, y: 24}
+  tileIconSize: {x: 36, y: 36}
   globals: {fileID: 11400000, guid: d93029da9ee3b55439018199c3a3d144, type: 2}
 --- !u!114 &5607939472726344117
 MonoBehaviour:
