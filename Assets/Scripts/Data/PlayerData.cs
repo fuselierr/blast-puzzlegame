@@ -1,18 +1,4 @@
 using System;
-using System.Collections.Generic;
-
-[Serializable]
-public class CampaignLevelResult
-{
-    public int levelIndex;
-    public float bestTimeSeconds;
-
-    public CampaignLevelResult(int levelIndex, float bestTimeSeconds)
-    {
-        this.levelIndex = levelIndex;
-        this.bestTimeSeconds = bestTimeSeconds;
-    }
-}
 
 [Serializable]
 public class PlayerData
@@ -22,9 +8,6 @@ public class PlayerData
     public int freeplayHighScore = 0;
     public int classicHighScore = 0;
 
-    public List<int> completedCampaignLevels = new List<int>();
-    public List<int> completedCampaignTutorials = new List<int>();
-    public List<CampaignLevelResult> campaignLevelResults = new List<CampaignLevelResult>();
     public string lastSaveTime = string.Empty;
 }
 
