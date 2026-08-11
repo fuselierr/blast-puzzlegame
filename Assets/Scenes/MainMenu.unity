@@ -22934,6 +22934,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 478724927}
     m_Modifications:
+    - target: {fileID: 141960058127847180, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
+      propertyPath: selectionSprite
+      value: 
+      objectReference: {fileID: 5211086781936739708, guid: 45704558cca23b444af4b8c9c1753cc3, type: 3}
     - target: {fileID: 287423886473383225, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -23050,10 +23054,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -55.2025
       objectReference: {fileID: 0}
-    - target: {fileID: 2150168694441067694, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
-      propertyPath: m_Icon
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 2487440283533093604, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -23109,10 +23109,6 @@ PrefabInstance:
     - target: {fileID: 8243198896573602763, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -47.529
-      objectReference: {fileID: 0}
-    - target: {fileID: 8975881030475152845, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
-      propertyPath: m_Color.a
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8981378351624739899, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
       propertyPath: m_AnchorMax.y
