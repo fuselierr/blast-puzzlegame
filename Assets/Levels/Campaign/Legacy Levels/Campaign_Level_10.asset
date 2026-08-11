@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7cdba1b5b386d0419d5ff059f5573c0, type: 3}
+  m_Name: Campaign_Level_10
+  m_EditorClassIdentifier: Assembly-CSharp::CampaignLevelData
+  levelName: Double Impact
+  width: 7
+  height: 7
+  tutorialMessage: Double mines fire twice in every direction. Use one to clear strong debris with a single detonation.
+  tutorialType: 8
+  standardMines: 0
+  crossMines: 0
+  diagonalMines: 0
+  doubleMines: 1
+  layout: '---t---
+
+    -------
+
+    -------
+
+    t-----t
+
+    -------
+
+    -------
+
+    ---t---'

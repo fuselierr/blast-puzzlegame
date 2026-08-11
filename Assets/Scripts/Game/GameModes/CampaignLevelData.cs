@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum CampaignTutorialType
@@ -36,79 +35,47 @@ public class CampaignLevelData : ScriptableObject
 
     public string layout;
 
-    private static readonly Dictionary<char, TileType> tiletype_decoder = new Dictionary<char, TileType>()
-    {
-        ['x'] = TileType.Debris,
-        ['X'] = TileType.Debris,
-        ['#'] = TileType.Debris,
-        ['.'] = TileType.Tile,
-        ['-'] = TileType.Tile,
-        ['w'] = TileType.Wall,
-        ['W'] = TileType.Wall,
-        // ['t'] = TileType.ToughDebris,
-        // ['T'] = TileType.ToughDebris,
-        ['t'] = TileType.StrongDebris,
-        ['T'] = TileType.StrongDebris,
-    };
-
     public TileType GetTile(int x, int y)
     {
-        string[] rows = GetRows();
-        if (x < 0 || y < 0 || y >= rows.Length || x >= rows[y].Length)
+        return GetTileData(x, y).tileType;
+    }
+
+    public CustomLevelTileData GetTileData(int x, int row)
+    {
+        if (!TryToTileGrid(out CustomLevelTileData[,] grid, out _) ||
+            x < 0 || x >= width || row < 0 || row >= height)
         {
-            return TileType.Tile;
+            return new CustomLevelTileData(TileType.Tile);
         }
 
-        char symbol = rows[y][x];
-        return tiletype_decoder[symbol];
+        return grid[x, row];
+    }
+
+    public bool TryToTileGrid(
+        out CustomLevelTileData[,] grid,
+        out string error)
+    {
+        CustomLevelData parser = new CustomLevelData
+        {
+            levelName = levelName,
+            width = width,
+            height = height,
+            layout = NormalizeLayout(layout)
+        };
+
+        return parser.TryToTileGrid(out grid, out error);
     }
 
     public bool HasValidLayout(out string error)
     {
-        string[] rows = GetRows();
-        if (rows.Length != height)
-        {
-            error = $"expected {height} rows but found {rows.Length}";
-            return false;
-        }
-
-        for (int y = 0; y < rows.Length; y++)
-        {
-            if (rows[y].Length != width)
-            {
-                error = $"row {y + 1} should contain {width} characters but contains {rows[y].Length}";
-                return false;
-            }
-
-            for (int x = 0; x < rows[y].Length; x++)
-            {
-                char symbol = rows[y][x];
-                if (!tiletype_decoder.ContainsKey(symbol))
-                {
-                    error = $"unsupported character '{symbol}' at row {y + 1}, column {x + 1}";
-                    return false;
-                }
-            }
-        }
-
-        error = string.Empty;
-        return true;
+        return TryToTileGrid(out _, out error);
     }
 
-    private string[] GetRows()
+    private static string NormalizeLayout(string value)
     {
-        if (string.IsNullOrWhiteSpace(layout))
-        {
-            return new string[0];
-        }
-
-        string normalizedLayout = layout.Replace("\r", string.Empty);
-
-        if (!normalizedLayout.Contains("\n") && normalizedLayout.Contains("\\n"))
-        {
-            normalizedLayout = normalizedLayout.Replace("\\n", "\n");
-        }
-
-        return normalizedLayout.Trim().Split('\n');
+        string normalized = (value ?? string.Empty).Replace("\r", string.Empty);
+        return !normalized.Contains("\n") && normalized.Contains("\\n")
+            ? normalized.Replace("\\n", "\n")
+            : normalized;
     }
 }
