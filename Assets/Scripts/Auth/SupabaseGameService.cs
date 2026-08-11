@@ -483,6 +483,12 @@ public static class SupabaseGameService
                     profile => profile.Username
                 );
 
+            Dictionary<string, int> avatarIds =
+                profiles.Models.ToDictionary(
+                    profile => profile.Id,
+                    profile => profile.AvatarId
+                );
+
             List<DailyChallengeScoreRow> sorted =
                 scores.Models
                     .Where(IsCompletedDailyScore)
@@ -503,7 +509,12 @@ public static class SupabaseGameService
                         usernames,
                         row.UserId
                     ),
-                    score = ToSafeInt(row.Score.Value)
+                    score = ToSafeInt(row.Score.Value),
+                    avatarId = avatarIds.TryGetValue(
+                        row.UserId,
+                        out int avatarId)
+                            ? avatarId
+                            : 0
                 });
             }
         }
@@ -547,51 +558,6 @@ public static class SupabaseGameService
             );
 
             return string.Empty;
-        }
-    }
-
-    public static async Task<bool> SetProfileAvatar(int avatarId)
-    {
-        avatarId = Mathf.Clamp(avatarId, 0, 35);
-
-        try
-        {
-            string userId = await GetCurrentUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return false;
-            }
-
-            var response = await SupabaseManager.Instance
-                .SupabaseClient
-                .From<Profile>()
-                .Where(profile => profile.Id == userId)
-                .Get();
-
-            Profile profile = response.Models.FirstOrDefault();
-
-            if (profile == null)
-            {
-                return false;
-            }
-
-            profile.AvatarId = avatarId;
-
-            await SupabaseManager.Instance
-                .SupabaseClient
-                .From<Profile>()
-                .Update(profile);
-
-            return true;
-        }
-        catch (Exception exception)
-        {
-            Debug.LogError(
-                "Could not update profile avatar: " +
-                exception.Message);
-
-            return false;
         }
     }
 

@@ -14,13 +14,25 @@ public class LeaderboardEntryUI : MonoBehaviour
     [SerializeField] private Sprite defaultProfileSprite; // fallback if none provided
     [SerializeField] private GameObject highlightBackground; // e.g. to highlight "you"
  
-    public void Setup(LeaderboardEntryData data, bool isCurrentPlayer = false)
+    public void Setup(
+        LeaderboardEntryData data,
+        bool isCurrentPlayer,
+        ProfileAvatarCatalog avatarCatalog)
     {
         rankText.text = FormatRank(data.rank);
         nameText.text = data.playerName;
         scoreText.text = data.score.ToString("N0"); // e.g. 12,340
  
-        profileImage.sprite = data.profileImage != null ? data.profileImage : defaultProfileSprite;
+        Sprite avatarSprite = avatarCatalog != null
+            ? avatarCatalog.GetAvatar(data.avatarId)
+            : null;
+
+        profileImage.sprite = avatarSprite != null
+            ? avatarSprite
+            : data.profileImage != null
+                ? data.profileImage
+                : defaultProfileSprite;
+        profileImage.preserveAspect = true;
  
         if (highlightBackground != null)
             highlightBackground.SetActive(isCurrentPlayer);

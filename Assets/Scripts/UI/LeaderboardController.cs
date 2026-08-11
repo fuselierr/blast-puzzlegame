@@ -6,6 +6,7 @@ public class LeaderboardController : MonoBehaviour
 {
     [SerializeField]
     private Transform contentParent;
+    [SerializeField] private ProfileAvatarCatalog avatarCatalog;
 
     private List<LeaderboardEntryUI> staticRows =
         new List<LeaderboardEntryUI>();
@@ -69,7 +70,8 @@ public class LeaderboardController : MonoBehaviour
 
             staticRows[index].Setup(
                 entry,
-                isCurrentPlayer
+                isCurrentPlayer,
+                avatarCatalog
             );
         }
     }
