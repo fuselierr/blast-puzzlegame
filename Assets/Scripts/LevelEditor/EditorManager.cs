@@ -10,6 +10,8 @@ public class EditorManager : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private GameObject filePanel;
+    [SerializeField] private GameObject fullScreenUi;
+    [SerializeField] private GameObject editorWindow;
 
     [Header("Grid")]
     [SerializeField] private EditorGridSpawner gridSpawner;
@@ -260,6 +262,16 @@ public class EditorManager : MonoBehaviour
             verifiedText.gameObject.SetActive(false);
         }
 
+        if (fullScreenUi != null)
+        {
+            fullScreenUi.SetActive(false);
+        }
+
+        if (editorWindow != null)
+        {
+            editorWindow.SetActive(false);
+        }
+
         gridSpawner.SetTilesVisible(false);
         filePanel.SetActive(false);
         gameplayGridSpawner.gameObject.SetActive(true);
@@ -281,6 +293,16 @@ public class EditorManager : MonoBehaviour
         if (verificationManager != null)
         {
             verificationManager.enabled = false;
+        }
+
+        if (fullScreenUi != null)
+        {
+            fullScreenUi.SetActive(true);
+        }
+
+        if (editorWindow != null)
+        {
+            editorWindow.SetActive(true);
         }
 
         if (gameplayGridSpawner != null)
