@@ -10,8 +10,6 @@ public class EditorManager : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private GameObject filePanel;
-    [SerializeField] private GameObject fullScreenUi;
-    [SerializeField] private GameObject editorWindow;
 
     [Header("Grid")]
     [SerializeField] private EditorGridSpawner gridSpawner;
@@ -152,6 +150,22 @@ public class EditorManager : MonoBehaviour
 
     private void PaintTile(EditorTile tile)
     {
+        if (tile == null)
+        {
+            return;
+        }
+
+        bool tileChanged =
+            tile.Type != selectedTileType ||
+            ((selectedTileType == TileType.Mine ||
+              selectedTileType == TileType.Mirror) &&
+             tile.MineType != selectedMineType);
+
+        if (!tileChanged)
+        {
+            return;
+        }
+
         Debug.Log(
             $"PAINTING {tile.GridPosition} WITH " +
             $"{selectedTileType}, {selectedMineType}",
@@ -159,11 +173,17 @@ public class EditorManager : MonoBehaviour
         );
 
         tile.SetTile(selectedTileType, selectedMineType);
+        InvalidateVerification();
     }
 
     private void DeleteTile(EditorTile tile)
     {
         if (tile == null)
+        {
+            return;
+        }
+
+        if (tile.Type == TileType.Tile)
         {
             return;
         }
@@ -174,6 +194,7 @@ public class EditorManager : MonoBehaviour
         );
 
         tile.SetTile(TileType.Tile, MineType.Standard);
+        InvalidateVerification();
     }
 
     public void ResizeGridFromInputs()
@@ -194,6 +215,28 @@ public class EditorManager : MonoBehaviour
         if (newWidth != gridSpawner.Width || newHeight != gridSpawner.Height)
         {
             gridSpawner.ResizeGrid(newWidth, newHeight);
+            InvalidateVerification();
+        }
+    }
+
+    private void InvalidateVerification()
+    {
+        if (currentLevel != null)
+        {
+            currentLevel.verified = false;
+        }
+
+        // Do not leave a previous "Level Verified!" result visible after the
+        // board it referred to has changed.
+        if (messageHideRoutine != null)
+        {
+            StopCoroutine(messageHideRoutine);
+            messageHideRoutine = null;
+        }
+
+        if (verifiedText != null)
+        {
+            verifiedText.gameObject.SetActive(false);
         }
     }
 
@@ -262,16 +305,6 @@ public class EditorManager : MonoBehaviour
             verifiedText.gameObject.SetActive(false);
         }
 
-        if (fullScreenUi != null)
-        {
-            fullScreenUi.SetActive(false);
-        }
-
-        if (editorWindow != null)
-        {
-            editorWindow.SetActive(false);
-        }
-
         gridSpawner.SetTilesVisible(false);
         filePanel.SetActive(false);
         gameplayGridSpawner.gameObject.SetActive(true);
@@ -293,16 +326,6 @@ public class EditorManager : MonoBehaviour
         if (verificationManager != null)
         {
             verificationManager.enabled = false;
-        }
-
-        if (fullScreenUi != null)
-        {
-            fullScreenUi.SetActive(true);
-        }
-
-        if (editorWindow != null)
-        {
-            editorWindow.SetActive(true);
         }
 
         if (gameplayGridSpawner != null)
