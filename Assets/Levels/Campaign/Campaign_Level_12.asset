@@ -20,20 +20,20 @@ MonoBehaviour:
   crossMines: 1
   diagonalMines: 1
   doubleMines: 1
-  layout: '--x------
+  layout: '- - D - - - - - -
 
-    ---------
+    - - - - - - - - -
 
-    -x-xw-x--
+    - D - D W - D - -
 
-    --xxx----
+    - - D D D - - - -
 
-    ------x-x
+    - - - - - - D - D
 
-    --ww-x---
+    - - W W - D - - -
 
-    --------t
+    - - - - - - - - H
 
-    ---t-x---
+    - - - H - D - - -
 
-    --t-x---x'
+    - - H - D - - - D'

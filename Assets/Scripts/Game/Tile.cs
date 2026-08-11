@@ -13,6 +13,13 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private Globals globals;
 
+    [Header("Debris Particles")]
+    [Tooltip("One-shot ParticleSystem spawned whenever debris is hit.")]
+    [SerializeField] private ParticleSystem debrisHitParticlePrefab;
+    [SerializeField] private Color debrisParticleColor =
+        new Color(0.55f, 0.38f, 0.2f, 1f);
+    [SerializeField, Min(0f)] private float debrisParticleGravity = 1.5f;
+
     public TileType Type { get; private set; } = TileType.Tile;
     public MineType mineType { get; private set; } = MineType.Standard;
     public string TeleporterPairId { get; private set; }
@@ -79,6 +86,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         if (Type == TileType.Debris)
         {
+            SpawnDebrisParticles();
             Type = TileType.Tile;
             SetFlagged(false);
             spriteRenderer.sprite = globals != null ? globals.GetSprite(TileType.Tile) : null;
@@ -86,6 +94,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
         else if (Type == TileType.StrongDebris)
         {
+            SpawnDebrisParticles();
             bool wasFlagged = IsFlagged;
             SetTileType(TileType.Debris);
             SetFlagged(wasFlagged);
@@ -93,9 +102,32 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    private void SpawnDebrisParticles()
+    {
+        if (debrisHitParticlePrefab == null)
+        {
+            return;
+        }
+
+        ParticleSystem particles = Instantiate(
+            debrisHitParticlePrefab,
+            transform.position,
+            Quaternion.identity);
+
+        ParticleSystem.MainModule main = particles.main;
+        main.playOnAwake = false;
+        main.loop = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.gravityModifier = debrisParticleGravity;
+        main.startColor = debrisParticleColor;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        particles.Play();
+    }
+
     public void ToggleFlag()
     {
-        if (Type != TileType.Debris)
+        if (Type != TileType.Debris && Type != TileType.StrongDebris)
         {
             return;
         }
@@ -162,7 +194,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             gameManager.ReturnMine(prevMineType);
             gameManager.NotifyMineReturned(GridPosition, prevMineType);
         }
-        else if (Type == TileType.Debris)
+        else if (Type == TileType.Debris || Type == TileType.StrongDebris)
         {
             ToggleFlag();
         }

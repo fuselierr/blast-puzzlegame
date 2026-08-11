@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using TMPro;
 
 public enum MainMenuPage
@@ -18,8 +22,21 @@ public enum CommunityTab
     Discover
 }
 
+[Serializable]
+public class ModeLockView
+{
+    public Button button;
+    public GameObject lockImage;
+    [Tooltip("Images/text to tint grey while this mode is locked.")]
+    public Graphic[] graphics;
+
+    [NonSerialized] public Color[] originalColors;
+}
+
 public class MainMenu : MonoBehaviour
 {
+    private const int RequiredCampaignCompletions = 5;
+
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject campaignPanel;
 
@@ -39,15 +56,22 @@ public class MainMenu : MonoBehaviour
 
     [SerializeField] private LeaderboardController leaderboardController;
 
+    [Header("Mode Unlocks")]
+    [Tooltip("Add Daily Challenge, Classic, Freeplay, and Community here.")]
+    [SerializeField] private ModeLockView[] campaignLockedModes;
+    [SerializeField] private Color lockedModeColor =
+        new Color(0.35f, 0.35f, 0.35f, 1f);
+
     private static bool dailyChallengeRequestRunning;
     private int score;
+    private bool extraModesUnlocked;
 
     public static MainMenuPage PageToOpen = MainMenuPage.Main;
     public static CommunityTab CommunityTabToOpen = CommunityTab.MyLevels;
 
     public async void PlayDailyChallenge()
     {
-        if (dailyChallengeRequestRunning)
+        if (!extraModesUnlocked || dailyChallengeRequestRunning)
         {
             return;
         }
@@ -88,6 +112,11 @@ public class MainMenu : MonoBehaviour
     }
     public void PlayFreeplay()
     {
+        if (!extraModesUnlocked)
+        {
+            return;
+        }
+
         GameManager.SelectedMode = GameMode.Freeplay;
         GameManager.IsDailyChallenge = false;
         GameManager.SelectedCustomLevel = null;
@@ -102,6 +131,11 @@ public class MainMenu : MonoBehaviour
 
     public void PlayClassic()
     {
+        if (!extraModesUnlocked)
+        {
+            return;
+        }
+
         HideAllPanels();
 
         if (classicProgressPanel != null)
@@ -149,6 +183,11 @@ public class MainMenu : MonoBehaviour
 
     public void OpenCommunity()
     {
+        if (!extraModesUnlocked)
+        {
+            return;
+        }
+
         mainMenuPanel.SetActive(false);
         communityPanel.SetActive(true);
         OpenCommunityTab(CommunityTab.MyLevels);
@@ -190,19 +229,43 @@ public class MainMenu : MonoBehaviour
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private void Awake()
+    {
+        CaptureModeColors();
+        SetExtraModesUnlocked(false);
+    }
+
     private async void Start()
     {
         dailyChallengeRequestRunning = false;
+        MainMenuPage requestedPage = PageToOpen;
+        PageToOpen = MainMenuPage.Main;
+
+        HideAllPanels();
+        mainMenuPanel.SetActive(true);
+
+        List<CampaignLevelProgressRow> campaignProgress =
+            await SupabaseGameService.GetCampaignProgress();
+
+        int completedCampaignLevels = campaignProgress
+            .Where(row => row != null && row.CompletedAt.HasValue)
+            .Select(row => row.LevelNumber)
+            .Distinct()
+            .Count();
+
+        SetExtraModesUnlocked(
+            completedCampaignLevels >= RequiredCampaignCompletions);
+
         HideAllPanels();
 
-        switch (PageToOpen)
+        switch (requestedPage)
         {
             case MainMenuPage.Campaign:
                 campaignPanel.SetActive(true);
                 break;
 
             case MainMenuPage.Classic:
-                if (classicProgressPanel != null)
+                if (extraModesUnlocked && classicProgressPanel != null)
                 {
                     classicProgressPanel.SetActive(true);
                 }
@@ -213,8 +276,15 @@ public class MainMenu : MonoBehaviour
                 break;
 
             case MainMenuPage.Community:
-                communityPanel.SetActive(true);
-                OpenCommunityTab(CommunityTabToOpen);
+                if (extraModesUnlocked)
+                {
+                    communityPanel.SetActive(true);
+                    OpenCommunityTab(CommunityTabToOpen);
+                }
+                else
+                {
+                    mainMenuPanel.SetActive(true);
+                }
                 break;
 
             case MainMenuPage.Stats:
@@ -231,8 +301,6 @@ public class MainMenu : MonoBehaviour
                 break;
         }
 
-        PageToOpen = MainMenuPage.Main;
-
         attemptedDailyChallenge = await SupabaseGameService.HasAttemptedDailyChallengeToday();
 
         int? savedDailyScore = await SupabaseGameService.GetTodayDailyScore();
@@ -243,6 +311,75 @@ public class MainMenu : MonoBehaviour
                 savedDailyScore.HasValue
                     ? savedDailyScore.Value.ToString()
                     : "N/A";
+        }
+    }
+
+    private void CaptureModeColors()
+    {
+        if (campaignLockedModes == null)
+        {
+            return;
+        }
+
+        foreach (ModeLockView mode in campaignLockedModes)
+        {
+            if (mode == null || mode.graphics == null)
+            {
+                continue;
+            }
+
+            mode.originalColors = mode.graphics
+                .Select(graphic => graphic != null ? graphic.color : Color.white)
+                .ToArray();
+        }
+    }
+
+    private void SetExtraModesUnlocked(bool unlocked)
+    {
+        extraModesUnlocked = unlocked;
+
+        if (campaignLockedModes == null)
+        {
+            return;
+        }
+
+        foreach (ModeLockView mode in campaignLockedModes)
+        {
+            if (mode == null)
+            {
+                continue;
+            }
+
+            if (mode.button != null)
+            {
+                mode.button.interactable = unlocked;
+            }
+
+            if (mode.lockImage != null)
+            {
+                mode.lockImage.SetActive(!unlocked);
+            }
+
+            if (mode.graphics == null)
+            {
+                continue;
+            }
+
+            for (int index = 0; index < mode.graphics.Length; index++)
+            {
+                Graphic graphic = mode.graphics[index];
+                if (graphic == null)
+                {
+                    continue;
+                }
+
+                Color original = mode.originalColors != null &&
+                    index < mode.originalColors.Length
+                        ? mode.originalColors[index]
+                        : Color.white;
+
+                graphic.color = unlocked ? original : lockedModeColor;
+            }
         }
     }
 

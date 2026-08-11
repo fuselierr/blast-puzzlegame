@@ -21,16 +21,16 @@ MonoBehaviour:
   crossMines: 0
   diagonalMines: 0
   doubleMines: 1
-  layout: '---t---
+  layout: '- - - H - - -
 
-    -------
+    - - - - - - -
 
-    -------
+    - - - - - - -
 
-    t-----t
+    H - - - - - H
 
-    -------
+    - - - - - - -
 
-    -------
+    - - - - - - -
 
-    ---t---'
+    - - - H - - -'
