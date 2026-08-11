@@ -13,6 +13,9 @@ public class Profile : BaseModel
 
     [Column("points")]
     public int Points { get; set; }
+
+    [Column("avatar_id")]
+    public int AvatarId { get; set; }
 }
 
 [Table("progress")]

@@ -550,6 +550,51 @@ public static class SupabaseGameService
         }
     }
 
+    public static async Task<bool> SetProfileAvatar(int avatarId)
+    {
+        avatarId = Mathf.Clamp(avatarId, 0, 35);
+
+        try
+        {
+            string userId = await GetCurrentUserId();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return false;
+            }
+
+            var response = await SupabaseManager.Instance
+                .SupabaseClient
+                .From<Profile>()
+                .Where(profile => profile.Id == userId)
+                .Get();
+
+            Profile profile = response.Models.FirstOrDefault();
+
+            if (profile == null)
+            {
+                return false;
+            }
+
+            profile.AvatarId = avatarId;
+
+            await SupabaseManager.Instance
+                .SupabaseClient
+                .From<Profile>()
+                .Update(profile);
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                "Could not update profile avatar: " +
+                exception.Message);
+
+            return false;
+        }
+    }
+
     private static async Task<string> GetCurrentUserId()
     {
         if (!await EnsureReady())
