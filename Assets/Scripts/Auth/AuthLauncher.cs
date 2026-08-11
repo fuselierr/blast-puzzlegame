@@ -180,7 +180,9 @@ public class AuthLauncher : MonoBehaviour
             {
                 Id = userId,
                 Username = username,
-                Points = 0
+                Points = 0,
+                // Avatar 0 is the first sprite in ProfileAvatarCatalog.
+                AvatarId = 0
             };
 
             await SupabaseManager.Instance.SupabaseClient
