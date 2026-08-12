@@ -60,4 +60,4 @@ This policy may be updated when the game's features or data practices change. Up
 
 For privacy questions, contact:
 
-**mike.gao312@hotmail.com**
+**cs446LCity@gmail.com**
