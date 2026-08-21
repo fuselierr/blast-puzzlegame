@@ -1,0 +1,243 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void EmbeddedAttribute__ctor_mD68C6A5CEFA068849BF8AFB85F0B84E43E08E871 (void);
+extern void RefSafetyRulesAttribute__ctor_m9BF1A604C94C13909184608C2E5BC374F1B92555 (void);
+extern void Base64UrlEncoder_Encode_mAE48E502735B9D0C3AF5AB1DE4631E87F19CAEAB (void);
+extern void Base64UrlEncoder_Encode_m025D31B217DFFC802B250E738AD416B704EECA4E (void);
+extern void Base64UrlEncoder_Encode_mCD1780F5EE59D8849C90F1F0D879D83BCA9B65EA (void);
+extern void Base64UrlEncoder_DecodeBytes_m6A0A6764B8535F56DBC708B829A6E96D6F0F7FBB (void);
+extern void Base64UrlEncoder_Decode_mB5DD18DDEDFFB2D05065EEE09E94C3126C0B775B (void);
+extern void Base64UrlEncoder_UnsafeDecode_m1DACD016000DFAE83DC3D8AD256ECEBBBA45F668 (void);
+extern void Base64UrlEncoder_Decode_mC3A9DF0B8B86E6B6EBBC8A2ACAA219E3741E43B4 (void);
+extern void Base64UrlEncoding_Decode_mA0ABCEB2268794D30038E7D69F5BF1CE833994E9 (void);
+extern void Base64UrlEncoding_ValidateAndGetOutputSize_mA14F9ED70D2FE7D29A62899068A7A93B7FB8FA41 (void);
+extern void Base64UrlEncoding__cctor_m2FC123E190DF8384FC04F42A167C0414840C943F (void);
+extern void DateTimeUtil_Add_m7C099C20017A665438AA13CEF310CD4A2130F383 (void);
+extern void DateTimeUtil_GetMaxValue_mA5375720906A27BABC34B7F428742BC0327A8591 (void);
+extern void DateTimeUtil_GetMinValue_m2BC1BB1F82EBEBB3B247D03B2F98FFBDF99D71BB (void);
+extern void EpochTime_GetIntDate_m74D8457E1F9DA181D047252A4949827DCBED04D8 (void);
+extern void EpochTime_DateTime_m20629450645E42002C54CC9AC5A8372BE9E4919A (void);
+extern void EpochTime__cctor_m236688F12C36E5DC73BE8F954CA4CA093C662E0B (void);
+extern void SecurityTokenArgumentException__ctor_m1CB6214CCE72674EDF37AEA6238B1B0D6ABF9567 (void);
+extern void SecurityTokenArgumentException__ctor_m4AC1A6ED31BE6018516C157E90B790BD102F6E58 (void);
+extern void SecurityTokenArgumentException__ctor_mC023EEF333EAA73EAB1BC0911D6905E038ECF6DD (void);
+extern void SecurityTokenException__ctor_mF3CBE80FA93AF061EB89C631A5D6FF1F9EF2FC2E (void);
+extern void SecurityTokenException__ctor_mCEAA275E6C6B8295A93F0377C0FFA74085FD86CC (void);
+extern void SecurityTokenException__ctor_m99AFEF7AEABF47375D39663E2EA066FD02C9188B (void);
+extern void SecurityTokenException_GetObjectData_m9FA2FA44CCB304B6B4E00D29E95C8A203AD226F7 (void);
+extern void SecurityTokenMalformedException__ctor_mBE19E94B7EBA4EF806F80F7119C9910E08A82011 (void);
+extern void SecurityTokenMalformedException__ctor_mB14F471BA79F688C642F84ABB9027C6020B91686 (void);
+extern void SecurityTokenMalformedException__ctor_m4A4E274B44575A789F3471E6374510D24B0716A0 (void);
+extern void SecurityKey_get_KeyId_m501A1F0B4E96D7F334BF6A81CDC6C9EF450B3D57 (void);
+extern void SecurityToken_UnsafeToString_m2FC89CFBE52F8BB74340C0318CB9BB8FE6AEA8FA (void);
+extern void SecurityToken__ctor_m46CF82D4FD80C727CE9386D18E514311550DAE38 (void);
+extern void SecurityTokenHandler__ctor_mCBA016D7ADA99993C76279331C30F3A9FF3F301E (void);
+extern void SecurityTokenHandler_CanReadToken_m7D433FF4963FA5C7324C54DC2E822AC12530106D (void);
+extern void SigningCredentials_get_Algorithm_m6586A84A7ECF5D8CE261DE2F6100C0FA76870FCA (void);
+extern void SigningCredentials_get_Key_mFF85E98BD5D00205B97624FC93B7204D63346541 (void);
+extern void TokenHandler_get_MaximumTokenSizeInBytes_mDC20761CA0A9979E75A9509CD40760A504231774 (void);
+extern void TokenHandler__ctor_m09A43DDCA9DCE640A3E6A47231CCCFA7AD139B53 (void);
+extern void TokenHandler__cctor_mB4AB1BC3B445F7CA5EA8C172D8ED8354A137A46E (void);
+extern void TokenUtilities_GetClaimValueUsingValueType_m9DB97765E259CA274F15F8F361E49048DF8FFC65 (void);
+extern void X509SigningCredentials_get_Certificate_m4A729771DB776650D1E5F79D21ADEF0ACB6CF069 (void);
+extern void JsonSerializerPrimitives_CreateJsonReaderException_mC4FE9751E866EFFA63AFD939CBD1E767C1661C44 (void);
+extern void JsonSerializerPrimitives_CreateJsonReaderExceptionInvalidType_m6DD6D02E3D8E9FE47F93EAF02FEB601FE8AE4826 (void);
+extern void JsonSerializerPrimitives_CreateJsonElement_m4B58B9D4E7AC2625244DD97386042AC4B0870228 (void);
+extern void JsonSerializerPrimitives_CreateJsonElement_m08430E8D7F3C8AEB919F2BAB07FCE05B3E8C160B (void);
+extern void JsonSerializerPrimitives_CreateObjectFromJsonElement_m00A5B4DD96FA908870C6F36DA6E0CEDE73F3A46D (void);
+extern void JsonSerializerPrimitives_IsReaderAtTokenType_m0AFED70E4CD72E3997E523242478A50278B98B27 (void);
+extern void JsonSerializerPrimitives_ReadLong_m367CD1F919116A504FA7E2B370706250574F7C06 (void);
+extern void JsonSerializerPrimitives_ReadJsonElement_mDDD62F2D3A215A1AF536376F2B62256160908D53 (void);
+extern void JsonSerializerPrimitives_ReadArrayOfObjects_mAD85BB8DDAB2E65C1BB47D31E6F12886474663C7 (void);
+extern void JsonSerializerPrimitives_ReadPropertyName_m6AA4091C69334BA15DA64EA55EEFE4E253ECB6BA (void);
+extern void JsonSerializerPrimitives_ReadString_m29F2F4D5C9D3DEE6D91511BE3BC146B025BB0819 (void);
+extern void JsonSerializerPrimitives_ReadStringOrNumberAsString_m758BAE21236A813F44C77367545D5B0283949599 (void);
+extern void JsonSerializerPrimitives_ReadStringAsObject_mEFA32B57FC3AFB1E364FAD74AE5E01B59CA34381 (void);
+extern void JsonSerializerPrimitives_ReadStrings_m2C3761823B4DE03580BAB9AD52C00E04B653C385 (void);
+extern void JsonSerializerPrimitives_ReadPropertyValueAsObject_m209DBFC16D5C215B3BDC4F73B4044A728C01A1DD (void);
+extern void JsonSerializerPrimitives_ReadNumber_m21307FDD3E82BECAF61D33342912ADC7D308B00E (void);
+extern void JsonSerializerPrimitives_IsReaderPositionedOnNull_m35A6E5B058D0AB230794BE9E77D4FD4FE17657C7 (void);
+extern void JsonSerializerPrimitives_WriteObjects_mA252AE8071B55F3E3C6AA9AB1C59CC2208BB487A (void);
+extern void JsonSerializerPrimitives_WriteObject_m62593E5F4ECFFCBC8ADF0691889F153AD4EB065E (void);
+extern void JsonSerializerPrimitives_WriteObjectValue_m6B617012D6A9F51B329AF5ED148A0B148005BC17 (void);
+extern void JsonSerializerPrimitives__cctor_mEEB17A3A9930F3F2DD681BFEEC0A59FC5BD584A8 (void);
+static Il2CppMethodPointer s_methodPointers[63] = 
+{
+	EmbeddedAttribute__ctor_mD68C6A5CEFA068849BF8AFB85F0B84E43E08E871,
+	RefSafetyRulesAttribute__ctor_m9BF1A604C94C13909184608C2E5BC374F1B92555,
+	Base64UrlEncoder_Encode_mAE48E502735B9D0C3AF5AB1DE4631E87F19CAEAB,
+	Base64UrlEncoder_Encode_m025D31B217DFFC802B250E738AD416B704EECA4E,
+	Base64UrlEncoder_Encode_mCD1780F5EE59D8849C90F1F0D879D83BCA9B65EA,
+	Base64UrlEncoder_DecodeBytes_m6A0A6764B8535F56DBC708B829A6E96D6F0F7FBB,
+	Base64UrlEncoder_Decode_mB5DD18DDEDFFB2D05065EEE09E94C3126C0B775B,
+	Base64UrlEncoder_UnsafeDecode_m1DACD016000DFAE83DC3D8AD256ECEBBBA45F668,
+	Base64UrlEncoder_Decode_mC3A9DF0B8B86E6B6EBBC8A2ACAA219E3741E43B4,
+	NULL,
+	Base64UrlEncoding_Decode_mA0ABCEB2268794D30038E7D69F5BF1CE833994E9,
+	Base64UrlEncoding_ValidateAndGetOutputSize_mA14F9ED70D2FE7D29A62899068A7A93B7FB8FA41,
+	Base64UrlEncoding__cctor_m2FC123E190DF8384FC04F42A167C0414840C943F,
+	DateTimeUtil_Add_m7C099C20017A665438AA13CEF310CD4A2130F383,
+	DateTimeUtil_GetMaxValue_mA5375720906A27BABC34B7F428742BC0327A8591,
+	DateTimeUtil_GetMinValue_m2BC1BB1F82EBEBB3B247D03B2F98FFBDF99D71BB,
+	EpochTime_GetIntDate_m74D8457E1F9DA181D047252A4949827DCBED04D8,
+	EpochTime_DateTime_m20629450645E42002C54CC9AC5A8372BE9E4919A,
+	EpochTime__cctor_m236688F12C36E5DC73BE8F954CA4CA093C662E0B,
+	SecurityTokenArgumentException__ctor_m1CB6214CCE72674EDF37AEA6238B1B0D6ABF9567,
+	SecurityTokenArgumentException__ctor_m4AC1A6ED31BE6018516C157E90B790BD102F6E58,
+	SecurityTokenArgumentException__ctor_mC023EEF333EAA73EAB1BC0911D6905E038ECF6DD,
+	SecurityTokenException__ctor_mF3CBE80FA93AF061EB89C631A5D6FF1F9EF2FC2E,
+	SecurityTokenException__ctor_mCEAA275E6C6B8295A93F0377C0FFA74085FD86CC,
+	SecurityTokenException__ctor_m99AFEF7AEABF47375D39663E2EA066FD02C9188B,
+	SecurityTokenException_GetObjectData_m9FA2FA44CCB304B6B4E00D29E95C8A203AD226F7,
+	SecurityTokenMalformedException__ctor_mBE19E94B7EBA4EF806F80F7119C9910E08A82011,
+	SecurityTokenMalformedException__ctor_mB14F471BA79F688C642F84ABB9027C6020B91686,
+	SecurityTokenMalformedException__ctor_m4A4E274B44575A789F3471E6374510D24B0716A0,
+	SecurityKey_get_KeyId_m501A1F0B4E96D7F334BF6A81CDC6C9EF450B3D57,
+	SecurityToken_UnsafeToString_m2FC89CFBE52F8BB74340C0318CB9BB8FE6AEA8FA,
+	SecurityToken__ctor_m46CF82D4FD80C727CE9386D18E514311550DAE38,
+	SecurityTokenHandler__ctor_mCBA016D7ADA99993C76279331C30F3A9FF3F301E,
+	SecurityTokenHandler_CanReadToken_m7D433FF4963FA5C7324C54DC2E822AC12530106D,
+	SigningCredentials_get_Algorithm_m6586A84A7ECF5D8CE261DE2F6100C0FA76870FCA,
+	SigningCredentials_get_Key_mFF85E98BD5D00205B97624FC93B7204D63346541,
+	TokenHandler_get_MaximumTokenSizeInBytes_mDC20761CA0A9979E75A9509CD40760A504231774,
+	TokenHandler__ctor_m09A43DDCA9DCE640A3E6A47231CCCFA7AD139B53,
+	TokenHandler__cctor_mB4AB1BC3B445F7CA5EA8C172D8ED8354A137A46E,
+	TokenUtilities_GetClaimValueUsingValueType_m9DB97765E259CA274F15F8F361E49048DF8FFC65,
+	X509SigningCredentials_get_Certificate_m4A729771DB776650D1E5F79D21ADEF0ACB6CF069,
+	JsonSerializerPrimitives_CreateJsonReaderException_mC4FE9751E866EFFA63AFD939CBD1E767C1661C44,
+	JsonSerializerPrimitives_CreateJsonReaderExceptionInvalidType_m6DD6D02E3D8E9FE47F93EAF02FEB601FE8AE4826,
+	JsonSerializerPrimitives_CreateJsonElement_m4B58B9D4E7AC2625244DD97386042AC4B0870228,
+	JsonSerializerPrimitives_CreateJsonElement_m08430E8D7F3C8AEB919F2BAB07FCE05B3E8C160B,
+	JsonSerializerPrimitives_CreateObjectFromJsonElement_m00A5B4DD96FA908870C6F36DA6E0CEDE73F3A46D,
+	NULL,
+	JsonSerializerPrimitives_IsReaderAtTokenType_m0AFED70E4CD72E3997E523242478A50278B98B27,
+	JsonSerializerPrimitives_ReadLong_m367CD1F919116A504FA7E2B370706250574F7C06,
+	JsonSerializerPrimitives_ReadJsonElement_mDDD62F2D3A215A1AF536376F2B62256160908D53,
+	JsonSerializerPrimitives_ReadArrayOfObjects_mAD85BB8DDAB2E65C1BB47D31E6F12886474663C7,
+	JsonSerializerPrimitives_ReadPropertyName_m6AA4091C69334BA15DA64EA55EEFE4E253ECB6BA,
+	JsonSerializerPrimitives_ReadString_m29F2F4D5C9D3DEE6D91511BE3BC146B025BB0819,
+	JsonSerializerPrimitives_ReadStringOrNumberAsString_m758BAE21236A813F44C77367545D5B0283949599,
+	JsonSerializerPrimitives_ReadStringAsObject_mEFA32B57FC3AFB1E364FAD74AE5E01B59CA34381,
+	JsonSerializerPrimitives_ReadStrings_m2C3761823B4DE03580BAB9AD52C00E04B653C385,
+	JsonSerializerPrimitives_ReadPropertyValueAsObject_m209DBFC16D5C215B3BDC4F73B4044A728C01A1DD,
+	JsonSerializerPrimitives_ReadNumber_m21307FDD3E82BECAF61D33342912ADC7D308B00E,
+	JsonSerializerPrimitives_IsReaderPositionedOnNull_m35A6E5B058D0AB230794BE9E77D4FD4FE17657C7,
+	JsonSerializerPrimitives_WriteObjects_mA252AE8071B55F3E3C6AA9AB1C59CC2208BB487A,
+	JsonSerializerPrimitives_WriteObject_m62593E5F4ECFFCBC8ADF0691889F153AD4EB065E,
+	JsonSerializerPrimitives_WriteObjectValue_m6B617012D6A9F51B329AF5ED148A0B148005BC17,
+	JsonSerializerPrimitives__cctor_mEEB17A3A9930F3F2DD681BFEEC0A59FC5BD584A8,
+};
+static const int32_t s_InvokerIndices[63] = 
+{
+	17349,
+	13116,
+	28166,
+	21779,
+	24068,
+	28166,
+	28134,
+	21726,
+	28166,
+	-1,
+	20554,
+	21536,
+	30066,
+	23963,
+	27799,
+	27799,
+	27988,
+	27800,
+	30066,
+	17349,
+	13190,
+	6688,
+	17349,
+	13190,
+	6688,
+	6688,
+	17349,
+	13190,
+	6688,
+	17089,
+	17089,
+	17349,
+	17349,
+	9329,
+	17089,
+	17089,
+	17013,
+	17349,
+	30066,
+	28166,
+	17089,
+	18953,
+	20423,
+	28035,
+	28035,
+	24325,
+	-1,
+	21356,
+	20316,
+	28034,
+	21732,
+	21731,
+	20422,
+	20422,
+	20422,
+	18952,
+	20422,
+	28141,
+	21356,
+	25146,
+	22542,
+	25146,
+	30066,
+};
+static const Il2CppTokenRangePair s_rgctxIndices[2] = 
+{
+	{ 0x0600000A, { 0, 3 } },
+	{ 0x0600002F, { 3, 3 } },
+};
+extern const uint32_t g_rgctx_Func_3_t8050336F8F0255A7D789F4D77FE883AA3ABDBEA3;
+extern const uint32_t g_rgctx_Func_3_Invoke_m3721FD84D4FD6D89F342E2DB9DA2A8320384490A;
+extern const uint32_t g_rgctx_T_t4F29D2F987CCD9EC5DF883AA28A58D5FF0EFAE20;
+extern const uint32_t g_rgctx_T_tF41EC1FCF97AE95412070D5D2CA5C88AB306E9CC;
+extern const uint32_t g_rgctx_TU26_t742E4E7C0C58F85A66C5A339245DDFE558BDADCD;
+extern const uint32_t g_rgctx_T_tF41EC1FCF97AE95412070D5D2CA5C88AB306E9CC;
+static const Il2CppRGCTXDefinition s_rgctxValues[6] = 
+{
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Func_3_t8050336F8F0255A7D789F4D77FE883AA3ABDBEA3 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Func_3_Invoke_m3721FD84D4FD6D89F342E2DB9DA2A8320384490A },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t4F29D2F987CCD9EC5DF883AA28A58D5FF0EFAE20 },
+	{ (Il2CppRGCTXDataType)1, (const void *)&g_rgctx_T_tF41EC1FCF97AE95412070D5D2CA5C88AB306E9CC },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_TU26_t742E4E7C0C58F85A66C5A339245DDFE558BDADCD },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_tF41EC1FCF97AE95412070D5D2CA5C88AB306E9CC },
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Microsoft_IdentityModel_Tokens_CodeGenModule;
+const Il2CppCodeGenModule g_Microsoft_IdentityModel_Tokens_CodeGenModule = 
+{
+	"Microsoft.IdentityModel.Tokens.dll",
+	63,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	2,
+	s_rgctxIndices,
+	6,
+	s_rgctxValues,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

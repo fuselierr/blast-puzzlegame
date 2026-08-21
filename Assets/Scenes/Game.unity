@@ -9161,6 +9161,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4535347015163120212, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1756587305}
+    - target: {fileID: 4535347015163120212, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseSettings
+      objectReference: {fileID: 0}
+    - target: {fileID: 4535347015163120212, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIHandler, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 5357282035359336678, guid: 27ec89d3124da6746b9796117d63b5ee, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

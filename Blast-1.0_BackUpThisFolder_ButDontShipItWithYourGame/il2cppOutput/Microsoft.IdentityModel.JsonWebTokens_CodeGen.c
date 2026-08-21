@@ -1,0 +1,90 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void EmbeddedAttribute__ctor_m788CEB89888CF0B939F94FED93B768E33AC090D9 (void);
+extern void IsReadOnlyAttribute__ctor_mDE60A0209D897D54803E7CBDAA960B2FD04C6EA7 (void);
+extern void RefSafetyRulesAttribute__ctor_m7A0FC14D9E6AF2BDF9F47992941C670E435D9E03 (void);
+extern void ClaimTypeMapping__cctor_m42E0350B2F3B511D8496FE869EF188ED79C46B7C (void);
+extern void ClaimTypeMapping_get_InboundClaimTypeMap_m5E6F60F7D532CF10718FA197F82AF7554D89CCCA (void);
+extern void ClaimTypeMapping_get_OutboundClaimTypeMap_m30894CA99ABB5F7E7FA686A3640BCE6971E05758 (void);
+extern void ClaimTypeMapping_get_InboundClaimFilter_mB6C9A6FFB8F03BB76824A21486C114F141F258CF (void);
+extern void JwtPayloadUtf8Bytes_get_Aud_m1CF56055F3CD511ACB8367590C8418F5B6069D09 (void);
+extern void JwtPayloadUtf8Bytes_get_Exp_m59E588692A4AEBE823D2CC15A9334E8D35C4AD80 (void);
+extern void JwtPayloadUtf8Bytes_get_Iat_mDCE721D911CD65F0DA4AA595AAB863A50B13A956 (void);
+extern void JwtPayloadUtf8Bytes_get_Iss_m9E39B76C32165E2B6D8D7611DEFBA38B147D5B1D (void);
+extern void JwtPayloadUtf8Bytes_get_Jti_mAE7BE46647E2E0B51F13CB724CEAD0E8BE72F11B (void);
+extern void JwtPayloadUtf8Bytes_get_Nbf_m21EE662FF851AD3814D7C7D399C686B37C774BD5 (void);
+extern void JwtPayloadUtf8Bytes_get_Sub_mA8F549DA3D4A2F3FA860432B5B7E132988A93F13 (void);
+extern void JwtTokenUtilities_CreateJwsRegex_m4F8BC59D444F9E21ABC629E98BBA1CFC5E946BF7 (void);
+extern void JwtTokenUtilities_CreateJweRegex_mC27549E17DFAFA64DE121B734D50BF60CD2EF2F9 (void);
+extern void JwtTokenUtilities_CountJwtTokenPart_mF36FC2B9DF3506332F6F5AE8A38C2DE828B47855 (void);
+extern void JwtTokenUtilities__cctor_m3870E760DB9F1D256EB2A1ED7DFCF88D9B2F25A9 (void);
+static Il2CppMethodPointer s_methodPointers[18] = 
+{
+	EmbeddedAttribute__ctor_m788CEB89888CF0B939F94FED93B768E33AC090D9,
+	IsReadOnlyAttribute__ctor_mDE60A0209D897D54803E7CBDAA960B2FD04C6EA7,
+	RefSafetyRulesAttribute__ctor_m7A0FC14D9E6AF2BDF9F47992941C670E435D9E03,
+	ClaimTypeMapping__cctor_m42E0350B2F3B511D8496FE869EF188ED79C46B7C,
+	ClaimTypeMapping_get_InboundClaimTypeMap_m5E6F60F7D532CF10718FA197F82AF7554D89CCCA,
+	ClaimTypeMapping_get_OutboundClaimTypeMap_m30894CA99ABB5F7E7FA686A3640BCE6971E05758,
+	ClaimTypeMapping_get_InboundClaimFilter_mB6C9A6FFB8F03BB76824A21486C114F141F258CF,
+	JwtPayloadUtf8Bytes_get_Aud_m1CF56055F3CD511ACB8367590C8418F5B6069D09,
+	JwtPayloadUtf8Bytes_get_Exp_m59E588692A4AEBE823D2CC15A9334E8D35C4AD80,
+	JwtPayloadUtf8Bytes_get_Iat_mDCE721D911CD65F0DA4AA595AAB863A50B13A956,
+	JwtPayloadUtf8Bytes_get_Iss_m9E39B76C32165E2B6D8D7611DEFBA38B147D5B1D,
+	JwtPayloadUtf8Bytes_get_Jti_mAE7BE46647E2E0B51F13CB724CEAD0E8BE72F11B,
+	JwtPayloadUtf8Bytes_get_Nbf_m21EE662FF851AD3814D7C7D399C686B37C774BD5,
+	JwtPayloadUtf8Bytes_get_Sub_mA8F549DA3D4A2F3FA860432B5B7E132988A93F13,
+	JwtTokenUtilities_CreateJwsRegex_m4F8BC59D444F9E21ABC629E98BBA1CFC5E946BF7,
+	JwtTokenUtilities_CreateJweRegex_mC27549E17DFAFA64DE121B734D50BF60CD2EF2F9,
+	JwtTokenUtilities_CountJwtTokenPart_mF36FC2B9DF3506332F6F5AE8A38C2DE828B47855,
+	JwtTokenUtilities__cctor_m3870E760DB9F1D256EB2A1ED7DFCF88D9B2F25A9,
+};
+static const int32_t s_InvokerIndices[18] = 
+{
+	17349,
+	17349,
+	13116,
+	30066,
+	29966,
+	29966,
+	29966,
+	29664,
+	29664,
+	29664,
+	29664,
+	29664,
+	29664,
+	29664,
+	29966,
+	29966,
+	24136,
+	30066,
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Microsoft_IdentityModel_JsonWebTokens_CodeGenModule;
+const Il2CppCodeGenModule g_Microsoft_IdentityModel_JsonWebTokens_CodeGenModule = 
+{
+	"Microsoft.IdentityModel.JsonWebTokens.dll",
+	18,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
