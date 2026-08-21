@@ -85,12 +85,12 @@ public class EditorManager : MonoBehaviour
 
         if (widthInput != null)
         {
-            widthInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
+            widthInput.onEndEdit.AddListener(_ => ResizeGridFromInputs(true));
         }
 
         if (heightInput != null)
         {
-            heightInput.onEndEdit.AddListener(_ => ResizeGridFromInputs());
+            heightInput.onEndEdit.AddListener(_ => ResizeGridFromInputs(false));
         }
 
         CustomLevelData levelBeingEdited =
@@ -199,6 +199,11 @@ public class EditorManager : MonoBehaviour
 
     public void ResizeGridFromInputs()
     {
+        ResizeGridFromInputs(true);
+    }
+
+    private void ResizeGridFromInputs(bool preserveWidth)
+    {
         if (gridSpawner == null)
         {
             return;
@@ -207,9 +212,20 @@ public class EditorManager : MonoBehaviour
         int newWidth = ParseIntField(widthInput, gridSpawner.Width);
         int newHeight = ParseIntField(heightInput, gridSpawner.Height);
 
-        if (newWidth <= 0 || newHeight <= 0)
+        if ((long)newWidth * newHeight > EditorGridSpawner.MaxTileCount)
         {
-            return;
+            if (preserveWidth)
+            {
+                newHeight = Mathf.Max(
+                    1,
+                    EditorGridSpawner.MaxTileCount / newWidth);
+            }
+            else
+            {
+                newWidth = Mathf.Max(
+                    1,
+                    EditorGridSpawner.MaxTileCount / newHeight);
+            }
         }
 
         if (newWidth != gridSpawner.Width || newHeight != gridSpawner.Height)
@@ -217,6 +233,9 @@ public class EditorManager : MonoBehaviour
             gridSpawner.ResizeGrid(newWidth, newHeight);
             InvalidateVerification();
         }
+
+        // Reflect the valid non-zero, tile-limited dimensions in the UI.
+        RefreshDimensionInputs();
     }
 
     private void InvalidateVerification()
@@ -249,7 +268,10 @@ public class EditorManager : MonoBehaviour
 
         if (int.TryParse(inputField.text, out int value))
         {
-            return Mathf.Max(1, value);
+            // Zero and negative dimensions are invalid. Each individual
+            // dimension can be as large as the total tile allowance; the
+            // spawner then constrains the width x height product.
+            return Mathf.Clamp(value, 1, EditorGridSpawner.MaxTileCount);
         }
 
         return fallback;

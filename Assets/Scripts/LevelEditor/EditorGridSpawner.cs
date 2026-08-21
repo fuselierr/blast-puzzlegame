@@ -4,9 +4,11 @@ using UnityEngine.UI;
 
 public class EditorGridSpawner : MonoBehaviour
 {
+    public const int MaxTileCount = 2000;
+
     [Header("Grid")]
-    [SerializeField, Min(1)] private int width = 10;
-    [SerializeField, Min(1)] private int height = 14;
+    [SerializeField, Range(1, MaxTileCount)] private int width = 10;
+    [SerializeField, Range(1, MaxTileCount)] private int height = 14;
 
     [Header("Shared Assets")]
     [SerializeField] private Globals globals;
@@ -43,8 +45,7 @@ public class EditorGridSpawner : MonoBehaviour
             return;
         }
 
-        width = Mathf.Max(1, width);
-        height = Mathf.Max(1, height);
+        ClampDimensionsToTileLimit(ref width, ref height);
 
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayout.constraintCount = width;
@@ -143,9 +144,23 @@ public class EditorGridSpawner : MonoBehaviour
 
     public void ResizeGrid(int newWidth, int newHeight)
     {
-        width = Mathf.Max(1, newWidth);
-        height = Mathf.Max(1, newHeight);
+        ClampDimensionsToTileLimit(ref newWidth, ref newHeight);
+        width = newWidth;
+        height = newHeight;
         GenerateGrid();
+    }
+
+    private static void ClampDimensionsToTileLimit(
+        ref int requestedWidth,
+        ref int requestedHeight)
+    {
+        // Neither dimension may be zero. A single dimension may use the full
+        // tile allowance, while the other is reduced as needed so the grid
+        // never contains more than MaxTileCount tiles.
+        requestedWidth = Mathf.Clamp(requestedWidth, 1, MaxTileCount);
+
+        int maximumHeight = Mathf.Max(1, MaxTileCount / requestedWidth);
+        requestedHeight = Mathf.Clamp(requestedHeight, 1, maximumHeight);
     }
 
     public RectTransform GetPreviewCaptureTarget()
